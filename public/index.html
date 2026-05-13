@@ -552,25 +552,22 @@ function svgPathMm(points, xCm, yCm, rollX, rollY) {
   return 'M ' + points.map(p => `${(rollX + (xCm + p.x) * 10).toFixed(2)} ${(rollY + (yCm + p.y) * 10).toFixed(2)}`).join(' L ') + ' Z';
 }
 function singleCutLayoutSvg(layout, c, index, total) {
-  const marginMm = 45;
-  const headerMm = 55;
-  const footerMm = 35;
-  const rollX = marginMm;
-  const rollY = marginMm + headerMm;
+  const rollX = 0;
+  const rollY = 0;
   const rollWidthMm = layout.rollWidthCm * 10;
   const rollLengthMm = Math.max(layout.totalLengthCm * 10, 1);
-  const viewWidthMm = rollWidthMm + marginMm * 2;
-  const viewHeightMm = rollLengthMm + marginMm * 2 + headerMm + footerMm;
+  const viewWidthMm = rollWidthMm;
+  const viewHeightMm = rollLengthMm;
 
-  let rollLayer = `<rect x="${rollX}" y="${rollY}" width="${rollWidthMm.toFixed(2)}" height="${rollLengthMm.toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
+  let rollLayer = `<rect x="0" y="0" width="${rollWidthMm.toFixed(2)}" height="${rollLengthMm.toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
   let cutLayer = '';
   let openingLayer = '';
   let blankLayer = '';
   let dimLayer = '';
-  let labelLayer = `<text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+20).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial">Раскрой — ${esc(c.address || c.name || 'заказ')} — рулон ${(layout.rollWidthCm/100).toFixed(1)} м — файл ${index+1}/${total}</text><text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+40).toFixed(2)}" text-anchor="middle" font-size="13" font-family="Arial" fill="#008000">Зеленый пунктир — проем, красный контур — резка с офсетом</text>`;
+  let labelLayer = '';
 
   layout.placements.forEach((p, i) => {
-    const x = p.xCm, y = p.yCm;
+    const x = p.xCm || 0, y = p.yCm || 0;
     const minX = rollX + x * 10;
     const minY = rollY + y * 10;
     const wMm = p.widthCm * 10;
@@ -582,9 +579,15 @@ function singleCutLayoutSvg(layout, c, index, total) {
     blankLayer += `<rect x="${minX.toFixed(2)}" y="${minY.toFixed(2)}" width="${wMm.toFixed(2)}" height="${hMm.toFixed(2)}" fill="none" stroke="#0066ff" stroke-width="0.25" stroke-dasharray="6 4"/>`;
     cutLayer += `<path d="${svgPathMm(p.cutPts, x, y, rollX, rollY)}" fill="none" stroke="#ff0000" stroke-width="0.35" inkscape:label="${label}"/>`;
     openingLayer += `<path d="${svgPathMm(p.openingPts, x, y, rollX, rollY)}" fill="none" stroke="#008000" stroke-width="0.25" stroke-dasharray="6 4"/>`;
-    labelLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${((minY+maxY)/2).toFixed(2)}" text-anchor="middle" font-size="16" font-family="Arial">${label}${p.rotated ? ' / поворот' : ''}</text>`;
-    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+16).toFixed(2)}" text-anchor="middle" font-size="13" fill="#ff9900">${formatM(p.widthCm)} × ${formatM(p.lengthCm)}</text>`;
-    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+32).toFixed(2)}" text-anchor="middle" font-size="11" fill="#008000">офсет ${(p.offsetCm||4.5)} см</text>`;
+
+    const textX = ((minX + maxX) / 2).toFixed(2);
+    const labelY = Math.min(maxY - 18, minY + hMm / 2).toFixed(2);
+    const dimY = (minY + 16).toFixed(2);
+    const offY = (minY + 32).toFixed(2);
+
+    labelLayer += `<text x="${textX}" y="${labelY}" text-anchor="middle" font-size="16" font-family="Arial">${label}${p.rotated ? ' / поворот' : ''}</text>`;
+    dimLayer += `<text x="${textX}" y="${dimY}" text-anchor="middle" font-size="13" fill="#ff9900">${formatM(p.widthCm)} × ${formatM(p.lengthCm)}</text>`;
+    dimLayer += `<text x="${textX}" y="${offY}" text-anchor="middle" font-size="11" fill="#008000">офсет ${(p.offsetCm||4.5)} см</text>`;
   });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -601,6 +604,7 @@ function singleCutLayoutSvg(layout, c, index, total) {
   <g id="layer_labels" inkscape:label="Подписи" inkscape:groupmode="layer">${labelLayer}</g>
 </svg>`;
 }
+
 function downloadCutLayoutSvg() {
   const c = client();
   const ca = curCalc();
