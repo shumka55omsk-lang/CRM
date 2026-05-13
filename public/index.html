@@ -159,10 +159,12 @@ function materialChoiceForPiece(x,pr){
 
   // Правило пользователя:
   // если одна сторона <= 2 м, другая <= 2.1 м, а 1.8 м нет/не хватает,
-  // сначала пробуем 2.2 или 2.4 с поворотом поперек длины рулона.
+  // сначала пробуем 2.2 или 2.4, но выбираем вариант с МИНИМАЛЬНЫМ расходом погонных метров.
+  // Для проема 200×90 с офсетом габарит примерно 209×99 см:
+  // на рулоне 2.2 м деталь должна лечь 209 см по ширине рулона и расходовать 99 см длины.
   if(compactPiece&&rollAvailableCm(180)<=0){
     const preferred=variants
-      .filter(v=>(v.roll===220||v.roll===240)&&v.rotated)
+      .filter(v=>(v.roll===220||v.roll===240))
       .sort((a,b)=>{
         const aStock=rollAvailableCm(a.roll)>=a.needM?0:1;
         const bStock=rollAvailableCm(b.roll)>=b.needM?0:1;
@@ -266,7 +268,7 @@ function stockFind(material,width){
   return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Поворот</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'да':'нет'}</td><td>${d.forcedFallback?'2.2/2.4 вместо 1.8':(d.selectedByStock?'есть на складе':'к закупу')}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто вдоль':'поперек рулона'}</td><td>${d.forcedFallback?'2.2/2.4 вместо 1.8':(d.selectedByStock?'есть на складе':'к закупу')}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -532,39 +534,68 @@ function svgPathMm(points, xCm, yCm, rollX, rollY) {
   return 'M ' + points.map(p => `${(rollX + (xCm + p.x) * 10).toFixed(2)} ${(rollY + (yCm + p.y) * 10).toFixed(2)}`).join(' L ') + ' Z';
 }
 function singleCutLayoutSvg(layout, c, index, total) {
-  const marginMm = 45;
-  const headerMm = 55;
-  const footerMm = 35;
-  const rollX = marginMm;
-  const rollY = marginMm + headerMm;
+  // ВАЖНО для ЧПУ:
+  // холст SVG равен реальному рулону:
+  // ширина холста = ширина рулона,
+  // высота холста = нужный погонаж.
   const rollWidthMm = layout.rollWidthCm * 10;
   const rollLengthMm = Math.max(layout.totalLengthCm * 10, 1);
-  const viewWidthMm = rollWidthMm + marginMm * 2;
-  const viewHeightMm = rollLengthMm + marginMm * 2 + headerMm + footerMm;
+  const rollX = 0;
+  const rollY = 0;
+  const viewWidthMm = rollWidthMm;
+  const viewHeightMm = rollLengthMm;
 
-  let rollLayer = `<rect x="${rollX}" y="${rollY}" width="${rollWidthMm.toFixed(2)}" height="${rollLengthMm.toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
+  let rollLayer = `<rect x="0" y="0" width="${rollWidthMm.toFixed(2)}" height="${rollLengthMm.toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
   let cutLayer = '';
   let openingLayer = '';
   let blankLayer = '';
   let dimLayer = '';
-  let labelLayer = `<text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+20).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial">Раскрой — ${esc(c.address || c.name || 'заказ')} — рулон ${(layout.rollWidthCm/100).toFixed(1)} м — файл ${index+1}/${total}</text>`;
+  let offsetLayer = '';
+  let labelLayer = '';
 
   layout.placements.forEach((p, i) => {
     const x = p.xCm, y = p.yCm;
-    const minX = rollX + x * 10;
-    const minY = rollY + y * 10;
+    const minX = x * 10;
+    const minY = y * 10;
     const wMm = p.widthCm * 10;
     const hMm = p.lengthCm * 10;
     const maxX = minX + wMm;
     const maxY = minY + hMm;
     const label = `Окно ${p.window} / деталь ${p.detail}`;
+    const offsetCm = p.offsetCm || 4.5;
 
+    // Габарит заготовки / bbox детали
     blankLayer += `<rect x="${minX.toFixed(2)}" y="${minY.toFixed(2)}" width="${wMm.toFixed(2)}" height="${hMm.toFixed(2)}" fill="none" stroke="#0066ff" stroke-width="0.25" stroke-dasharray="6 4"/>`;
+
+    // Красный слой — реальная резка, уже с офсетом.
     cutLayer += `<path d="${svgPathMm(p.cutPts, x, y, rollX, rollY)}" fill="none" stroke="#ff0000" stroke-width="0.35" inkscape:label="${label}"/>`;
-    openingLayer += `<path d="${svgPathMm(p.openingPts, x, y, rollX, rollY)}" fill="none" stroke="#008000" stroke-width="0.25" stroke-dasharray="6 4"/>`;
-    labelLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${((minY+maxY)/2).toFixed(2)}" text-anchor="middle" font-size="16" font-family="Arial">${label}${p.rotated ? ' / поворот' : ''}</text>`;
-    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+16).toFixed(2)}" text-anchor="middle" font-size="13" fill="#ff9900">${formatM(p.widthCm)} × ${formatM(p.lengthCm)}</text>`;
+
+    // Зеленый слой — исходный контур проема.
+    openingLayer += `<path d="${svgPathMm(p.openingPts, x, y, rollX, rollY)}" fill="none" stroke="#008000" stroke-width="0.25" stroke-dasharray="5 4"/>`;
+
+    // Оранжевый слой — подпись офсета. Сам контур резки уже является offset-контуром.
+    const offTextX = Math.min(maxX - 4, minX + 6);
+    const offTextY = Math.min(maxY - 6, minY + 18);
+    offsetLayer += `<text x="${offTextX.toFixed(2)}" y="${offTextY.toFixed(2)}" font-size="11" font-family="Arial" fill="#ff9900">Офсет ${offsetCm} см</text>`;
+
+    // Размеры слоями: сверху ширина детали, справа длина детали.
+    const dimTopY = Math.max(minY + 12, minY + 12);
+    dimLayer += `<line x1="${minX.toFixed(2)}" y1="${dimTopY.toFixed(2)}" x2="${maxX.toFixed(2)}" y2="${dimTopY.toFixed(2)}" stroke="#ff9900" stroke-width="0.25"/>`;
+    dimLayer += `<circle cx="${minX.toFixed(2)}" cy="${dimTopY.toFixed(2)}" r="1.2" fill="#ff9900"/><circle cx="${maxX.toFixed(2)}" cy="${dimTopY.toFixed(2)}" r="1.2" fill="#ff9900"/>`;
+    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(dimTopY-3).toFixed(2)}" text-anchor="middle" font-size="12" font-family="Arial" fill="#ff9900">${formatM(p.widthCm)}</text>`;
+
+    const dimRightX = Math.min(rollWidthMm - 6, maxX - 6);
+    dimLayer += `<line x1="${dimRightX.toFixed(2)}" y1="${minY.toFixed(2)}" x2="${dimRightX.toFixed(2)}" y2="${maxY.toFixed(2)}" stroke="#ff9900" stroke-width="0.25"/>`;
+    dimLayer += `<circle cx="${dimRightX.toFixed(2)}" cy="${minY.toFixed(2)}" r="1.2" fill="#ff9900"/><circle cx="${dimRightX.toFixed(2)}" cy="${maxY.toFixed(2)}" r="1.2" fill="#ff9900"/>`;
+    dimLayer += `<text x="${(dimRightX+4).toFixed(2)}" y="${((minY+maxY)/2).toFixed(2)}" text-anchor="middle" font-size="12" font-family="Arial" fill="#ff9900" transform="rotate(90 ${(dimRightX+4).toFixed(2)} ${((minY+maxY)/2).toFixed(2)})">${formatM(p.lengthCm)}</text>`;
+
+    // Подписи внутри габарита, чтобы не менять размер холста.
+    const labelY = Math.min(maxY - 10, minY + Math.max(30, hMm / 2));
+    labelLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${labelY.toFixed(2)}" text-anchor="middle" font-size="15" font-family="Arial" fill="#333333">${label}${p.rotated ? ' / поворот' : ''}</text>`;
   });
+
+  // Информация о рулоне тоже внутри холста, без расширения canvas.
+  labelLayer += `<text x="${(rollWidthMm/2).toFixed(2)}" y="18" text-anchor="middle" font-size="14" font-family="Arial" fill="#333333">Рулон ${(layout.rollWidthCm/100).toFixed(1)} м · погонаж ${(layout.totalLengthCm/100).toFixed(2)} м · ${esc(c.address || c.name || 'заказ')}</text>`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -574,8 +605,9 @@ function singleCutLayoutSvg(layout, c, index, total) {
      viewBox="0 0 ${viewWidthMm.toFixed(2)} ${viewHeightMm.toFixed(2)}">
   <g id="layer_cut" inkscape:label="Резка" inkscape:groupmode="layer">${cutLayer}</g>
   <g id="layer_opening" inkscape:label="Контур проема" inkscape:groupmode="layer">${openingLayer}</g>
+  <g id="layer_offset" inkscape:label="Офсет" inkscape:groupmode="layer">${offsetLayer}</g>
   <g id="layer_blanks" inkscape:label="Габариты деталей" inkscape:groupmode="layer">${blankLayer}</g>
-  <g id="layer_roll" inkscape:label="Рулон" inkscape:groupmode="layer">${rollLayer}</g>
+  <g id="layer_roll" inkscape:label="Рулон ${formatM(layout.rollWidthCm)} × ${formatM(layout.totalLengthCm)}" inkscape:groupmode="layer">${rollLayer}</g>
   <g id="layer_dimensions" inkscape:label="Размеры" inkscape:groupmode="layer">${dimLayer}</g>
   <g id="layer_labels" inkscape:label="Подписи" inkscape:groupmode="layer">${labelLayer}</g>
 </svg>`;
