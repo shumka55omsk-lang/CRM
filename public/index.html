@@ -105,116 +105,173 @@ function rollAvailableCm(rollCm){
   const s=stockFind('ПВХ полотно', rollWidthLabel(rollCm));
   return s?n(s.qty_m):0;
 }
-function materialChoiceForPiece(x,pr){
+function preferredRollOrder(){
+  const primary=[220,240], fallback=[180];
+  const withStock=primary.filter(r=>rollAvailableCm(r)>0);
+  const restPrimary=primary.filter(r=>!withStock.includes(r));
+  const fallbackStock=fallback.filter(r=>rollAvailableCm(r)>0);
+  const fallbackNoStock=fallback.filter(r=>!fallbackStock.includes(r));
+  const out=[...withStock,...fallbackStock,...restPrimary,...fallbackNoStock];
+  return [...new Set(out)];
+}
+function makePieceGeometry(x,pr,roll,rotated){
   const off=n(pr.off)||4.5;
   const opening=cutOpeningPoints(x);
   const cut=offsetPolyCm(opening,off);
   const box=bboxCm(cut);
-  const rolls=[180,220,240];
 
-  let variants=[];
-  rolls.forEach(roll=>{
-    if(box.width<=roll){
-      variants.push({
-        roll,
-        needM:box.height/100,
-        rotated:false,
-        cutWidthCm:box.width,
-        cutLengthCm:box.height,
-        box,
-        opening,
-        cut
-      });
-    }
-    if(box.height<=roll){
-      variants.push({
-        roll,
-        needM:box.width/100,
-        rotated:true,
-        cutWidthCm:box.height,
-        cutLengthCm:box.width,
-        box,
-        opening,
-        cut
-      });
-    }
-  });
+  let cutPts=normalizePointsCm(cut,box);
+  let openingPts=normalizePointsCm(opening,box);
+  let widthCm=box.width;
+  let lengthCm=box.height;
 
-  if(!variants.length)return{bad:true,box,opening,cut};
-
-  // убираем полные дубли
-  const seen=new Set();
-  variants=variants.filter(v=>{
-    const key=v.roll+'|'+v.rotated+'|'+v.needM.toFixed(4);
-    if(seen.has(key))return false;
-    seen.add(key);
-    return true;
-  });
-
-  variants.sort((a,b)=>a.roll-b.roll||a.needM-b.needM);
-
-  const minSide=Math.min(box.width,box.height);
-  const maxSide=Math.max(box.width,box.height);
-  const compactPiece=minSide<=200&&maxSide<=210;
-
-  // Правило пользователя:
-  // если одна сторона <= 2 м, другая <= 2.1 м, а 1.8 м нет/не хватает,
-  // сначала пробуем 2.2 или 2.4, но выбираем вариант с МИНИМАЛЬНЫМ расходом погонных метров.
-  // Для проема 200×90 с офсетом габарит примерно 209×99 см:
-  // на рулоне 2.2 м деталь должна лечь 209 см по ширине рулона и расходовать 99 см длины.
-  if(compactPiece&&rollAvailableCm(180)<=0){
-    const preferred=variants
-      .filter(v=>(v.roll===220||v.roll===240))
-      .sort((a,b)=>{
-        const aStock=rollAvailableCm(a.roll)>=a.needM?0:1;
-        const bStock=rollAvailableCm(b.roll)>=b.needM?0:1;
-        return aStock-bStock||a.roll-b.roll||a.needM-b.needM;
-      });
-    if(preferred.length){
-      const best=preferred[0];
-      return Object.assign({bad:false,selectedByStock:rollAvailableCm(best.roll)>=best.needM,forcedFallback:true},best);
-    }
+  if(rotated){
+    const rotatedCut=rotatePointsClockwiseCm(cutPts,box.width);
+    const rotatedOpening=rotatePointsClockwiseCm(openingPts,box.width);
+    const cutBox=bboxCm(rotatedCut);
+    cutPts=rotatedCut.map(p=>({x:p.x-cutBox.minX,y:p.y-cutBox.minY}));
+    openingPts=rotatedOpening.map(p=>({x:p.x-cutBox.minX,y:p.y-cutBox.minY}));
+    widthCm=cutBox.width;
+    lengthCm=cutBox.height;
   }
 
-  // Сначала выбираем вариант, который реально есть на складе.
-  const withStock=variants.filter(v=>rollAvailableCm(v.roll)>=v.needM);
-  if(withStock.length){
-    withStock.sort((a,b)=>a.roll-b.roll||a.needM-b.needM);
-    return Object.assign({bad:false,selectedByStock:true},withStock[0]);
-  }
-
-  // Если подходящего остатка нет — показываем самый экономичный вариант как потребность к закупу.
-  return Object.assign({bad:false,selectedByStock:false},variants[0]);
+  if(widthCm>roll)return null;
+  return{
+    roll,
+    needM:lengthCm/100,
+    rotated,
+    cutWidthCm:widthCm,
+    cutLengthCm:lengthCm,
+    widthCm,
+    lengthCm,
+    box,
+    opening,
+    cut,
+    cutPts,
+    openingPts,
+    offsetCm:off
+  };
 }
-function mats(it,pr){
-  let usage={180:0,220:0,240:0},bad=[],edge=0,details=[];
+function pieceVariantsForRoll(x,pr,roll){
+  const a=makePieceGeometry(x,pr,roll,false);
+  const b=makePieceGeometry(x,pr,roll,true);
+  return [a,b].filter(Boolean).sort((u,v)=>u.lengthCm-v.lengthCm||u.widthCm-v.widthCm);
+}
+function allPieceVariants(x,pr){
+  const out=[];
+  [220,240,180].forEach(r=>out.push(...pieceVariantsForRoll(x,pr,r)));
+  return out;
+}
+function chooseBaseVariant(x,pr){
+  const order=preferredRollOrder();
+  for(const roll of order){
+    const variants=pieceVariantsForRoll(x,pr,roll);
+    if(variants.length){
+      // Для каждого выбранного рулона берем ориентацию с минимальным расходом длины.
+      return Object.assign({bad:false,selectedByStock:rollAvailableCm(roll)>0},variants[0]);
+    }
+  }
+  const opening=cutOpeningPoints(x);
+  const cut=offsetPolyCm(opening,n(pr.off)||4.5);
+  const box=bboxCm(cut);
+  return{bad:true,box,opening,cut};
+}
+function materialChoiceForPiece(x,pr){
+  return chooseBaseVariant(x,pr);
+}
+function createCutPieces(it,pr){
+  const pieces=[],bad=[];
   it.forEach(x=>{
     for(let k=0;k<x.qty;k++){
-      let ch=materialChoiceForPiece(x,pr);
-      if(ch.bad){
-        bad.push(`Окно ${x.index}: габарит резки ${formatM(ch.box.width)} × ${formatM(ch.box.height)} не входит в рулоны`);
-      }else{
-        usage[ch.roll]+=ch.needM;
-        details.push({
-          window:x.index,
-          detail:k+1,
-          roll:ch.roll,
-          needM:ch.needM,
-          rotated:ch.rotated,
-          cutWidthCm:ch.cutWidthCm,
-          cutLengthCm:ch.cutLengthCm,
-          opening:`${x.w} × ${x.h1}/${x.h2} см`,
-          qty:1,
-          selectedByStock:ch.selectedByStock,
-          forcedFallback:ch.forcedFallback
-        });
+      const base=chooseBaseVariant(x,pr);
+      if(base.bad){
+        bad.push(`Окно ${x.index}: габарит резки ${formatM(base.box.width)} × ${formatM(base.box.height)} не входит в рулоны`);
+        continue;
+      }
+      pieces.push({
+        window:x.index,
+        detail:k+1,
+        source:x,
+        ...base
+      });
+    }
+  });
+  return{pieces,bad};
+}
+function packPiecesOnRoll(pieces,roll){
+  // Сортировка по длине и ширине помогает сначала уложить крупные детали.
+  const sorted=[...pieces].sort((a,b)=>b.lengthCm-a.lengthCm||b.widthCm-a.widthCm);
+  const shelves=[];
+  sorted.forEach(p=>{
+    let placed=false;
+    // Пробуем положить в существующий ряд по ширине рулона.
+    for(const shelf of shelves){
+      if(shelf.usedWidth+p.widthCm<=roll+0.001){
+        p.xCm=shelf.usedWidth;
+        p.yCm=shelf.yCm;
+        shelf.usedWidth+=p.widthCm;
+        shelf.heightCm=Math.max(shelf.heightCm,p.lengthCm);
+        shelf.pieces.push(p);
+        placed=true;
+        break;
       }
     }
+    if(!placed){
+      const y=shelves.reduce((s,sh)=>s+sh.heightCm,0);
+      const shelf={yCm:y,usedWidth:p.widthCm,heightCm:p.lengthCm,pieces:[p]};
+      p.xCm=0;
+      p.yCm=y;
+      shelves.push(shelf);
+    }
+  });
+  return{
+    rollWidthCm:roll,
+    totalLengthCm:Math.max(shelves.reduce((s,sh)=>s+sh.heightCm,0),1),
+    placements:shelves.flatMap(sh=>sh.pieces)
+  };
+}
+function buildOptimizedLayouts(it,pr){
+  const {pieces,bad}=createCutPieces(it,pr);
+  const grouped={180:[],220:[],240:[]};
+  pieces.forEach(p=>grouped[p.roll].push(p));
+  const layouts=[];
+  [220,240,180].forEach(roll=>{
+    if(grouped[roll].length)layouts.push(packPiecesOnRoll(grouped[roll],roll));
+  });
+  return{layouts,bad,pieces};
+}
+function mats(it,pr){
+  const opt=buildOptimizedLayouts(it,pr);
+  let usage={180:0,220:0,240:0},details=[],edge=0;
+  opt.layouts.forEach(layout=>{
+    usage[layout.rollWidthCm]=layout.totalLengthCm/100;
+    layout.placements.forEach(p=>{
+      details.push({
+        window:p.window,
+        detail:p.detail,
+        roll:p.roll,
+        needM:p.lengthCm/100,
+        rotated:p.rotated,
+        cutWidthCm:p.widthCm,
+        cutLengthCm:p.lengthCm,
+        opening:`${p.source.w} × ${p.source.h1}/${p.source.h2} см`,
+        qty:1,
+        selectedByStock:rollAvailableCm(p.roll)>0,
+        forcedFallback:(p.roll===220||p.roll===240)&&rollAvailableCm(180)<=0,
+        xCm:p.xCm||0,
+        yCm:p.yCm||0,
+        offsetCm:p.offsetCm||n(pr.off)||4.5
+      });
+    });
+  });
+
+  it.forEach(x=>{
     if(x.ed){
       let w=x.w/100,h1=x.h1/100,h2=x.h2/100;
       edge+=(w+h1+h2+Math.sqrt(w*w+(h1-h2)**2))*x.qty;
     }
   });
+
   let rows=[];
   Object.keys(usage).forEach(k=>{
     if(usage[k]){
@@ -225,15 +282,16 @@ function mats(it,pr){
         need:usage[k],
         rolls,
         rest:rolls*50-usage[k],
-        comment:'Офсет резки '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
+        comment:'Оптимальная раскладка по ширине рулона. Офсет '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
       });
     }
   });
   let en=edge*1.1,er=en?Math.ceil(en/50):0;
   return{
     rollRows:rows,
-    oversized:bad,
+    oversized:opt.bad,
     details,
+    layouts:opt.layouts,
     edgingRow:{material:'Окантовка',width:'10 см',need:en,rolls:er,rest:er?er*50-en:0,comment:'Запас 10%'}
   };
 }
@@ -268,7 +326,7 @@ function stockFind(material,width){
   return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто вдоль':'поперек рулона'}</td><td>${d.forcedFallback?'2.2/2.4 вместо 1.8':(d.selectedByStock?'есть на складе':'к закупу')}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.forcedFallback?'2.2/2.4 вместо 1.8':(d.selectedByStock?'есть на складе':'к закупу')}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -443,13 +501,15 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         ? `Отступ от края: ${zDistance} см`
         : (zCount >= 3 ? `Расстояние между молниями: ${zDistance} см` : 'Молния по центру'))
     : '';
+  const qty = ni(x.qty || 1);
   const meta = [
+    `Кол-во: ${qty} шт.`,
     `Ремни: ${straps}`,
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
     zDistanceLabel,
     `Окантовка: ${edgingWidth} см`
   ].filter(Boolean).join('<br>');
-  return `<div class="scheme-title">Окно ${i}</div><div class="scheme-meta">${meta}</div>` +
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount);
 }function report(c,ca){return`<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>body{font-family:Arial;margin:0}.page{padding:10mm}.head{display:grid;grid-template-columns:1fr 1fr;gap:5px}.sum{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.box{border:1px solid #ddd;padding:6px}.pdfgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.pdfgrid svg{width:100%;height:auto;max-height:70mm}.scheme-title{font-weight:900;text-align:center;font-size:12px;margin:0 0 1px}.scheme-meta{font-size:8.5px;line-height:1.12;color:#1f2933;font-weight:600;margin:0 0 2px}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border:1px solid #ddd;padding:4px}@media(max-width:768px){.pdfgrid,.head{grid-template-columns:1fr}.sum{grid-template-columns:repeat(2,1fr)}}@media print{.page{padding:7mm}.pdfgrid{grid-template-columns:repeat(2,1fr);gap:3px 6px}.pdfgrid svg{max-height:64mm}.scheme-meta{font-size:8px}}</style></head><body><div class=page><h1>Расчёт мягких окон</h1><div class=head><div><b>Клиент:</b> ${esc(c.name)}</div><div><b>Тел:</b> ${esc(c.phone)}</div><div><b>Адрес:</b> ${esc(c.address)}</div><div><b>Дата:</b> ${esc(c.measureDate)}</div></div><div class=sum><div class=box>Окон<b>${ca.totals.totalQty}</b></div><div class=box>Площадь<b>${ca.totals.totalArea.toFixed(2)} м²</b></div><div class=box>Полотно<b>${rub(ca.totals.baseTotal)}</b></div><div class=box>Допы<b>${rub(ca.totals.extraTotal)}</b></div><div class=box>Итого<b>${rub(ca.totals.grandTotal)}</b></div></div><div class="pdfgrid ${ca.items.length===1?'one':''}">${ca.items.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,ca.prices)}</div>`).join('')}</div><h3>Закуп</h3>${matsHtml(ca.materials)}</div></body></html>`}
 function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
@@ -469,62 +529,20 @@ function normalizePointArray(points) {
 function cutGeometryForPiece(x, pr) {
   const ch = materialChoiceForPiece(x, pr);
   if (ch.bad) return null;
-
-  let cutPts = normalizePointsCm(ch.cut, ch.box);
-  let openingPts = normalizePointsCm(ch.opening, ch.box);
-
-  if (ch.rotated) {
-    cutPts = normalizePointArray(rotatePointsClockwiseCm(cutPts, ch.box.width));
-    openingPts = normalizePointArray(rotatePointsClockwiseCm(openingPts, ch.box.width));
-  }
-
   return {
     roll: ch.roll,
-    widthCm: ch.cutWidthCm,
-    lengthCm: ch.cutLengthCm,
+    widthCm: ch.widthCm || ch.cutWidthCm,
+    lengthCm: ch.lengthCm || ch.cutLengthCm,
     rotated: ch.rotated,
-    cutPts,
-    openingPts
+    cutPts: ch.cutPts,
+    openingPts: ch.openingPts,
+    offsetCm: n(pr.off) || 4.5
   };
 }
 function buildCutLayouts(ca) {
   const pr = ca.prices || prices();
-  const grouped = {180: [], 220: [], 240: []};
-
-  (ca.items || []).forEach(x => {
-    for (let k = 0; k < (x.qty || 1); k++) {
-      const g = cutGeometryForPiece(x, pr);
-      if (!g) continue;
-      grouped[g.roll].push({
-        window: x.index,
-        detail: k + 1,
-        source: x,
-        ...g
-      });
-    }
-  });
-
-  const layouts = [];
-  Object.keys(grouped).forEach(rollKey => {
-    const roll = Number(rollKey);
-    const pieces = grouped[roll];
-    if (!pieces.length) return;
-
-    let y = 0;
-    const placements = pieces.map(p => {
-      const place = { ...p, xCm: 0, yCm: y };
-      y += p.lengthCm;
-      return place;
-    });
-
-    layouts.push({
-      rollWidthCm: roll,
-      totalLengthCm: Math.max(y, 1),
-      placements
-    });
-  });
-
-  return layouts;
+  const ma = mats(ca.items || [], pr);
+  return ma.layouts || [];
 }
 function svgPtsMm(points, xCm, yCm, rollX, rollY) {
   return points.map(p => `${(rollX + (xCm + p.x) * 10).toFixed(2)},${(rollY + (yCm + p.y) * 10).toFixed(2)}`).join(' ');
@@ -549,7 +567,7 @@ function singleCutLayoutSvg(layout, c, index, total) {
   let openingLayer = '';
   let blankLayer = '';
   let dimLayer = '';
-  let labelLayer = `<text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+20).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial">Раскрой — ${esc(c.address || c.name || 'заказ')} — рулон ${(layout.rollWidthCm/100).toFixed(1)} м — файл ${index+1}/${total}</text>`;
+  let labelLayer = `<text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+20).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial">Раскрой — ${esc(c.address || c.name || 'заказ')} — рулон ${(layout.rollWidthCm/100).toFixed(1)} м — файл ${index+1}/${total}</text><text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+40).toFixed(2)}" text-anchor="middle" font-size="13" font-family="Arial" fill="#008000">Зеленый пунктир — проем, красный контур — резка с офсетом</text>`;
 
   layout.placements.forEach((p, i) => {
     const x = p.xCm, y = p.yCm;
@@ -566,6 +584,7 @@ function singleCutLayoutSvg(layout, c, index, total) {
     openingLayer += `<path d="${svgPathMm(p.openingPts, x, y, rollX, rollY)}" fill="none" stroke="#008000" stroke-width="0.25" stroke-dasharray="6 4"/>`;
     labelLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${((minY+maxY)/2).toFixed(2)}" text-anchor="middle" font-size="16" font-family="Arial">${label}${p.rotated ? ' / поворот' : ''}</text>`;
     dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+16).toFixed(2)}" text-anchor="middle" font-size="13" fill="#ff9900">${formatM(p.widthCm)} × ${formatM(p.lengthCm)}</text>`;
+    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+32).toFixed(2)}" text-anchor="middle" font-size="11" fill="#008000">офсет ${(p.offsetCm||4.5)} см</text>`;
   });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
