@@ -5,7 +5,7 @@
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
 <section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="1.8 м / 2.2 м / 2.4 м / 10 см / шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Например: ПВХ полотно / 2.2 м / 31.5. Для ремней можно указывать количество в штуках.</p></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
 <section id="set" class="hide"><div class="top"><h1>Настройки</h1></div><div class="panel"><div class="grid"><div><label>Цена м²</label><input id="s_m2" type="number"></div><div><label>Окантовка пог.м</label><input id="s_edge" type="number"></div><div><label>Ремень шт</label><input id="s_strap" type="number"></div><div><label>Молния пог.м</label><input id="s_zip" type="number"></div><div><label>Монтаж м²</label><input id="s_inst" type="number"></div><div><label>Офсет резки см</label><input id="s_off" type="number" step="0.1"></div></div><p><button class="btn p" onclick="saveSet()">Сохранить</button></p></div></section>
-<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Молния см</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Скачать HTML</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Скачать HTML</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[];const LS='swcrm_supabase_settings_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -16,9 +16,64 @@ async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr]=await Promise.all
 async function saveClient(){let c=client();if(!c)return;let old=c.status,p={name:c_name.value,phone:c_phone.value,address:c_addr.value,source:c_src.value,status:c_stat.value,measure_date:c_date.value||null,comment:c_comm.value,updated_at:new Date().toISOString()};let {error}=await db.from('clients').update(p).eq('id',c.id);if(error)return alert(error.message);await db.from('client_history').insert({client_id:c.id,type:old!==p.status?'Статус':'Сохранение',text:old!==p.status?`Статус изменён: ${old} → ${p.status}`:'Данные клиента обновлены'});await loadData();openCard(c.id);alert('Сохранено')}async function delClient(id){if(!confirm('Удалить клиента?'))return;let {error}=await db.from('clients').delete().eq('id',id);if(error)return alert(error.message);await loadData()}
 function table(list){if(!list.length)return'<div class="empty">Нет данных</div>';return`<div class="tw"><table><thead><tr><th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>История</th><th>Сумма</th><th></th></tr></thead><tbody>${list.map(c=>{let ca=c.calcs&&c.calcs[0];return`<tr><td><b>${esc(c.name||'Без имени')}</b></td><td>${esc(c.phone||'-')}</td><td>${esc(c.address||'-')}</td><td><span class="status">${esc(c.status)}</span></td><td>${(c.history||[]).length}</td><td>${rub(ca?ca.totals.grandTotal:0)}</td><td class="actions"><button class="btn s p" onclick="openCard('${c.id}')">Открыть</button><button class="btn s r" onclick="delClient('${c.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
 function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.reduce((s,c)=>s+((c.calcs&&c.calcs[0])?c.calcs[0].totals.grandTotal:0),0));latest.innerHTML=table(clients.slice(0,5));let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
-function loadCalc(ca){p_m2.value=ca?.prices?.m2??set.m2;p_edge.value=ca?.prices?.edge??set.edge;p_strap.value=ca?.prices?.strap??set.strap;p_zip.value=ca?.prices?.zip??set.zip;p_inst.value=ca?.prices?.inst??set.inst;p_off.value=ca?.prices?.off??set.off;rows.innerHTML='';(ca?.items?.length?ca.items:[{w:200,h1:150,h2:150,qty:1,ed:true,straps:4,z:false,zc:0,inst:true}]).forEach(addRowObj);['p_m2','p_edge','p_strap','p_zip','p_inst','p_off'].forEach(id=>document.getElementById(id).oninput=recalc);recalc()}function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zc:0,inst:true});recalc()}function addRowObj(o){let tr=document.createElement('tr');tr.innerHTML=`<td><input class=w type=number value="${o.w??o.widthCm??''}"></td><td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td><td><input class=h2 type=number value="${o.h2??o.height2Cm??''}"></td><td><input class=qty type=number value="${o.qty??1}"></td><td><input class=ed type=checkbox ${o.ed??o.edging?'checked':''}></td><td><input class=straps type=number value="${o.straps??0}"></td><td><input class=z type=checkbox ${o.z??o.zipper?'checked':''}></td><td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td><td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td><td class=area>0</td><td class=rowt>0</td><td><button class="btn s r" onclick="this.closest('tr').remove();recalc()">×</button></td>`;rows.appendChild(tr);tr.querySelectorAll('input').forEach(i=>{i.oninput=recalc;i.onchange=recalc})}
-function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5}}function items(){return[...rows.querySelectorAll('tr')].map((tr,i)=>({index:i+1,w:n(tr.querySelector('.w').value),h1:n(tr.querySelector('.h1').value),h2:n(tr.querySelector('.h2').value),mh:Math.max(n(tr.querySelector('.h1').value),n(tr.querySelector('.h2').value)),qty:ni(tr.querySelector('.qty').value),ed:tr.querySelector('.ed').checked,straps:ni(tr.querySelector('.straps').value),z:tr.querySelector('.z').checked,zc:tr.querySelector('.z').checked?n(tr.querySelector('.zc').value):0,inst:tr.querySelector('.inst').checked}))}
-function totals(it,pr){let t={totalQty:0,totalArea:0,baseTotal:0,extraTotal:0,grandTotal:0,rows:[]};it.forEach(x=>{let w=x.w/100,h1=x.h1/100,h2=x.h2/100,mh=x.mh/100,area=w*mh*x.qty,base=area*pr.m2,per=w+h1+h2+Math.sqrt(w*w+(h1-h2)**2),extra=(x.ed?per*x.qty*pr.edge:0)+x.straps*x.qty*pr.strap+(x.z?x.zc/100*2*x.qty*pr.zip:0)+(x.inst?area*pr.inst:0),row=base+extra;t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra;t.grandTotal+=row;t.rows.push({area,rowTotal:row})});return t}
+function loadCalc(ca){p_m2.value=ca?.prices?.m2??set.m2;p_edge.value=ca?.prices?.edge??set.edge;p_strap.value=ca?.prices?.strap??set.strap;p_zip.value=ca?.prices?.zip??set.zip;p_inst.value=ca?.prices?.inst??set.inst;p_off.value=ca?.prices?.off??set.off;rows.innerHTML='';(ca?.items?.length?ca.items:[{w:200,h1:150,h2:150,qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true}]).forEach(addRowObj);['p_m2','p_edge','p_strap','p_zip','p_inst','p_off'].forEach(id=>document.getElementById(id).oninput=recalc);recalc()}function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true});recalc()}function addRowObj(o){
+  let zqVal = o.zq ?? o.zipperQty ?? o.zippersCount ?? (o.z || o.zipper ? 2 : 2);
+  let zdVal = o.zd ?? o.zipperDistance ?? o.zo ?? o.zipoff ?? o.zipperOffset ?? 0;
+  let tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
+  <td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td>
+  <td><input class=h2 type=number value="${o.h2??o.height2Cm??''}"></td>
+  <td><input class=qty type=number value="${o.qty??1}"></td>
+  <td><input class=ed type=checkbox ${o.ed??o.edging?'checked':''}></td>
+  <td><input class=straps type=number value="${o.straps??0}"></td>
+  <td><input class=z type=checkbox ${o.z??o.zipper?'checked':''}></td>
+  <td><input class=zq type=number min=1 value="${zqVal}"></td>
+  <td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td>
+  <td><input class=zd type=number value="${zdVal}" title="Если 2 молнии — отступ от края. Если 3 и более — расстояние между молниями."></td>
+  <td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td>
+  <td class=area>0</td><td class=rowt>0</td>
+  <td><button class="btn s r" onclick="this.closest('tr').remove();recalc()">×</button></td>`;
+  rows.appendChild(tr);
+  tr.querySelectorAll('input').forEach(i=>{i.oninput=recalc;i.onchange=recalc});
+}
+function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5}}function items(){
+  return[...rows.querySelectorAll('tr')].map((tr,i)=>{
+    const hasZ = tr.querySelector('.z').checked;
+    const zq = hasZ ? Math.max(1, ni(tr.querySelector('.zq')?.value || 2)) : 0;
+    const zd = hasZ ? n(tr.querySelector('.zd')?.value || 0) : 0;
+    return{
+      index:i+1,
+      w:n(tr.querySelector('.w').value),
+      h1:n(tr.querySelector('.h1').value),
+      h2:n(tr.querySelector('.h2').value),
+      mh:Math.max(n(tr.querySelector('.h1').value),n(tr.querySelector('.h2').value)),
+      qty:ni(tr.querySelector('.qty').value),
+      ed:tr.querySelector('.ed').checked,
+      straps:ni(tr.querySelector('.straps').value),
+      z:hasZ,
+      zq:zq,
+      zc:hasZ?n(tr.querySelector('.zc').value):0,
+      zd:zd,
+      inst:tr.querySelector('.inst').checked
+    };
+  });
+}
+function zipperCount(x){return x.z ? Math.max(1, ni(x.zq || x.zipperQty || x.zippersCount || 2)) : 0}
+function zipperDistance(x){return n(x.zd || x.zipperDistance || x.zo || x.zipoff || x.zipperOffset || 0)}
+function totals(it,pr){
+  let t={totalQty:0,totalArea:0,baseTotal:0,extraTotal:0,grandTotal:0,rows:[]};
+  it.forEach(x=>{
+    let w=x.w/100,h1=x.h1/100,h2=x.h2/100,mh=x.mh/100;
+    let area=w*mh*x.qty,base=area*pr.m2;
+    let per=w+h1+h2+Math.sqrt(w*w+(h1-h2)**2);
+    let zCount=zipperCount(x);
+    let zipperCost=x.z ? (x.zc/100)*zCount*x.qty*pr.zip : 0;
+    let extra=(x.ed?per*x.qty*pr.edge:0)+x.straps*x.qty*pr.strap+zipperCost+(x.inst?area*pr.inst:0);
+    let row=base+extra;
+    t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra;t.grandTotal+=row;t.rows.push({area,rowTotal:row});
+  });
+  return t;
+}
 function cutOpeningPoints(x){
   const mh=x.mh;
   return[
@@ -113,7 +168,7 @@ function stockNormWidth(w){return String(w||'').trim().replace(',', '.').replace
 function stockFind(material,width){let nw=stockNormWidth(width);return (stock||[]).find(s=>s.material===material&&stockNormWidth(s.width)===nw)}
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
 function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Поворот</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'да':'нет'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
-function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperOffsetCm) {
+function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
 
@@ -198,15 +253,56 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
 
       let zipperElements = '';
       if (hasZipper && zipperCmPerSide > 0) {
+        const zQty = Math.max(1, parseInt(zipperQty || 2, 10) || 2);
+        const zipperDistanceCmSafe = Number(zipperDistanceCm || 0);
         const lenPx = Math.min(zipperCmPerSide, maxHeightCm) * scale;
-        const zStart = bottomY - lenPx, zEnd = bottomY, offsetPx = zipperOffsetCm * scale;
-        const lx = outerX + offsetPx, rx = outerRightX - offsetPx;
-        zipperElements += `<line x1="${lx}" y1="${zStart}" x2="${lx}" y2="${zEnd}" stroke="#7e3f98" stroke-width="1.2" stroke-dasharray="4 3"/>`;
-        zipperElements += `<line x1="${rx}" y1="${zStart}" x2="${rx}" y2="${zEnd}" stroke="#7e3f98" stroke-width="1.2" stroke-dasharray="4 3"/>`;
-        if (zipperOffsetCm > 0) {
+        const zStart = bottomY - lenPx, zEnd = bottomY;
+
+        let zipperXs = [];
+        if (zQty === 1) {
+          zipperXs = [(outerX + outerRightX) / 2];
+        } else if (zQty === 2) {
+          const offsetPx = zipperDistanceCmSafe * scale;
+          zipperXs = [outerX + offsetPx, outerRightX - offsetPx];
+        } else {
+          const stepPx = zipperDistanceCmSafe * scale;
+          const centerX = (outerX + outerRightX) / 2;
+          if (stepPx > 0) {
+            let startX = centerX - (stepPx * (zQty - 1)) / 2;
+            let endX = centerX + (stepPx * (zQty - 1)) / 2;
+            const minAllowed = outerX + 4;
+            const maxAllowed = outerRightX - 4;
+            if (startX < minAllowed) {
+              const shift = minAllowed - startX;
+              startX += shift; endX += shift;
+            }
+            if (endX > maxAllowed) {
+              const shift = endX - maxAllowed;
+              startX -= shift; endX -= shift;
+            }
+            for (let i = 0; i < zQty; i++) zipperXs.push(startX + stepPx * i);
+          } else {
+            const innerStep = (outerRightX - outerX) / (zQty + 1);
+            for (let i = 1; i <= zQty; i++) zipperXs.push(outerX + innerStep * i);
+          }
+        }
+
+        zipperXs.forEach(function(xpos){
+          zipperElements += `<line x1="${xpos}" y1="${zStart}" x2="${xpos}" y2="${zEnd}" stroke="#7e3f98" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+        });
+
+        if (zipperDistanceCmSafe > 0) {
           const y = outerTopY - 28;
-          zipperElements += `<line x1="${outerX}" y1="${y}" x2="${lx}" y2="${y}" stroke="#425466" stroke-width="0.9"/><circle cx="${outerX}" cy="${y}" r="1.6" fill="#425466"/><circle cx="${lx}" cy="${y}" r="1.6" fill="#425466"/><text x="${(outerX+lx)/2}" y="${y-5}" text-anchor="middle" font-size="11" font-weight="500" fill="#425466">${zipperOffsetCm} см</text>`;
-          zipperElements += `<line x1="${rx}" y1="${y}" x2="${outerRightX}" y2="${y}" stroke="#425466" stroke-width="0.9"/><circle cx="${rx}" cy="${y}" r="1.6" fill="#425466"/><circle cx="${outerRightX}" cy="${y}" r="1.6" fill="#425466"/><text x="${(rx+outerRightX)/2}" y="${y-5}" text-anchor="middle" font-size="11" font-weight="500" fill="#425466">${zipperOffsetCm} см</text>`;
+          if (zQty === 2) {
+            const lx = zipperXs[0], rx = zipperXs[1];
+            zipperElements += `<line x1="${outerX}" y1="${y}" x2="${lx}" y2="${y}" stroke="#425466" stroke-width="0.9"/><circle cx="${outerX}" cy="${y}" r="1.6" fill="#425466"/><circle cx="${lx}" cy="${y}" r="1.6" fill="#425466"/><text x="${(outerX+lx)/2}" y="${y-5}" text-anchor="middle" font-size="11" font-weight="500" fill="#425466">${zipperDistanceCmSafe} см</text>`;
+            zipperElements += `<line x1="${rx}" y1="${y}" x2="${outerRightX}" y2="${y}" stroke="#425466" stroke-width="0.9"/><circle cx="${rx}" cy="${y}" r="1.6" fill="#425466"/><circle cx="${outerRightX}" cy="${y}" r="1.6" fill="#425466"/><text x="${(rx+outerRightX)/2}" y="${y-5}" text-anchor="middle" font-size="11" font-weight="500" fill="#425466">${zipperDistanceCmSafe} см</text>`;
+          } else if (zQty >= 3 && zipperXs.length >= 2) {
+            for (let i = 0; i < zipperXs.length - 1; i++) {
+              const a = zipperXs[i], b = zipperXs[i+1];
+              zipperElements += `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="#425466" stroke-width="0.8"/><circle cx="${a}" cy="${y}" r="1.4" fill="#425466"/><circle cx="${b}" cy="${y}" r="1.4" fill="#425466"/><text x="${(a+b)/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="500" fill="#425466">${zipperDistanceCmSafe} см</text>`;
+            }
+          }
         }
       }
 
@@ -239,18 +335,169 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   const straps = ni(x.straps);
   const hasZipper = !!x.z;
   const zipperCm = hasZipper ? n(x.zc) : 0;
-  const zipperOffset = n(x.zo || x.zipoff || 0);
+  const zCount = hasZipper ? zipperCount(x) : 0;
+  const zDistance = hasZipper ? zipperDistance(x) : 0;
+  const zDistanceLabel = hasZipper
+    ? (zCount === 2
+        ? `Отступ от края: ${zDistance} см`
+        : (zCount >= 3 ? `Расстояние между молниями: ${zDistance} см` : 'Молния по центру'))
+    : '';
   const meta = [
     `Ремни: ${straps}`,
-    hasZipper ? `Молния: ${zipperCm} см × 2 стороны` : 'Молния: нет',
-    `Окантовка: ${edgingWidth} см`,
-    hasZipper && zipperOffset > 0 ? `Отступ молнии: ${zipperOffset} см от края окантовки` : ''
+    hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
+    zDistanceLabel,
+    `Окантовка: ${edgingWidth} см`
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i}</div><div class="scheme-meta">${meta}</div>` +
-    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zipperOffset);
+    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount);
 }function report(c,ca){return`<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>body{font-family:Arial;margin:0}.page{padding:10mm}.head{display:grid;grid-template-columns:1fr 1fr;gap:5px}.sum{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.box{border:1px solid #ddd;padding:6px}.pdfgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.pdfgrid svg{width:100%;height:auto;max-height:70mm}.scheme-title{font-weight:900;text-align:center;font-size:12px;margin:0 0 1px}.scheme-meta{font-size:8.5px;line-height:1.12;color:#1f2933;font-weight:600;margin:0 0 2px}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border:1px solid #ddd;padding:4px}@media(max-width:768px){.pdfgrid,.head{grid-template-columns:1fr}.sum{grid-template-columns:repeat(2,1fr)}}@media print{.page{padding:7mm}.pdfgrid{grid-template-columns:repeat(2,1fr);gap:3px 6px}.pdfgrid svg{max-height:64mm}.scheme-meta{font-size:8px}}</style></head><body><div class=page><h1>Расчёт мягких окон</h1><div class=head><div><b>Клиент:</b> ${esc(c.name)}</div><div><b>Тел:</b> ${esc(c.phone)}</div><div><b>Адрес:</b> ${esc(c.address)}</div><div><b>Дата:</b> ${esc(c.measureDate)}</div></div><div class=sum><div class=box>Окон<b>${ca.totals.totalQty}</b></div><div class=box>Площадь<b>${ca.totals.totalArea.toFixed(2)} м²</b></div><div class=box>Полотно<b>${rub(ca.totals.baseTotal)}</b></div><div class=box>Допы<b>${rub(ca.totals.extraTotal)}</b></div><div class=box>Итого<b>${rub(ca.totals.grandTotal)}</b></div></div><div class=pdfgrid>${ca.items.map((x,i)=>draw(x,i+1,ca.prices)).join('')}</div><h3>Закуп</h3>${matsHtml(ca.materials)}</div></body></html>`}
 function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class=pdfgrid>${it.map((x,i)=>draw(x,i+1,pr)).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(){let c=client(),ca=curCalc();let {data,error}=await db.from('calculations').insert({client_id:c.id,prices:ca.prices,items:ca.items,totals:ca.totals,materials:ca.materials}).select().single();if(error)return alert(error.message);await db.from('client_history').insert({client_id:c.id,type:'Расчёт',text:`Сохранён расчёт на ${rub(ca.totals.grandTotal)}`,amount:ca.totals.grandTotal,extra:{calculation_id:data.id}});await db.from('clients').update({updated_at:new Date().toISOString()}).eq('id',c.id);await loadData();openCard(c.id);alert('Расчёт сохранён')}function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}function downloadHtml(){let c=client(),ca=curCalc();blob(new Blob([report(c,ca)],{type:'text/html'}),safe(c.address||c.name)+'.html')}async function sendHtml(){let c=client(),ca=curCalc(),fn=safe(c.address||c.name)+'.html',file=new File([report(c,ca)],fn,{type:'text/html'}),form=new FormData();form.append('document',file);form.append('caption','Расчёт мягких окон: '+(c.address||c.name));try{let r=await fetch('/api/send-telegram',{method:'POST',body:form});if(!r.ok)throw Error(await r.text());await db.from('client_history').insert({client_id:c.id,type:'Telegram',text:'HTML-отчёт отправлен',extra:{filename:fn}});await loadData();openCard(c.id);alert('Отправлено')}catch(e){alert('Ошибка: '+e.message)}}
+
+
+function normalizePointsCm(points, box) {
+  return points.map(p => ({ x: p.x - box.minX, y: p.y - box.minY }));
+}
+function rotatePointsClockwiseCm(points, widthCm) {
+  return points.map(p => ({ x: p.y, y: widthCm - p.x }));
+}
+function normalizePointArray(points) {
+  const b = bboxCm(points);
+  return points.map(p => ({ x: p.x - b.minX, y: p.y - b.minY }));
+}
+function cutGeometryForPiece(x, pr) {
+  const ch = materialChoiceForPiece(x, pr);
+  if (ch.bad) return null;
+
+  let cutPts = normalizePointsCm(ch.cut, ch.box);
+  let openingPts = normalizePointsCm(ch.opening, ch.box);
+
+  if (ch.rotated) {
+    cutPts = normalizePointArray(rotatePointsClockwiseCm(cutPts, ch.box.width));
+    openingPts = normalizePointArray(rotatePointsClockwiseCm(openingPts, ch.box.width));
+  }
+
+  return {
+    roll: ch.roll,
+    widthCm: ch.cutWidthCm,
+    lengthCm: ch.cutLengthCm,
+    rotated: ch.rotated,
+    cutPts,
+    openingPts
+  };
+}
+function buildCutLayouts(ca) {
+  const pr = ca.prices || prices();
+  const grouped = {180: [], 220: [], 240: []};
+
+  (ca.items || []).forEach(x => {
+    for (let k = 0; k < (x.qty || 1); k++) {
+      const g = cutGeometryForPiece(x, pr);
+      if (!g) continue;
+      grouped[g.roll].push({
+        window: x.index,
+        detail: k + 1,
+        source: x,
+        ...g
+      });
+    }
+  });
+
+  const layouts = [];
+  Object.keys(grouped).forEach(rollKey => {
+    const roll = Number(rollKey);
+    const pieces = grouped[roll];
+    if (!pieces.length) return;
+
+    let y = 0;
+    const placements = pieces.map(p => {
+      const place = { ...p, xCm: 0, yCm: y };
+      y += p.lengthCm;
+      return place;
+    });
+
+    layouts.push({
+      rollWidthCm: roll,
+      totalLengthCm: Math.max(y, 1),
+      placements
+    });
+  });
+
+  return layouts;
+}
+function svgPtsMm(points, xCm, yCm, rollX, rollY) {
+  return points.map(p => `${(rollX + (xCm + p.x) * 10).toFixed(2)},${(rollY + (yCm + p.y) * 10).toFixed(2)}`).join(' ');
+}
+function svgPathMm(points, xCm, yCm, rollX, rollY) {
+  if (!points.length) return '';
+  return 'M ' + points.map(p => `${(rollX + (xCm + p.x) * 10).toFixed(2)} ${(rollY + (yCm + p.y) * 10).toFixed(2)}`).join(' L ') + ' Z';
+}
+function singleCutLayoutSvg(layout, c, index, total) {
+  const marginMm = 45;
+  const headerMm = 55;
+  const footerMm = 35;
+  const rollX = marginMm;
+  const rollY = marginMm + headerMm;
+  const rollWidthMm = layout.rollWidthCm * 10;
+  const rollLengthMm = Math.max(layout.totalLengthCm * 10, 1);
+  const viewWidthMm = rollWidthMm + marginMm * 2;
+  const viewHeightMm = rollLengthMm + marginMm * 2 + headerMm + footerMm;
+
+  let rollLayer = `<rect x="${rollX}" y="${rollY}" width="${rollWidthMm.toFixed(2)}" height="${rollLengthMm.toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
+  let cutLayer = '';
+  let openingLayer = '';
+  let blankLayer = '';
+  let dimLayer = '';
+  let labelLayer = `<text x="${(viewWidthMm/2).toFixed(2)}" y="${(marginMm+20).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial">Раскрой — ${esc(c.address || c.name || 'заказ')} — рулон ${(layout.rollWidthCm/100).toFixed(1)} м — файл ${index+1}/${total}</text>`;
+
+  layout.placements.forEach((p, i) => {
+    const x = p.xCm, y = p.yCm;
+    const minX = rollX + x * 10;
+    const minY = rollY + y * 10;
+    const wMm = p.widthCm * 10;
+    const hMm = p.lengthCm * 10;
+    const maxX = minX + wMm;
+    const maxY = minY + hMm;
+    const label = `Окно ${p.window} / деталь ${p.detail}`;
+
+    blankLayer += `<rect x="${minX.toFixed(2)}" y="${minY.toFixed(2)}" width="${wMm.toFixed(2)}" height="${hMm.toFixed(2)}" fill="none" stroke="#0066ff" stroke-width="0.25" stroke-dasharray="6 4"/>`;
+    cutLayer += `<path d="${svgPathMm(p.cutPts, x, y, rollX, rollY)}" fill="none" stroke="#ff0000" stroke-width="0.35" inkscape:label="${label}"/>`;
+    openingLayer += `<path d="${svgPathMm(p.openingPts, x, y, rollX, rollY)}" fill="none" stroke="#008000" stroke-width="0.25" stroke-dasharray="6 4"/>`;
+    labelLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${((minY+maxY)/2).toFixed(2)}" text-anchor="middle" font-size="16" font-family="Arial">${label}${p.rotated ? ' / поворот' : ''}</text>`;
+    dimLayer += `<text x="${((minX+maxX)/2).toFixed(2)}" y="${(minY+16).toFixed(2)}" text-anchor="middle" font-size="13" fill="#ff9900">${formatM(p.widthCm)} × ${formatM(p.lengthCm)}</text>`;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="${viewWidthMm.toFixed(2)}mm"
+     height="${viewHeightMm.toFixed(2)}mm"
+     viewBox="0 0 ${viewWidthMm.toFixed(2)} ${viewHeightMm.toFixed(2)}">
+  <g id="layer_cut" inkscape:label="Резка" inkscape:groupmode="layer">${cutLayer}</g>
+  <g id="layer_opening" inkscape:label="Контур проема" inkscape:groupmode="layer">${openingLayer}</g>
+  <g id="layer_blanks" inkscape:label="Габариты деталей" inkscape:groupmode="layer">${blankLayer}</g>
+  <g id="layer_roll" inkscape:label="Рулон" inkscape:groupmode="layer">${rollLayer}</g>
+  <g id="layer_dimensions" inkscape:label="Размеры" inkscape:groupmode="layer">${dimLayer}</g>
+  <g id="layer_labels" inkscape:label="Подписи" inkscape:groupmode="layer">${labelLayer}</g>
+</svg>`;
+}
+function downloadCutLayoutSvg() {
+  const c = client();
+  const ca = curCalc();
+  const layouts = buildCutLayouts(ca);
+
+  if (!layouts.length) {
+    alert('Нет данных для раскроя. Заполните размеры окон.');
+    return;
+  }
+
+  layouts.forEach((layout, i) => {
+    const svg = singleCutLayoutSvg(layout, c, i, layouts.length);
+    const name = safe((c.address || c.name || 'raskroy') + '_rulon_' + (layout.rollWidthCm/100).toFixed(1) + 'm_' + (i+1)) + '.svg';
+    setTimeout(() => blob(new Blob([svg], {type:'image/svg+xml;charset=utf-8'}), name), i * 300);
+  });
+}
+
 
 function stockRowsHtml(){if(!stock||!stock.length)return '<div class="empty">Склад пустой. Добавь остатки материала.</div>';return `<div class=tw><table><thead><tr><th>Материал</th><th>Ширина / тип</th><th>В наличии</th><th>Критический остаток</th><th>Статус</th><th></th></tr></thead><tbody>${stock.map(s=>{let qty=n(s.qty_m),crit=n(s.critical_m),st=qty<=crit?'КРИТИЧЕСКИЙ':'ОК',color=qty<=crit?'#b42318':'#166534';return`<tr><td>${esc(s.material)}</td><td>${esc(s.width)}</td><td>${qty.toFixed(2)}</td><td>${crit.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st}</td><td class="actions"><button class="btn s" onclick="editStock('${s.id}')">Изм.</button><button class="btn s r" onclick="deleteStock('${s.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
 function movementsHtml(){if(!stockMoves||!stockMoves.length)return '<div class="empty">Движений пока нет</div>';return `<div class=tw><table><thead><tr><th>Дата</th><th>Тип</th><th>Кол-во</th><th>Комментарий</th></tr></thead><tbody>${stockMoves.map(m=>`<tr><td>${new Date(m.created_at).toLocaleString('ru-RU')}</td><td>${esc(m.type||'')}</td><td>${n(m.qty_m).toFixed(2)}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table></div>`}
@@ -269,7 +516,7 @@ function productionTaskHtml(c,ca){
     <td>${x.qty}</td>
     <td>${x.ed?'да':'нет'}</td>
     <td>${x.straps}</td>
-    <td>${x.z?('да, '+x.zc+' см × 2 стороны'):'нет'}</td>
+    <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт. '+(zipperCount(x)===2?'отступ от края ':'шаг ')+zipperDistance(x)+' см'):'нет'}</td>
     <td>${x.inst?'да':'нет'}</td>
   </tr>`).join('');
   const details=(ca.materials.details||[]).map(d=>`<tr>
