@@ -319,6 +319,16 @@ function buildOptimizedLayouts(it,pr){
 
   return buildFallbackMixedLayouts(it,pr,candidateRolls);
 }
+
+function polyPerimeterCm(points){
+  let per=0;
+  for(let i=0;i<points.length;i++){
+    const a=points[i], b=points[(i+1)%points.length];
+    per += Math.sqrt((b.x-a.x)**2 + (b.y-a.y)**2);
+  }
+  return per;
+}
+
 function mats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
   let usage={180:0,220:0,240:0},details=[],edge=0;
