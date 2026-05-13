@@ -230,21 +230,100 @@ function packPiecesOnRoll(pieces,roll){
     placements:shelves.flatMap(sh=>sh.pieces)
   };
 }
-function buildOptimizedLayouts(it,pr){
-  const {pieces,bad}=createCutPieces(it,pr);
-  const grouped={180:[],220:[],240:[]};
-  pieces.forEach(p=>grouped[p.roll].push(p));
-  const layouts=[];
-  [220,240,180].forEach(roll=>{
-    if(grouped[roll].length)layouts.push(packPiecesOnRoll(grouped[roll],roll));
+function buildLayoutForSingleRoll(it,pr,roll){
+  const pieces=[],bad=[];
+  it.forEach(x=>{
+    for(let k=0;k<x.qty;k++){
+      const variants=pieceVariantsForRoll(x,pr,roll);
+      if(!variants.length){
+        const opening=cutOpeningPoints(x);
+        const cut=offsetPolyCm(opening,n(pr.off)||4.5);
+        const box=bboxCm(cut);
+        bad.push(`Окно ${x.index}: габарит резки ${formatM(box.width)} × ${formatM(box.height)} не входит в рулон ${(roll/100).toFixed(1)} м`);
+        continue;
+      }
+      const best=variants[0]; // минимальный расход длины на данном рулоне
+      pieces.push({
+        window:x.index,
+        detail:k+1,
+        source:x,
+        ...best
+      });
+    }
   });
-  return{layouts,bad,pieces};
+  if(bad.length)return{ok:false,bad,layout:null,area:Infinity};
+  const layout=packPiecesOnRoll(pieces,roll);
+  const area=roll*layout.totalLengthCm;
+  return{ok:true,bad:[],layout,area};
+}
+function buildFallbackMixedLayouts(it,pr,candidateRolls){
+  const grouped={180:[],220:[],240:[]},bad=[];
+  it.forEach(x=>{
+    for(let k=0;k<x.qty;k++){
+      let best=null;
+      candidateRolls.forEach(roll=>{
+        const variants=pieceVariantsForRoll(x,pr,roll);
+        if(!variants.length)return;
+        const v=variants[0];
+        const score=roll*v.lengthCm; // площадь расхода одной детали
+        if(!best||score<best.score)best={score,roll,v};
+      });
+      if(!best){
+        const opening=cutOpeningPoints(x);
+        const cut=offsetPolyCm(opening,n(pr.off)||4.5);
+        const box=bboxCm(cut);
+        bad.push(`Окно ${x.index}: габарит резки ${formatM(box.width)} × ${formatM(box.height)} не входит в доступные рулоны`);
+        continue;
+      }
+      grouped[best.roll].push({
+        window:x.index,
+        detail:k+1,
+        source:x,
+        ...best.v
+      });
+    }
+  });
+  const layouts=[];
+  candidateRolls.forEach(roll=>{
+    if(grouped[roll]&&grouped[roll].length)layouts.push(packPiecesOnRoll(grouped[roll],roll));
+  });
+  return{layouts,bad,pieces:layouts.flatMap(l=>l.placements)};
+}
+function buildOptimizedLayouts(it,pr){
+  // Экономная логика:
+  // 1) сначала учитываем только рулоны, которые есть на складе;
+  // 2) пробуем разложить весь заказ на каждом доступном рулоне отдельно;
+  // 3) выбираем вариант с минимальной площадью расхода: ширина рулона × погонаж;
+  // 4) поэтому 1.8 м будет выбран, если он экономичнее, даже если есть 2.2 м;
+  // 5) 2.2/2.4 выбираются, когда за счет укладки рядом по ширине они дают меньший погонаж/расход.
+  let candidateRolls=[180,220,240].filter(r=>rollAvailableCm(r)>0);
+  if(!candidateRolls.length)candidateRolls=[180,220,240];
+
+  const singleRollOptions=candidateRolls
+    .map(roll=>buildLayoutForSingleRoll(it,pr,roll))
+    .filter(o=>o.ok);
+
+  if(singleRollOptions.length){
+    singleRollOptions.sort((a,b)=>a.area-b.area||a.layout.rollWidthCm-b.layout.rollWidthCm);
+    const best=singleRollOptions[0];
+
+    // Проверяем смешанный вариант на случай, если часть деталей выгоднее увести на другой рулон.
+    const mixed=buildFallbackMixedLayouts(it,pr,candidateRolls);
+    const mixedArea=mixed.layouts.reduce((s,l)=>s+l.rollWidthCm*l.totalLengthCm,0);
+    if(mixed.layouts.length&&mixedArea+0.001<best.area){
+      return{layouts:mixed.layouts,bad:mixed.bad,pieces:mixed.pieces};
+    }
+
+    return{layouts:[best.layout],bad:[],pieces:best.layout.placements};
+  }
+
+  return buildFallbackMixedLayouts(it,pr,candidateRolls);
 }
 function mats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
   let usage={180:0,220:0,240:0},details=[],edge=0;
   opt.layouts.forEach(layout=>{
-    usage[layout.rollWidthCm]=layout.totalLengthCm/100;
+    usage[layout.rollWidthCm]=(usage[layout.rollWidthCm]||0)+layout.totalLengthCm/100;
     layout.placements.forEach(p=>{
       details.push({
         window:p.window,
@@ -267,8 +346,12 @@ function mats(it,pr){
 
   it.forEach(x=>{
     if(x.ed){
-      let w=x.w/100,h1=x.h1/100,h2=x.h2/100;
-      edge+=(w+h1+h2+Math.sqrt(w*w+(h1-h2)**2))*x.qty;
+      // Окантовку считаем по внешнему контуру резки с офсетом, а не по чистому проёму.
+      // Офсет берётся из настроек расчёта, обычно 4.5 см.
+      const off=n(pr.off)||4.5;
+      const opening=cutOpeningPoints(x);
+      const cut=offsetPolyCm(opening,off);
+      edge+=(polyPerimeterCm(cut)/100)*x.qty;
     }
   });
 
@@ -282,7 +365,7 @@ function mats(it,pr){
         need:usage[k],
         rolls,
         rest:rolls*50-usage[k],
-        comment:'Оптимальная раскладка по ширине рулона. Офсет '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
+        comment:'Экономная раскладка: выбран рулон с минимальным расходом материала. Офсет '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
       });
     }
   });
@@ -292,7 +375,7 @@ function mats(it,pr){
     oversized:opt.bad,
     details,
     layouts:opt.layouts,
-    edgingRow:{material:'Окантовка',width:'10 см',need:en,rolls:er,rest:er?er*50-en:0,comment:'Запас 10%'}
+    edgingRow:{material:'Окантовка',width:'10 см',need:en,rolls:er,rest:er?er*50-en:0,comment:'По контуру резки с офсетом '+(n(pr.off)||4.5)+' см + запас 10%'}
   };
 }
 function stockNormMaterial(v){
@@ -326,7 +409,7 @@ function stockFind(material,width){
   return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.forcedFallback?'2.2/2.4 вместо 1.8':(d.selectedByStock?'есть на складе':'к закупу')}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -624,14 +707,52 @@ function downloadCutLayoutSvg() {
 
 
 function stockRowsHtml(){if(!stock||!stock.length)return '<div class="empty">Склад пустой. Добавь остатки материала.</div>';return `<div class=tw><table><thead><tr><th>Материал</th><th>Ширина / тип</th><th>В наличии</th><th>Критический остаток</th><th>Статус</th><th></th></tr></thead><tbody>${stock.map(s=>{let qty=n(s.qty_m),crit=n(s.critical_m),st=qty<=crit?'КРИТИЧЕСКИЙ':'ОК',color=qty<=crit?'#b42318':'#166534';return`<tr><td>${esc(s.material)}</td><td>${esc(s.width)}</td><td>${qty.toFixed(2)}</td><td>${crit.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st}</td><td class="actions"><button class="btn s" onclick="editStock('${s.id}')">Изм.</button><button class="btn s r" onclick="deleteStock('${s.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
-function movementsHtml(){if(!stockMoves||!stockMoves.length)return '<div class="empty">Движений пока нет</div>';return `<div class=tw><table><thead><tr><th>Дата</th><th>Тип</th><th>Кол-во</th><th>Комментарий</th></tr></thead><tbody>${stockMoves.map(m=>`<tr><td>${new Date(m.created_at).toLocaleString('ru-RU')}</td><td>${esc(m.type||'')}</td><td>${n(m.qty_m).toFixed(2)}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table></div>`}
+function movementMaterialInfo(m){
+  const item=(stock||[]).find(s=>s.id===m.stock_item_id);
+  let material=item?item.material:(m.material||'');
+  let width=item?item.width:(m.width||'');
+  if((!material||!width)&&m.note){
+    const mm=String(m.note).match(/Материал:\s*([^|]+)\|\s*Ширина:\s*([^|]+)/i);
+    if(mm){material=material||mm[1].trim();width=width||mm[2].trim();}
+  }
+  return{material:material||'—',width:width||'—'};
+}
+function movementClientInfo(m){
+  const c=(clients||[]).find(x=>x.id===m.client_id);
+  if(c)return `${c.address||c.name||'Заказ'}${c.phone?' / '+c.phone:''}`;
+  if(m.note){
+    const mm=String(m.note).match(/Заказ:\s*([^|]+)/i);
+    if(mm)return mm[1].trim();
+  }
+  return '—';
+}
+function movementsHtml(){
+  if(!stockMoves||!stockMoves.length)return '<div class="empty">Движений пока нет</div>';
+  return `<div class=tw><table><thead><tr>
+    <th>Дата</th><th>Тип</th><th>Материал</th><th>Ширина / тип</th><th>Кол-во</th><th>Заказ</th><th>Комментарий</th>
+  </tr></thead><tbody>${stockMoves.map(m=>{
+    const mi=movementMaterialInfo(m);
+    const order=movementClientInfo(m);
+    const qty=n(m.qty_m);
+    const color=qty<0?'#b42318':'#166534';
+    return `<tr>
+      <td>${new Date(m.created_at).toLocaleString('ru-RU')}</td>
+      <td>${esc(m.type||m.movement_type||'')}</td>
+      <td><b>${esc(mi.material)}</b></td>
+      <td>${esc(mi.width)}</td>
+      <td style="font-weight:900;color:${color}">${qty.toFixed(2)}</td>
+      <td>${esc(order)}</td>
+      <td>${esc(m.note||'')}</td>
+    </tr>`;
+  }).join('')}</tbody></table></div>`;
+}
 function activeMaterialsNeed(){let all=[];clients.filter(c=>WORK.includes(c.status)&&c.calcs&&c.calcs[0]).forEach(c=>all.push(...c.calcs[0].items));return mats(all,set)}
 function renderWarehouse(){if(typeof stockList==='undefined')return;stockList.innerHTML=stockRowsHtml();stockNeedList.innerHTML=matsHtml(activeMaterialsNeed());stockMovements.innerHTML=movementsHtml()}
 function editStock(id){let s=stock.find(x=>x.id===id);if(!s)return;wh_mat.value=s.material;wh_width.value=s.width;wh_qty.value=n(s.qty_m);wh_crit.value=n(s.critical_m);wh_width.dataset.id=id;show('warehouse')}
 async function saveStockItem(){if(!db)return alert('Supabase не подключён');let id=wh_width.dataset.id||'',payload={material:wh_mat.value,width:stockNormWidth(wh_width.value),qty_m:n(wh_qty.value),critical_m:n(wh_crit.value),updated_at:new Date().toISOString()};if(!payload.width)return alert('Укажи ширину / тип материала');let res=id?await db.from('stock_items').update(payload).eq('id',id):await db.from('stock_items').upsert(payload,{onConflict:'material,width'});if(res.error)return alert(res.error.message);wh_width.dataset.id='';wh_width.value='';wh_qty.value=0;wh_crit.value=5;await loadData();show('warehouse')}
 async function deleteStock(id){if(!confirm('Удалить позицию склада?'))return;let r=await db.from('stock_items').delete().eq('id',id);if(r.error)return alert(r.error.message);await loadData();show('warehouse')}
 function currentRowsForConsumption(){let ca=curCalc(),rows=[...ca.materials.rollRows];if(ca.materials.edgingRow.need>0)rows.push(ca.materials.edgingRow);return rows}
-async function consumeCurrentMaterials(){if(!db)return alert('Supabase не подключён');let c=client();if(!c)return;let rows=currentRowsForConsumption();if(!rows.length)return alert('Нет материалов для списания');let msg=rows.map(r=>{let st=stockState(r.material,r.width,r.need);return `${r.material} ${r.width}: нужно ${r.need.toFixed(2)}, в наличии ${st.qty.toFixed(2)}, после ${st.after.toFixed(2)}${st.def>0?' — НЕ ХВАТАЕТ '+st.def.toFixed(2):''}`}).join('\n');if(!confirm('Списать материалы со склада?\n\n'+msg))return;for(let r of rows){let st=stockState(r.material,r.width,r.need),item=st.item;if(!item){let ins=await db.from('stock_items').insert({material:r.material,width:r.width,qty_m:0,critical_m:0}).select().single();if(ins.error)return alert(ins.error.message);item=ins.data;st.qty=0;st.crit=0}let newQty=st.qty-r.need;let up=await db.from('stock_items').update({qty_m:newQty,updated_at:new Date().toISOString()}).eq('id',item.id);if(up.error)return alert(up.error.message);await db.from('stock_movements').insert({stock_item_id:item.id,client_id:c.id,type:'Расход',qty_m:-r.need,note:'Списание по заказу: '+(c.address||c.name||'')});if(newQty<=n(item.critical_m))await db.from('client_history').insert({client_id:c.id,type:'Склад',text:`Критический остаток: ${r.material} ${r.width}. После списания ${newQty.toFixed(2)}. Нужно докупить ${Math.max(0,n(item.critical_m)-newQty).toFixed(2)}.`})}await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Материалы списаны со склада',extra:{materials:rows}});await loadData();openCard(c.id);alert('Материалы списаны. Проверь разделы «Склад» и «Закуп».')}
+async function consumeCurrentMaterials(){if(!db)return alert('Supabase не подключён');let c=client();if(!c)return;let rows=currentRowsForConsumption();if(!rows.length)return alert('Нет материалов для списания');let msg=rows.map(r=>{let st=stockState(r.material,r.width,r.need);return `${r.material} ${r.width}: нужно ${r.need.toFixed(2)}, в наличии ${st.qty.toFixed(2)}, после ${st.after.toFixed(2)}${st.def>0?' — НЕ ХВАТАЕТ '+st.def.toFixed(2):''}`}).join('\n');if(!confirm('Списать материалы со склада?\n\n'+msg))return;for(let r of rows){let st=stockState(r.material,r.width,r.need),item=st.item;if(!item){let ins=await db.from('stock_items').insert({material:r.material,width:r.width,qty_m:0,critical_m:0}).select().single();if(ins.error)return alert(ins.error.message);item=ins.data;st.qty=0;st.crit=0}let newQty=st.qty-r.need;let up=await db.from('stock_items').update({qty_m:newQty,updated_at:new Date().toISOString()}).eq('id',item.id);if(up.error)return alert(up.error.message);await db.from('stock_movements').insert({stock_item_id:item.id,client_id:c.id,type:'Расход',qty_m:-r.need,note:`Материал: ${r.material} | Ширина: ${r.width} | Заказ: ${c.address||c.name||''} | Списано: ${r.need.toFixed(2)}`});if(newQty<=n(item.critical_m))await db.from('client_history').insert({client_id:c.id,type:'Склад',text:`Критический остаток: ${r.material} ${r.width}. После списания ${newQty.toFixed(2)}. Нужно докупить ${Math.max(0,n(item.critical_m)-newQty).toFixed(2)}.`})}await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Материалы списаны со склада',extra:{materials:rows}});await loadData();openCard(c.id);alert('Материалы списаны. Проверь разделы «Склад» и «Закуп».')}
 function productionTaskHtml(c,ca){
   const today=new Date().toLocaleDateString('ru-RU');
   const itemsRows=ca.items.map(x=>`<tr>
