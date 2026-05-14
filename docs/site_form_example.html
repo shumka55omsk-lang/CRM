@@ -1,0 +1,37 @@
+<!-- Пример формы заявки на сайте -->
+<form id="leadForm">
+  <input name="name" placeholder="Ваше имя">
+  <input name="phone" placeholder="Телефон" required>
+  <input name="address" placeholder="Адрес / район / СНТ">
+  <textarea name="message" placeholder="Комментарий"></textarea>
+  <button type="submit">Отправить заявку</button>
+</form>
+
+<script>
+document.getElementById('leadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const form = e.currentTarget;
+  const data = {
+    name: form.name.value,
+    phone: form.phone.value,
+    address: form.address.value,
+    message: form.message.value,
+    source: 'Сайт мягкиеокна55.рф'
+  };
+
+  const res = await fetch('https://ТВОЙ-CRM-ДОМЕН.vercel.app/api/site-lead', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  if (res.ok) {
+    alert('Заявка отправлена');
+    form.reset();
+  } else {
+    alert('Ошибка отправки заявки');
+    console.error(await res.text());
+  }
+});
+</script>
