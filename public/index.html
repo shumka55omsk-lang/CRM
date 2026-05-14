@@ -667,7 +667,129 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount);
-}function report(c,ca){return`<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>body{font-family:Arial;margin:0}.page{padding:10mm}.head{display:grid;grid-template-columns:1fr 1fr;gap:5px}.sum{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.box{border:1px solid #ddd;padding:6px}.pdfgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.pdfgrid svg{width:100%;height:auto;max-height:70mm}.scheme-title{font-weight:900;text-align:center;font-size:12px;margin:0 0 1px}.scheme-meta{font-size:8.5px;line-height:1.12;color:#1f2933;font-weight:600;margin:0 0 2px}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border:1px solid #ddd;padding:4px}@media(max-width:768px){.pdfgrid,.head{grid-template-columns:1fr}.sum{grid-template-columns:repeat(2,1fr)}}@media print{.page{padding:7mm}.pdfgrid{grid-template-columns:repeat(2,1fr);gap:3px 6px}.pdfgrid svg{max-height:64mm}.scheme-meta{font-size:8px}}</style></head><body><div class=page><h1>Расчёт мягких окон</h1><div class=head><div><b>Клиент:</b> ${esc(c.name)}</div><div><b>Тел:</b> ${esc(c.phone)}</div><div><b>Адрес:</b> ${esc(c.address)}</div><div><b>Дата:</b> ${esc(c.measureDate)}</div></div><div class=sum><div class=box>Окон<b>${ca.totals.totalQty}</b></div><div class=box>Площадь<b>${ca.totals.totalArea.toFixed(2)} м²</b></div><div class=box>Полотно<b>${rub(ca.totals.baseTotal)}</b></div><div class=box>Допы<b>${rub(ca.totals.extraTotal)}</b></div><div class=box>Обрезки<b>${ca.prices.scraps?rub(ca.totals.scrapCost):(rub(ca.totals.scrapCostInfo)+' справочно')}</b></div><div class=box>Итого<b>${rub(ca.totals.grandTotal)}</b></div></div><p><b>Площадь погонажа:</b> ${ca.totals.rollArea.toFixed(2)} м²; <b>площадь деталей с офсетом:</b> ${ca.totals.cutArea.toFixed(2)} м²; <b>обрезки:</b> ${ca.totals.scrapArea.toFixed(2)} м².</p><div class="pdfgrid ${ca.items.length===1?'one':''}">${ca.items.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,ca.prices)}</div>`).join('')}</div><h3>Закуп</h3>${matsHtml(ca.materials)}</div></body></html>`}
+}function report(c,ca){
+  const materialRows=[...(ca.materials.rollRows||[])];
+  if(ca.materials.edgingRow&&ca.materials.edgingRow.need)materialRows.push(ca.materials.edgingRow);
+
+  const materialCards=materialRows.length
+    ? materialRows.map(r=>`<div class="mcard">
+        <div class="mname">${esc(r.material)} <b>${esc(r.width)}</b></div>
+        <div class="mgrid">
+          <span>Нужно</span><b>${n(r.need).toFixed(2)}</b>
+          <span>Рулонов</span><b>${r.rolls||0}</b>
+          <span>Остаток</span><b>${n(r.rest).toFixed(2)}</b>
+        </div>
+        <div class="comment">${esc(r.comment||'')}</div>
+      </div>`).join('')
+    : '<div class="empty">Нет данных по закупу</div>';
+
+  const detailCards=(ca.materials.details||[]).length
+    ? (ca.materials.details||[]).map(d=>`<div class="dcard">
+        <b>Окно ${d.window}, деталь ${d.detail}</b>
+        <span>Рулон: ${(d.roll/100).toFixed(1)} м</span>
+        <span>Размер резки: ${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</span>
+        <span>Пог. м: ${n(d.needM).toFixed(2)} м</span>
+        <span>Ориентация: ${d.rotated?'повернуто':'без поворота'}</span>
+      </div>`).join('')
+    : '';
+
+  const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
+      <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
+      <div>Проём: ${x.w} × ${x.h1}/${x.h2} см</div>
+      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps}</div>
+      <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
+    </div>`).join('');
+
+  return`<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Расчёт мягких окон — ${esc(c.address||c.name||'клиент')}</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:Arial, sans-serif;margin:0;background:#f5f7fb;color:#111827}
+  .page{max-width:980px;margin:0 auto;padding:14px}
+  .hero{background:#111827;color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+  h1{font-size:22px;margin:0 0 10px}
+  h2{font-size:18px;margin:18px 0 10px}
+  .head{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .head div,.box,.mcard,.dcard,.itemcard{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px}
+  .hero .head div{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+  .muted,.comment{color:#6b7280;font-size:12px}
+  .sum{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+  .box span{display:block;color:#6b7280;font-size:12px}
+  .box b{display:block;font-size:18px;margin-top:4px}
+  .total{background:#ecfdf3;border-color:#bbf7d0}
+  .total b{font-size:22px}
+  .items,.materials,.details{display:grid;gap:8px}
+  .materials{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .mname{font-weight:800;margin-bottom:8px}
+  .mgrid{display:grid;grid-template-columns:1fr auto;gap:4px 10px}
+  .mgrid span{color:#6b7280}
+  .pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:12px}
+  .pdfitem{flex:0 1 360px;max-width:420px;min-width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px}
+  .pdfitem svg{width:100%;height:auto;display:block}
+  .pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}
+  .scheme-title{font-weight:900;text-align:left;font-size:14px;margin:0 0 2px}
+  .scheme-meta{font-size:11px;line-height:1.25;color:#374151;font-weight:600;margin:0 0 5px}
+  .details{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .dcard span,.itemcard div{display:block;margin-top:4px}
+  .empty{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px;color:#6b7280}
+  @media(max-width:760px){
+    .page{padding:10px}
+    .hero{border-radius:14px;padding:12px}
+    h1{font-size:20px}
+    .head{grid-template-columns:1fr}
+    .sum{grid-template-columns:repeat(2,1fr)}
+    .box b{font-size:16px}
+    .total{grid-column:1/-1}
+    .pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}
+  }
+  @media print{
+    body{background:#fff}
+    .page{max-width:none;padding:8mm}
+    .hero{background:#fff;color:#111;border:1px solid #ddd}
+    .sum{grid-template-columns:repeat(5,1fr)}
+    .pdfitem{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <h1>Расчёт мягких окон</h1>
+    <div class="head">
+      <div><b>Клиент:</b> ${esc(c.name||'—')}</div>
+      <div><b>Телефон:</b> ${esc(c.phone||'—')}</div>
+      <div><b>Адрес:</b> ${esc(c.address||'—')}</div>
+      <div><b>Дата:</b> ${esc(c.measureDate||'—')}</div>
+    </div>
+  </div>
+
+  <div class="sum">
+    <div class="box"><span>Окон</span><b>${ca.totals.totalQty}</b></div>
+    <div class="box"><span>Площадь</span><b>${ca.totals.totalArea.toFixed(2)} м²</b></div>
+    <div class="box"><span>Полотно</span><b>${rub(ca.totals.baseTotal)}</b></div>
+    <div class="box"><span>Допы / работы</span><b>${rub(ca.totals.extraTotal)}</b></div>
+    <div class="box total"><span>Итого</span><b>${rub(ca.totals.grandTotal)}</b></div>
+  </div>
+
+  <h2>Изделия</h2>
+  <div class="items">${itemCards}</div>
+
+  <h2>Схемы</h2>
+  <div class="pdfgrid ${ca.items.length===1?'one':''}">
+    ${ca.items.map((x,i)=>`<div class="pdfitem">${draw(x,i+1,ca.prices)}</div>`).join('')}
+  </div>
+
+  <h2>Материалы к закупу / списанию</h2>
+  <div class="materials">${materialCards}</div>
+
+  ${detailCards?`<h2>Детали раскроя</h2><div class="details">${detailCards}</div>`:''}
+</div>
+</body>
+</html>`}
 function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(){let c=client(),ca=curCalc();let {data,error}=await db.from('calculations').insert({client_id:c.id,prices:ca.prices,items:ca.items,totals:ca.totals,materials:ca.materials}).select().single();if(error)return alert(error.message);await db.from('client_history').insert({client_id:c.id,type:'Расчёт',text:`Сохранён расчёт на ${rub(ca.totals.grandTotal)}`,amount:ca.totals.grandTotal,extra:{calculation_id:data.id}});await db.from('clients').update({updated_at:new Date().toISOString()}).eq('id',c.id);await loadData();openCard(c.id);alert('Расчёт сохранён')}function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}function downloadHtml(){let c=client(),ca=curCalc();blob(new Blob([report(c,ca)],{type:'text/html'}),safe(c.address||c.name)+'.html')}async function sendHtml(){let c=client(),ca=curCalc(),fn=safe(c.address||c.name)+'.html',file=new File([report(c,ca)],fn,{type:'text/html'}),form=new FormData();form.append('document',file);form.append('caption','Расчёт мягких окон: '+(c.address||c.name));try{let r=await fetch('/api/send-telegram',{method:'POST',body:form});if(!r.ok)throw Error(await r.text());await db.from('client_history').insert({client_id:c.id,type:'Telegram',text:'HTML-отчёт отправлен',extra:{filename:fn}});await loadData();openCard(c.id);alert('Отправлено')}catch(e){alert('Ошибка: '+e.message)}}
 
