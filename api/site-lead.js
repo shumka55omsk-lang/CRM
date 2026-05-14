@@ -1,46 +1,79 @@
+const ALLOWED_ORIGINS = [
+  "https://www.мягкиеокна55.рф",
+  "https://мягкиеокна55.рф",
+  "http://www.мягкиеокна55.рф",
+  "http://мягкиеокна55.рф"
+];
+
+function corsHeaders(request) {
+  const origin = request.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : "*";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
+  };
+}
+
+function clean(v) { return String(v || "").trim(); }
 
 async function tgNotify(text) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!botToken || !chatId) return { ok: false, skipped: true };
+
   const form = new FormData();
   form.append("chat_id", chatId);
   form.append("text", text);
   form.append("parse_mode", "HTML");
-  const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, { method: "POST", body: form });
+
+  const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    body: form
+  });
+
   return { ok: r.ok, status: r.status, text: await r.text() };
 }
-function clean(v) { return String(v || "").trim(); }
-function leadText(prefix, lead) {
+
+function leadText(lead) {
   return [
-    `<b>${prefix}</b>`,
-    ``,
+    "<b>Новая заявка: Сайт мягкиеокна55.рф</b>",
+    "",
     `Имя: ${clean(lead.name) || "—"}`,
     `Телефон: ${clean(lead.phone) || "—"}`,
     `Адрес: ${clean(lead.address) || "—"}`,
     `Источник: ${clean(lead.source) || "—"}`,
-    ``,
-    `Комментарий:`,
+    "",
+    "Комментарий:",
     clean(lead.message) || "—"
   ].join("\n");
 }
-async function createLead(request, defaultSource) {
+
+async function createLead(request) {
+  const headersCors = corsHeaders(request);
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!supabaseUrl || !serviceKey) {
-    return Response.json({ ok: false, error: "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured" }, { status: 500 });
+    return Response.json({ ok: false, error: "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured" }, { status: 500, headers: headersCors });
   }
+
   let body = {};
-  try { body = await request.json(); } catch { return Response.json({ ok: false, error: "Invalid JSON body" }, { status: 400 }); }
+  try { body = await request.json(); }
+  catch { return Response.json({ ok: false, error: "Invalid JSON body" }, { status: 400, headers: headersCors }); }
 
   const lead = {
     name: clean(body.name),
     phone: clean(body.phone),
     address: clean(body.address),
     message: clean(body.message || body.comment || body.text),
-    source: clean(body.source) || defaultSource
+    source: clean(body.source) || "Сайт мягкиеокна55.рф"
   };
-  if (!lead.phone && !lead.message) return Response.json({ ok: false, error: "Phone or message is required" }, { status: 400 });
+
+  if (!lead.phone && !lead.message) {
+    return Response.json({ ok: false, error: "Phone or message is required" }, { status: 400, headers: headersCors });
+  }
 
   const headers = {
     "apikey": serviceKey,
@@ -48,18 +81,26 @@ async function createLead(request, defaultSource) {
     "Content-Type": "application/json",
     "Prefer": "return=representation"
   };
-  const clientPayload = {
-    name: lead.name,
-    phone: lead.phone,
-    address: lead.address,
-    source: lead.source,
-    status: "Новая заявка",
-    comment: lead.message,
-    updated_at: new Date().toISOString()
-  };
-  const clientRes = await fetch(`${supabaseUrl}/rest/v1/clients`, { method: "POST", headers, body: JSON.stringify(clientPayload) });
+
+  const clientRes = await fetch(`${supabaseUrl}/rest/v1/clients`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      name: lead.name,
+      phone: lead.phone,
+      address: lead.address,
+      source: lead.source,
+      status: "Новая заявка",
+      comment: lead.message,
+      updated_at: new Date().toISOString()
+    })
+  });
+
   const clientData = await clientRes.json().catch(() => null);
-  if (!clientRes.ok) return Response.json({ ok: false, error: "Failed to create client", details: clientData }, { status: clientRes.status });
+  if (!clientRes.ok) {
+    return Response.json({ ok: false, error: "Failed to create client", details: clientData }, { status: clientRes.status, headers: headersCors });
+  }
+
   const client = Array.isArray(clientData) ? clientData[0] : clientData;
   const clientId = client?.id;
 
@@ -70,11 +111,12 @@ async function createLead(request, defaultSource) {
       body: JSON.stringify({
         client_id: clientId,
         type: "Новая заявка",
-        text: `Создана заявка. Источник: ${lead.source}. ${lead.message ? "Комментарий: " + lead.message : ""}`,
+        text: `Создана заявка с сайта. ${lead.message ? "Комментарий: " + lead.message : ""}`,
         extra: lead
       })
     });
   }
+
   try {
     await fetch(`${supabaseUrl}/rest/v1/site_leads`, {
       method: "POST",
@@ -90,21 +132,31 @@ async function createLead(request, defaultSource) {
       })
     });
   } catch {}
-  const tg = await tgNotify(leadText(`Новая заявка: ${lead.source}`, lead));
-  return Response.json({ ok: true, client, telegram: tg });
+
+  const tg = await tgNotify(leadText(lead));
+  return Response.json({ ok: true, client, telegram: tg }, { headers: headersCors });
 }
 
-export async function GET() {
+export async function OPTIONS(request) {
+  return new Response(null, { status: 204, headers: corsHeaders(request) });
+}
+
+export async function GET(request) {
   return Response.json({
     ok: true,
     api: "site-lead",
     method: "POST",
+    cors: true,
+    allowedOrigins: ALLOWED_ORIGINS,
     requiredEnv: {
       SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
       SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
       TELEGRAM_BOT_TOKEN: Boolean(process.env.TELEGRAM_BOT_TOKEN),
       TELEGRAM_CHAT_ID: Boolean(process.env.TELEGRAM_CHAT_ID)
     }
-  });
+  }, { headers: corsHeaders(request) });
 }
-export async function POST(request) { return createLead(request, "Сайт"); }
+
+export async function POST(request) {
+  return createLead(request);
+}
