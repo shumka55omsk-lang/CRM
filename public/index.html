@@ -245,6 +245,18 @@ function preferredRollOrder(){
   const out=[...withStock,...fallbackStock,...restPrimary,...fallbackNoStock];
   return [...new Set(out)];
 }
+function mirrorPointsVerticalCm(points,widthCm){
+  return points.map(p=>({x:widthCm-p.x,y:p.y}));
+}
+function normalizePairByCutBox(cutPts,openingPts){
+  const b=bboxCm(cutPts);
+  return{
+    cutPts:cutPts.map(p=>({x:p.x-b.minX,y:p.y-b.minY})),
+    openingPts:openingPts.map(p=>({x:p.x-b.minX,y:p.y-b.minY})),
+    widthCm:b.width,
+    lengthCm:b.height
+  };
+}
 function makePieceGeometry(x,pr,roll,rotated){
   const off=n(pr.off)||4.5;
   const opening=cutOpeningPoints(x);
@@ -255,15 +267,31 @@ function makePieceGeometry(x,pr,roll,rotated){
   let openingPts=normalizePointsCm(opening,box);
   let widthCm=box.width;
   let lengthCm=box.height;
+  let mirrored=false;
+  const isTrapezoid=Math.abs(n(x.h1)-n(x.h2))>0.001;
 
   if(rotated){
     const rotatedCut=rotatePointsClockwiseCm(cutPts,box.width);
     const rotatedOpening=rotatePointsClockwiseCm(openingPts,box.width);
-    const cutBox=bboxCm(rotatedCut);
-    cutPts=rotatedCut.map(p=>({x:p.x-cutBox.minX,y:p.y-cutBox.minY}));
-    openingPts=rotatedOpening.map(p=>({x:p.x-cutBox.minX,y:p.y-cutBox.minY}));
-    widthCm=cutBox.width;
-    lengthCm=cutBox.height;
+    const norm=normalizePairByCutBox(rotatedCut,rotatedOpening);
+    cutPts=norm.cutPts;
+    openingPts=norm.openingPts;
+    widthCm=norm.widthCm;
+    lengthCm=norm.lengthCm;
+
+    // Если трапеция была повернута для раскладки на рулоне,
+    // наклонная сторона может оказаться у левого края полотна.
+    // Зеркалим по вертикали, чтобы к левому краю примкнула ровная сторона.
+    if(isTrapezoid){
+      const mirroredCut=mirrorPointsVerticalCm(cutPts,widthCm);
+      const mirroredOpening=mirrorPointsVerticalCm(openingPts,widthCm);
+      const mnorm=normalizePairByCutBox(mirroredCut,mirroredOpening);
+      cutPts=mnorm.cutPts;
+      openingPts=mnorm.openingPts;
+      widthCm=mnorm.widthCm;
+      lengthCm=mnorm.lengthCm;
+      mirrored=true;
+    }
   }
 
   if(widthCm>roll)return null;
@@ -271,6 +299,7 @@ function makePieceGeometry(x,pr,roll,rotated){
     roll,
     needM:lengthCm/100,
     rotated,
+    mirrored,
     cutWidthCm:widthCm,
     cutLengthCm:lengthCm,
     widthCm,
@@ -578,7 +607,7 @@ function stockFind(material,width){
   return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -785,7 +814,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         <span>Рулон: ${(d.roll/100).toFixed(1)} м</span>
         <span>Размер резки: ${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</span>
         <span>Пог. м: ${n(d.needM).toFixed(2)} м</span>
-        <span>Ориентация: ${d.rotated?'повернуто':'без поворота'}</span>
+        <span>Ориентация: ${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</span>
       </div>`).join('')
     : '';
 
@@ -1097,6 +1126,7 @@ function cutGeometryForPiece(x, pr) {
     widthCm: ch.widthCm || ch.cutWidthCm,
     lengthCm: ch.lengthCm || ch.cutLengthCm,
     rotated: ch.rotated,
+    mirrored: ch.mirrored,
     cutPts: ch.cutPts,
     openingPts: ch.openingPts,
     offsetCm: n(pr.off) || 4.5
@@ -1137,7 +1167,7 @@ function singleCutLayoutSvg(layout, c, index, total) {
     const hMm = p.lengthCm * 10;
     const maxX = minX + wMm;
     const maxY = minY + hMm;
-    const label = `Окно ${p.window} / деталь ${p.detail}`;
+    const label = `Окно ${p.window} / деталь ${p.detail}${p.mirrored?' / зеркально':''}`;
 
     blankLayer += `<rect x="${minX.toFixed(2)}" y="${minY.toFixed(2)}" width="${wMm.toFixed(2)}" height="${hMm.toFixed(2)}" fill="none" stroke="#0066ff" stroke-width="0.25" stroke-dasharray="6 4"/>`;
     cutLayer += `<path d="${svgPathMm(p.cutPts, x, y, rollX, rollY)}" fill="none" stroke="#ff0000" stroke-width="0.35" inkscape:label="${label}"/>`;
@@ -1316,7 +1346,7 @@ function productionRollLayoutSvg(layout){
   let pieces='', labels='';
   (layout.placements||[]).forEach(p=>{
     const x=p.xCm||0, y=p.yCm||0, w=p.widthCm||p.cutWidthCm||0, h=p.lengthCm||p.cutLengthCm||0;
-    const label=`Окно ${p.window}/${p.detail}`;
+    const label=`Окно ${p.window}/${p.detail}${p.mirrored?'/зеркально':''}`;
     const size=`${formatM(w)}×${formatM(h)}`;
     const pathPts=(p.cutPts||[]).map(pt=>`${(x+pt.x).toFixed(2)},${(y+pt.y).toFixed(2)}`).join(' ');
     if(pathPts){
@@ -1365,7 +1395,7 @@ function productionTaskHtml(c,ca){
     <td>${(d.roll/100).toFixed(1)} м</td>
     <td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td>
     <td>${d.needM.toFixed(2)} м</td>
-    <td>${d.rotated?'повернуть':'обычно'}</td>
+    <td>${d.rotated?'повернуть':'обычно'}${d.mirrored?' / зеркально':''}</td>
   </tr>`).join('');
   const rollLayoutsHtml=productionRollLayoutsHtml(ca);
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Задание производство</title>
