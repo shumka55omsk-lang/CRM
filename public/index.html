@@ -1024,8 +1024,11 @@ async function saveCalc(silent=false){
 }
 function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}
 function openHtmlPreview(html, filename, title){
+  const crmUrl = window.location.href;
   const saveJs = `
 <script>
+const CRM_RETURN_URL = ${JSON.stringify(crmUrl)};
+
 function saveThisHtml(){
   const html='<!doctype html>\\n'+document.documentElement.outerHTML;
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
@@ -1038,11 +1041,26 @@ function saveThisHtml(){
   a.remove();
   URL.revokeObjectURL(url);
 }
+
+function returnToCrm(){
+  try{
+    if(window.opener && !window.opener.closed){
+      window.opener.focus();
+      window.close();
+      setTimeout(()=>{ location.href = CRM_RETURN_URL; }, 250);
+      return;
+    }
+  }catch(e){}
+  location.href = CRM_RETURN_URL;
+}
 <\/script>`;
   const saveBar = `
-<div class="saveBar" style="position:sticky;top:0;z-index:9999;background:#111827;color:#fff;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-family:Arial,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.18)">
-  <b>${title||'HTML-документ'}</b>
-  <button onclick="saveThisHtml()" style="background:#22c55e;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer">Сохранить HTML</button>
+<div class="saveBar" style="position:sticky;top:0;z-index:9999;background:#111827;color:#fff;padding:10px 12px;display:flex;gap:8px;align-items:center;justify-content:space-between;font-family:Arial,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.18);flex-wrap:wrap">
+  <b style="font-size:14px">${title||'HTML-документ'}</b>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="returnToCrm()" style="background:#2563eb;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer">← Вернуться в CRM</button>
+    <button onclick="saveThisHtml()" style="background:#22c55e;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer">Сохранить HTML</button>
+  </div>
 </div>`;
   let finalHtml = String(html);
   if(finalHtml.includes('</head>')) finalHtml = finalHtml.replace('</head>', saveJs+'</head>');
@@ -1058,7 +1076,7 @@ function saveThisHtml(){
   w.document.open();
   w.document.write(finalHtml);
   w.document.close();
-}function downloadHtml(){let c=client(),ca=curCalc(),fn=safe(c.address||c.name)+'.html';openHtmlPreview(report(c,ca),fn,'HTML полный')}async function sendHtml(){let c=client(),ca=curCalc(),fn=safe(c.address||c.name)+'.html',file=new File([report(c,ca)],fn,{type:'text/html'}),form=new FormData();form.append('document',file);form.append('caption','Расчёт мягких окон: '+(c.address||c.name));try{let r=await fetch('/api/send-telegram',{method:'POST',body:form});if(!r.ok)throw Error(await r.text());await db.from('client_history').insert({client_id:c.id,type:'Telegram',text:'HTML-отчёт отправлен',extra:{filename:fn}});await loadData();openCard(c.id);alert('Отправлено')}catch(e){alert('Ошибка: '+e.message)}}
+}async function sendHtml(){let c=client(),ca=curCalc(),fn=safe(c.address||c.name)+'.html',file=new File([report(c,ca)],fn,{type:'text/html'}),form=new FormData();form.append('document',file);form.append('caption','Расчёт мягких окон: '+(c.address||c.name));try{let r=await fetch('/api/send-telegram',{method:'POST',body:form});if(!r.ok)throw Error(await r.text());await db.from('client_history').insert({client_id:c.id,type:'Telegram',text:'HTML-отчёт отправлен',extra:{filename:fn}});await loadData();openCard(c.id);alert('Отправлено')}catch(e){alert('Ошибка: '+e.message)}}
 
 
 function normalizePointsCm(points, box) {
