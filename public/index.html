@@ -1055,6 +1055,12 @@ function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a
 function openHtmlPreview(html, filename, title){
   const crmUrl = window.location.href;
   const saveJs = `
+<style>
+@media print{
+  .saveBar{display:none!important}
+  body{padding-top:0!important}
+}
+</style>
 <script>
 const CRM_RETURN_URL = ${JSON.stringify(crmUrl)};
 
