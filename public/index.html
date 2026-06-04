@@ -1376,6 +1376,44 @@ function productionRollLayoutSvg(layout){
     </svg>
   </div>`;
 }
+
+function productionCutPieceCard(p){
+  const w=p.widthCm||p.cutWidthCm||0;
+  const h=p.lengthCm||p.cutLengthCm||0;
+  const vbW=Math.max(w,1), vbH=Math.max(h,1);
+  const cutPath=(p.cutPts||[]).map(pt=>`${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(' ');
+  const openingPath=(p.openingPts||[]).map(pt=>`${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(' ');
+  const orientation=[p.rotated?'повернуть':'обычно',p.mirrored?'зеркально':''].filter(Boolean).join(' / ');
+  return `<div class="cutPieceCard">
+    <div class="cutMeta">
+      <b>Окно ${p.window} / деталь ${p.detail}</b>
+      <span>Рулон ${(p.roll/100).toFixed(1)} м · размер резки ${formatM(w)} × ${formatM(h)} · пог. ${formatM(h)}</span>
+      <span>Ориентация: ${orientation || 'обычно'} · офсет ${p.offsetCm||''} см</span>
+    </div>
+    <svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <rect x="0" y="0" width="${vbW}" height="${vbH}" fill="#fff" stroke="#2563eb" stroke-width="0.35" stroke-dasharray="3 2" vector-effect="non-scaling-stroke"/>
+      ${cutPath?`<polygon points="${cutPath}" fill="rgba(217,45,32,.04)" stroke="#d92d20" stroke-width="0.45" vector-effect="non-scaling-stroke"/>`:''}
+      ${openingPath?`<polygon points="${openingPath}" fill="none" stroke="#15803d" stroke-width="0.32" stroke-dasharray="3 2" vector-effect="non-scaling-stroke"/>`:''}
+      <text x="${(vbW/2).toFixed(2)}" y="${Math.max(8, Math.min(14,vbH*0.08)).toFixed(2)}" text-anchor="middle" font-size="5" font-family="Arial" fill="#111">резка ${formatM(w)} × ${formatM(h)}</text>
+      <text x="${(vbW/2).toFixed(2)}" y="${(vbH-5).toFixed(2)}" text-anchor="middle" font-size="5" font-family="Arial" fill="#2563eb">ширина ${formatM(w)}</text>
+      <text x="${(vbW-5).toFixed(2)}" y="${(vbH/2).toFixed(2)}" text-anchor="middle" font-size="5" font-family="Arial" fill="#2563eb" transform="rotate(-90 ${(vbW-5).toFixed(2)} ${(vbH/2).toFixed(2)})">длина ${formatM(h)}</text>
+    </svg>
+  </div>`;
+}
+function productionCutSheetsHtml(ca){
+  const layouts=buildCutLayouts(ca);
+  const pieces=layouts.flatMap(l=>(l.placements||[]).map(p=>Object.assign({roll:l.rollWidthCm},p)));
+  if(!pieces.length)return '<div class="empty">Нет деталей раскроя для печати</div>';
+  let pages=[];
+  for(let i=0;i<pieces.length;i+=2){
+    const pair=pieces.slice(i,i+2);
+    pages.push(`<section class="cutSheetPage">
+      <div class="cutSheetHeader">Лист раскроя ${Math.floor(i/2)+1} · деталей ${i+1}${pair.length>1?'–'+(i+2):''} из ${pieces.length}</div>
+      <div class="cutSheetGrid">${pair.map(productionCutPieceCard).join('')}</div>
+    </section>`);
+  }
+  return `<div class="cutSheets">${pages.join('')}</div>`;
+}
 function productionRollLayoutsHtml(ca){
   const layouts=buildCutLayouts(ca);
   if(!layouts.length)return '<div class="empty">Нет данных раскладки на рулоне</div>';
@@ -1404,6 +1442,7 @@ function productionTaskHtml(c,ca){
     <td>${d.rotated?'повернуть':'обычно'}${d.mirrored?' / зеркально':''}</td>
   </tr>`).join('');
   const rollLayoutsHtml=productionRollLayoutsHtml(ca);
+  const cutSheetsHtml=productionCutSheetsHtml(ca);
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Задание производство</title>
   <style>
     body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#111}
@@ -1425,7 +1464,21 @@ function productionTaskHtml(c,ca){
     .legend span{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px}
     .legend .red{border:1px solid #d92d20;background:#fff4f4}.legend .blue{border:1px dashed #2563eb;background:#eff6ff}
     .empty{border:1px solid #ddd;border-radius:8px;padding:8px;color:#777}
-    @media print{.page{padding:7mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}}
+    .cutSheets{margin-top:8px}
+    .cutSheetPage{page-break-before:always;break-before:page;min-height:265mm;padding-top:3mm}
+    .cutSheetHeader{font-weight:900;font-size:16px;margin:0 0 6mm;border-bottom:1px solid #ddd;padding-bottom:2mm}
+    .cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:6mm;align-items:start}
+    .cutPieceCard{border:1px solid #bbb;border-radius:8px;padding:4mm;break-inside:avoid;page-break-inside:avoid;min-height:124mm}
+    .cutMeta{font-size:11px;line-height:1.35;margin-bottom:3mm}
+    .cutMeta b{display:block;font-size:13px;margin-bottom:1mm}
+    .cutMeta span{display:block;color:#333}
+    .cutPieceCard svg{width:100%;height:92mm;background:#fff}
+    @media print{
+      .page{padding:7mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}
+      .cutSheetPage{page-break-before:always;break-before:page}
+      .cutSheetGrid{grid-template-columns:1fr 1fr}
+      .cutPieceCard svg{height:92mm}
+    }
   </style></head><body><div class="page">
     <h1>Задание в производство</h1>
     <div class="head">
@@ -1443,6 +1496,9 @@ function productionTaskHtml(c,ca){
     <p><b>Обрезки:</b> ${ca.totals.scrapArea.toFixed(2)} м² / ${ca.prices.scraps?rub(ca.totals.scrapCost):(rub(ca.totals.scrapCostInfo)+' справочно')}.</p>
     <h2>Раскладка деталей на полотне рулона</h2>
     ${rollLayoutsHtml}
+    <h2>Листы раскроя для печати</h2>
+    <p class="legend">Каждый лист содержит до двух проёмов. На карточке указаны номер окна, деталь, рулон, размер резки и ориентация.</p>
+    ${cutSheetsHtml}
     <h2>Схемы изделий</h2>
     <div class="grid">${ca.items.map((x,i)=>`<div class="scheme">${draw(x,i+1,ca.prices)}</div>`).join('')}</div>
     <h2>Чек-лист производства</h2>
