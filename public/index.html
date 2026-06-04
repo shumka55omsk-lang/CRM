@@ -1380,41 +1380,53 @@ function productionRollLayoutSvg(layout){
 function productionCutPieceCard(p){
   const w=p.widthCm||p.cutWidthCm||0;
   const h=p.lengthCm||p.cutLengthCm||0;
-  const vbW=Math.max(w,1), vbH=Math.max(h,1);
-  const cutPath=(p.cutPts||[]).map(pt=>`${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(' ');
-  const openingPath=(p.openingPts||[]).map(pt=>`${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(' ');
   const ob=(p.openingPts&&p.openingPts.length)?bboxCm(p.openingPts):{width:0,height:0,minX:0,minY:0};
+
+  // В SVG добавляем поля вокруг детали, чтобы размеры резки были снаружи фигуры.
+  const margin=16;
+  const vbW=Math.max(w+margin*2,1);
+  const vbH=Math.max(h+margin*2,1);
+  const ox=margin, oy=margin;
+
+  const cutPath=(p.cutPts||[]).map(pt=>`${(pt.x+ox).toFixed(2)},${(pt.y+oy).toFixed(2)}`).join(' ');
+  const openingPath=(p.openingPts||[]).map(pt=>`${(pt.x+ox).toFixed(2)},${(pt.y+oy).toFixed(2)}`).join(' ');
   const orientation=[p.rotated?'повернуть':'обычно',p.mirrored?'зеркально':''].filter(Boolean).join(' / ');
-  const dimTopY=8, dimBottomY=Math.max(vbH-5, 5), dimRightX=Math.max(vbW-5, 5);
+
+  const cutTopY=oy-8;
+  const cutLeftX=ox-8;
+  const cutRightX=ox+w+8;
+  const cutBottomY=oy+h+8;
+  const openBottomY=oy+ob.minY+ob.height+5;
+  const openLeftX=ox+ob.minX+5;
+
   return `<div class="cutPieceCard">
     <div class="cutMeta">
       <b>Окно ${p.window} / деталь ${p.detail}</b>
-      <span><b>Размер резки:</b> ${formatM(w)} × ${formatM(h)} — сплошной внешний контур</span>
-      <span><b>Световой проём:</b> ${formatM(ob.width)} × ${formatM(ob.height)} — пунктир внутри</span>
-      <span>Рулон ${(p.roll/100).toFixed(1)} м · пог. ${formatM(h)} · ориентация: ${orientation || 'обычно'}</span>
+      <span><b>Резка:</b> ${formatM(w)} × ${formatM(h)} · сплошной внешний контур</span>
+      <span><b>Световой проём:</b> ${formatM(ob.width)} × ${formatM(ob.height)} · пунктир внутри</span>
+      <span>Рулон ${(p.roll/100).toFixed(1)} м · ориентация: ${orientation || 'обычно'}</span>
     </div>
     <svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <rect x="0" y="0" width="${vbW}" height="${vbH}" fill="#fff" stroke="#111827" stroke-width="0.55" vector-effect="non-scaling-stroke"/>
-      ${cutPath?`<polygon points="${cutPath}" fill="rgba(217,45,32,.035)" stroke="#d92d20" stroke-width="0.6" vector-effect="non-scaling-stroke"/>`:''}
-      ${openingPath?`<polygon points="${openingPath}" fill="none" stroke="#15803d" stroke-width="0.42" stroke-dasharray="4 2" vector-effect="non-scaling-stroke"/>`:''}
+      ${cutPath?`<polygon points="${cutPath}" fill="rgba(217,45,32,.035)" stroke="#d92d20" stroke-width="0.75" vector-effect="non-scaling-stroke"/>`:''}
+      ${openingPath?`<polygon points="${openingPath}" fill="none" stroke="#15803d" stroke-width="0.48" stroke-dasharray="4 2" vector-effect="non-scaling-stroke"/>`:''}
 
-      <!-- Размер резки: снаружи, сплошная линия -->
-      <line x1="0" y1="${dimTopY}" x2="${vbW}" y2="${dimTopY}" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <line x1="0" y1="${dimTopY-2}" x2="0" y2="${dimTopY+2}" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <line x1="${vbW}" y1="${dimTopY-2}" x2="${vbW}" y2="${dimTopY+2}" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <text x="${(vbW/2).toFixed(2)}" y="${Math.max(dimTopY-2,4).toFixed(2)}" text-anchor="middle" font-size="5.2" font-family="Arial" fill="#111827">резка ${formatM(w)}</text>
+      <!-- Размеры резки снаружи фигуры: сплошные линии -->
+      <line x1="${ox}" y1="${cutTopY}" x2="${ox+w}" y2="${cutTopY}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <line x1="${ox}" y1="${cutTopY-2.2}" x2="${ox}" y2="${cutTopY+2.2}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <line x1="${ox+w}" y1="${cutTopY-2.2}" x2="${ox+w}" y2="${cutTopY+2.2}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <text x="${(ox+w/2).toFixed(2)}" y="${(cutTopY-2.5).toFixed(2)}" text-anchor="middle" font-size="5.8" font-family="Arial" font-weight="700" fill="#111827">резка ${formatM(w)}</text>
 
-      <line x1="${dimRightX}" y1="0" x2="${dimRightX}" y2="${vbH}" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <line x1="${dimRightX-2}" y1="0" x2="${dimRightX+2}" y2="0" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <line x1="${dimRightX-2}" y1="${vbH}" x2="${dimRightX+2}" y2="${vbH}" stroke="#111827" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <text x="${(dimRightX-2).toFixed(2)}" y="${(vbH/2).toFixed(2)}" text-anchor="middle" font-size="5.2" font-family="Arial" fill="#111827" transform="rotate(-90 ${(dimRightX-2).toFixed(2)} ${(vbH/2).toFixed(2)})">резка ${formatM(h)}</text>
+      <line x1="${cutRightX}" y1="${oy}" x2="${cutRightX}" y2="${oy+h}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <line x1="${cutRightX-2.2}" y1="${oy}" x2="${cutRightX+2.2}" y2="${oy}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <line x1="${cutRightX-2.2}" y1="${oy+h}" x2="${cutRightX+2.2}" y2="${oy+h}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
+      <text x="${(cutRightX+4).toFixed(2)}" y="${(oy+h/2).toFixed(2)}" text-anchor="middle" font-size="5.8" font-family="Arial" font-weight="700" fill="#111827" transform="rotate(-90 ${(cutRightX+4).toFixed(2)} ${(oy+h/2).toFixed(2)})">резка ${formatM(h)}</text>
 
-      <!-- Световой проём: внутри, пунктир -->
+      <!-- Размеры светового проёма: пунктир внутри фигуры -->
       ${p.openingPts&&p.openingPts.length?`
-        <line x1="${ob.minX.toFixed(2)}" y1="${dimBottomY}" x2="${(ob.minX+ob.width).toFixed(2)}" y2="${dimBottomY}" stroke="#15803d" stroke-width="0.3" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"/>
-        <text x="${(ob.minX+ob.width/2).toFixed(2)}" y="${(dimBottomY-2).toFixed(2)}" text-anchor="middle" font-size="4.8" font-family="Arial" fill="#15803d">свет ${formatM(ob.width)}</text>
-        <line x1="${Math.max(ob.minX+2,2).toFixed(2)}" y1="${ob.minY.toFixed(2)}" x2="${Math.max(ob.minX+2,2).toFixed(2)}" y2="${(ob.minY+ob.height).toFixed(2)}" stroke="#15803d" stroke-width="0.3" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"/>
-        <text x="${Math.max(ob.minX+6,6).toFixed(2)}" y="${(ob.minY+ob.height/2).toFixed(2)}" text-anchor="middle" font-size="4.8" font-family="Arial" fill="#15803d" transform="rotate(-90 ${Math.max(ob.minX+6,6).toFixed(2)} ${(ob.minY+ob.height/2).toFixed(2)})">свет ${formatM(ob.height)}</text>
+        <line x1="${(ox+ob.minX).toFixed(2)}" y1="${openBottomY.toFixed(2)}" x2="${(ox+ob.minX+ob.width).toFixed(2)}" y2="${openBottomY.toFixed(2)}" stroke="#15803d" stroke-width="0.34" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"/>
+        <text x="${(ox+ob.minX+ob.width/2).toFixed(2)}" y="${(openBottomY-2.2).toFixed(2)}" text-anchor="middle" font-size="5.1" font-family="Arial" font-weight="700" fill="#15803d">свет ${formatM(ob.width)}</text>
+        <line x1="${openLeftX.toFixed(2)}" y1="${(oy+ob.minY).toFixed(2)}" x2="${openLeftX.toFixed(2)}" y2="${(oy+ob.minY+ob.height).toFixed(2)}" stroke="#15803d" stroke-width="0.34" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"/>
+        <text x="${(openLeftX+4).toFixed(2)}" y="${(oy+ob.minY+ob.height/2).toFixed(2)}" text-anchor="middle" font-size="5.1" font-family="Arial" font-weight="700" fill="#15803d" transform="rotate(-90 ${(openLeftX+4).toFixed(2)} ${(oy+ob.minY+ob.height/2).toFixed(2)})">свет ${formatM(ob.height)}</text>
       `:''}
     </svg>
   </div>`;
@@ -1487,17 +1499,17 @@ function productionTaskHtml(c,ca){
     .legend .red{border:1px solid #d92d20;background:#fff4f4}.legend .blue{border:1px dashed #2563eb;background:#eff6ff}
     .empty{border:1px solid #ddd;border-radius:8px;padding:8px;color:#777}
     .cutSheets{margin-top:8px}
-    .cutSheetPage{page-break-before:always;break-before:page;min-height:265mm;padding-top:3mm}
-    .cutSheetHeader{font-weight:900;font-size:16px;margin:0 0 6mm;border-bottom:1px solid #ddd;padding-bottom:2mm}
-    .cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:6mm;align-items:start}
-    .cutPieceCard{border:1px solid #bbb;border-radius:8px;padding:4mm;break-inside:avoid;page-break-inside:avoid;min-height:124mm}
-    .cutMeta{font-size:11px;line-height:1.35;margin-bottom:3mm}
-    .cutMeta b{display:block;font-size:13px;margin-bottom:1mm}
+    .cutSheetPage{page-break-before:always;break-before:page;min-height:282mm;padding-top:0}
+    .cutSheetHeader{font-weight:900;font-size:13px;margin:0 0 2mm;border-bottom:0;padding-bottom:0}
+    .cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:3mm;align-items:stretch}
+    .cutPieceCard{border:0;border-radius:0;padding:0;break-inside:avoid;page-break-inside:avoid;min-height:132mm;display:flex;flex-direction:column}
+    .cutMeta{font-size:10px;line-height:1.22;margin-bottom:1.5mm}
+    .cutMeta b{display:block;font-size:12px;margin-bottom:.5mm}
     .cutMeta span{display:block;color:#333}
-    .cutPieceCard svg{width:100%;height:92mm;background:#fff}
+    .cutPieceCard svg{width:100%;height:121mm;background:#fff;flex:1}
     @media print{
       .printCutBar{display:none!important}
-      .page{padding:7mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}
+      .page{padding:4mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}
       body.print-cut-only .page > h1,
       body.print-cut-only .page > .head,
       body.print-cut-only .page > h2,
@@ -1513,7 +1525,7 @@ function productionTaskHtml(c,ca){
       .cutSheetPage{page-break-before:always;break-before:page}
       .cutSheetPage:first-child{page-break-before:auto;break-before:auto}
       .cutSheetGrid{grid-template-columns:1fr 1fr}
-      .cutPieceCard svg{height:92mm}
+      .cutPieceCard svg{height:121mm}
     }
   </style>
   <script>
@@ -1546,7 +1558,7 @@ function productionTaskHtml(c,ca){
     <h2>Раскладка деталей на полотне рулона</h2>
     ${rollLayoutsHtml}
     <h2 class="cutSheetsTitle">Листы раскроя для печати</h2>
-    <p class="legend cutSheetsLegend">Каждый лист содержит до двух проёмов. Внешний сплошной контур и размеры — резка. Внутренний пунктир — световой проём.</p>
+    <p class="legend cutSheetsLegend">На листе до двух проёмов. Размеры резки вынесены снаружи фигуры, световой проём показан пунктиром внутри.</p>
     ${cutSheetsHtml}
     <h2>Схемы изделий</h2>
     <div class="grid">${ca.items.map((x,i)=>`<div class="scheme">${draw(x,i+1,ca.prices)}</div>`).join('')}</div>
