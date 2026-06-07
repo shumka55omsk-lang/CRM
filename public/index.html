@@ -1,11 +1,63 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CRM мягкие окна Supabase</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#111827}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#111827;color:#fff;padding:18px}.brand{font-size:24px;font-weight:900;line-height:1.1;margin-bottom:20px}.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px;border-radius:10px;margin:3px 0;font-size:15px}.nav button.active,.nav button:hover{background:#1f2937;color:#fff}.main{padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}h1{margin:0;font-size:28px}h2{font-size:20px;margin:18px 0 10px}.panel,.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 22px #0f172a10;margin-bottom:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card .l{color:#667085;font-size:13px}.card .v{font-size:26px;font-weight:900;margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#e5e7eb;font-weight:800;cursor:pointer}.btn.p{background:#1f6feb;color:#fff}.btn.g{background:#16a34a;color:#fff}.btn.r{background:#dc2626;color:#fff}.btn.o{background:#f59e0b;color:#fff}.btn.d{background:#111827;color:#fff}.btn.s{font-size:12px;padding:7px 9px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:13px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:9px;font-size:14px}textarea{min-height:70px}.hide{display:none!important}.tw{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;font-size:14px;text-align:left}th{background:#f9fafb}.status{border-radius:999px;background:#eef2ff;color:#3730a3;padding:5px 8px;font-weight:800;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:11px}.box span{font-size:13px;color:#667085}.box b{display:block;font-size:20px;margin-top:4px}.muted{color:#667085;font-size:13px}.bar{border-radius:12px;padding:10px 12px;margin-bottom:14px;font-weight:700}.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}.warn{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}.hist{display:flex;flex-direction:column;gap:8px}.hi{border-left:4px solid #1f6feb;background:#f9fafb;border-radius:10px;padding:10px}.hi .date{color:#667085;font-size:12px;margin-bottom:4px}.calc input[type=number]{min-width:72px}.pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:14px}.pdfitem{flex:0 1 360px;max-width:420px;min-width:300px}.pdfitem svg{width:100%;height:auto;display:block}.pdfgrid.one{justify-content:flex-start}.pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}.scheme-title{font-weight:900;text-align:left;font-size:13px;margin:0 0 2px}.scheme-meta{font-size:10px;line-height:1.2;color:#1f2933;font-weight:600;margin:0 0 3px}@media(max-width:850px){.pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{min-width:130px}.top{flex-direction:column;align-items:flex-start}.main{padding:12px}}
-.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.filecard{border:1px solid var(--b);border-radius:14px;padding:8px;background:#fff}.filecard img{width:100%;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--b)}.filecard a{font-size:12px;word-break:break-word}.scrap-compact{border:1px solid #f59e0b;background:#fff7ed;border-radius:14px;padding:8px 10px;margin:10px 0}.scrap-compact summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900}.scrap-compact summary span{display:flex;align-items:center;gap:8px}.scrap-compact input{width:16px;height:16px}.scrap-compact summary b{font-size:16px}.scrap-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.scrap-mini div{border:1px solid var(--b);border-radius:10px;padding:6px;background:#fff}.scrap-mini span{display:block;font-size:11px;color:var(--mut)}.scrap-mini b{font-size:13px}@media(max-width:700px){.scrap-mini{grid-template-columns:repeat(2,1fr)}}</style></head><body><div class="app"><aside class="side"><div class="brand">CRM<br>Мягкие окна</div><div class="nav"><button class="active" data-v="dash" onclick="show('dash')">Панель</button><button data-v="clients" onclick="show('clients')">Клиенты</button><button data-v="prod" onclick="show('prod')">Производство</button><button data-v="buy" onclick="show('buy')">Закуп</button><button data-v="warehouse" onclick="show('warehouse')">Склад</button><button data-v="set" onclick="show('set')">Настройки</button></div></aside><main class="main"><div id="bar" class="bar warn">Подключение Supabase...</div>
-<section id="dash"><div class="top"><h1>Панель</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="cards"><div class="card"><div class="l">Клиенты</div><div class="v" id="stC">0</div></div><div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div><div class="card"><div class="l">В работе</div><div class="v" id="stW">0</div></div><div class="card"><div class="l">Сумма</div><div class="v" id="stS">0 ₽</div></div></div><div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.filecard{border:1px solid var(--b);border-radius:14px;padding:8px;background:#fff}.filecard img{width:100%;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--b)}.filecard a{font-size:12px;word-break:break-word}.scrap-compact{border:1px solid #f59e0b;background:#fff7ed;border-radius:14px;padding:8px 10px;margin:10px 0}.scrap-compact summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900}.scrap-compact summary span{display:flex;align-items:center;gap:8px}.scrap-compact input{width:16px;height:16px}.scrap-compact summary b{font-size:16px}.scrap-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.scrap-mini div{border:1px solid var(--b);border-radius:10px;padding:6px;background:#fff}.scrap-mini span{display:block;font-size:11px;color:var(--mut)}.scrap-mini b{font-size:13px}@media(max-width:700px){.scrap-mini{grid-template-columns:repeat(2,1fr)}}
+.statusDash{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.statusCol{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:12px;min-height:120px}
+.statusColHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.statusColHead b{font-size:15px}
+.statusColHead span{display:block;color:#667085;font-size:12px;margin-top:2px}
+.statusCount{background:#eef2ff;color:#3730a3;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;white-space:nowrap}
+.statusOrders{display:flex;flex-direction:column;gap:8px}
+.orderMini{background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:9px}
+.orderMiniTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.orderMiniTop b{font-size:14px}
+.orderMiniSum{font-weight:900;color:#166534;white-space:nowrap}
+.orderMiniMeta{margin-top:5px;color:#667085;font-size:12px;line-height:1.35}
+.orderMiniActions{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+.statusEmpty{color:#98a2b3;font-size:13px;padding:8px 0}
+.statusCol.done{background:#f0fdf4;border-color:#bbf7d0}
+.statusCol.work{background:#eff6ff;border-color:#bfdbfe}
+.statusCol.new{background:#fff7ed;border-color:#fed7aa}
+.statusCol.cancel{background:#fef2f2;border-color:#fecaca}
+@media(max-width:700px){.statusDash{grid-template-columns:1fr}.orderMiniTop{flex-direction:column}.orderMiniSum{white-space:normal}}
+
+.calc th:first-child,
+.calc td:first-child{
+  position:sticky;
+  left:0;
+  z-index:2;
+  background:#fff;
+  min-width:82px;
+  text-align:center;
+  font-weight:900;
+  color:#1f2937;
+}
+.calc th:first-child{
+  background:#f9fafb;
+  z-index:3;
+}
+.calc td.rownum{
+  background:#eff6ff!important;
+  color:#1d4ed8!important;
+  border-right:1px solid #bfdbfe;
+  white-space:nowrap;
+}
+
+</style></head><body><div class="app"><aside class="side"><div class="brand">CRM<br>Мягкие окна</div><div class="nav"><button class="active" data-v="dash" onclick="show('dash')">Панель</button><button data-v="clients" onclick="show('clients')">Клиенты</button><button data-v="prod" onclick="show('prod')">Производство</button><button data-v="buy" onclick="show('buy')">Закуп</button><button data-v="warehouse" onclick="show('warehouse')">Склад</button><button data-v="set" onclick="show('set')">Настройки</button></div></aside><main class="main"><div id="bar" class="bar warn">Подключение Supabase...</div>
+<section id="dash"><div class="top"><h1>Панель заказов</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div>
+<div class="cards">
+  <div class="card"><div class="l">Все заказы</div><div class="v" id="stC">0</div></div>
+  <div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div>
+  <div class="card"><div class="l">В работе</div><div class="v" id="stW">0</div></div>
+  <div class="card"><div class="l">Выполнено</div><div class="v" id="stDone">0</div></div>
+  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div></div>
+</div>
+<div class="panel"><h2>Дашборд по статусам</h2><p class="muted">Заказы сгруппированы по текущему статусу. Нажми «Открыть», чтобы перейти в карточку клиента.</p><div id="statusDash" class="statusDash"></div></div>
+<div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
 <section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="1.8 м / 2.2 м / 2.4 м / 8 см / 10 см / шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="ПВХ — ₽/м²"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена для ПВХ полотна — за 1 м², для остальных — за пог.м/шт.</p></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
 <section id="set" class="hide"><div class="top"><h1>Настройки</h1></div><div class="panel"><div class="grid"><div><label>Цена м²</label><input id="s_m2" type="number"></div><div><label>Окантовка пог.м</label><input id="s_edge" type="number"></div><div><label>Ремень шт</label><input id="s_strap" type="number"></div><div><label>Молния пог.м</label><input id="s_zip" type="number"></div><div><label>Монтаж м²</label><input id="s_inst" type="number"></div><div><label>Офсет резки см</label><input id="s_off" type="number" step="0.1"></div></div><p><button class="btn p" onclick="saveSet()">Сохранить</button></p></div></section>
-<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Люверсы<br>открывается</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Люверсы<br>открывается</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[];const LS='swcrm_supabase_settings_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -32,19 +84,73 @@ async function saveClient(silent=false){
     setAutosaveStatus('Ошибка автосохранения клиента');
     return;
   }
+  let autoConsumed=false,autoError='';
+  if(old!==p.status&&p.status==='В производстве'){
+    try{
+      autoConsumed=await autoConsumeOnProduction(c,old,p.status);
+    }catch(e){
+      autoError=e.message||String(e);
+      await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Ошибка автосписания материалов: '+autoError});
+    }
+  }
   if(!silent){
     await db.from('client_history').insert({client_id:c.id,type:old!==p.status?'Статус':'Сохранение',text:old!==p.status?`Статус изменён: ${old} → ${p.status}`:'Данные клиента обновлены'});
-    await loadData();openCard(c.id);alert('Сохранено');
+    await loadData();openCard(c.id);alert('Сохранено'+(autoConsumed?'\nМатериалы автоматически списаны со склада.':(autoError?'\nОшибка автосписания: '+autoError:'')));
   }else{
     Object.assign(c,{
       name:p.name,phone:p.phone,address:p.address,source:p.source,status:p.status,measureDate:p.measure_date||'',comment:p.comment,updatedAt:p.updated_at
     });
-    setAutosaveStatus('Клиент сохранён');
+    setAutosaveStatus(autoConsumed?'Клиент сохранён, материалы списаны':'Клиент сохранён');
+    if(autoConsumed||autoError){await loadData();openCard(c.id);}
   }
 }
 async function delClient(id){if(!confirm('Удалить клиента?'))return;let {error}=await db.from('clients').delete().eq('id',id);if(error)return alert(error.message);await loadData()}
 function table(list){if(!list.length)return'<div class="empty">Нет данных</div>';return`<div class="tw"><table><thead><tr><th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>История</th><th>Сумма</th><th></th></tr></thead><tbody>${list.map(c=>{let ca=c.calcs&&c.calcs[0];return`<tr><td><b>${esc(c.name||'Без имени')}</b></td><td>${esc(c.phone||'-')}</td><td>${esc(c.address||'-')}</td><td><span class="status">${esc(c.status)}</span></td><td>${(c.history||[]).length}</td><td>${rub(ca?ca.totals.grandTotal:0)}</td><td class="actions"><button class="btn s p" onclick="openCard('${c.id}')">Открыть</button><button class="btn s r" onclick="delClient('${c.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
-function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.reduce((s,c)=>s+((c.calcs&&c.calcs[0])?c.calcs[0].totals.grandTotal:0),0));latest.innerHTML=table(clients.slice(0,5));let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
+
+function orderSum(c){let ca=c.calcs&&c.calcs[0];return ca&&ca.totals?Number(ca.totals.grandTotal||0):0}
+function statusClass(st){
+  if(st==='Завершено')return 'done';
+  if(WORK.includes(st))return 'work';
+  if(st==='Новая заявка'||st==='Связаться')return 'new';
+  if(st==='Отказ')return 'cancel';
+  return '';
+}
+function dashboardCard(c){
+  const sum=orderSum(c);
+  const date=c.updatedAt?new Date(c.updatedAt).toLocaleDateString('ru-RU'):'—';
+  const title=esc(c.name||c.address||'Без имени');
+  return `<div class="orderMini">
+    <div class="orderMiniTop"><b>${title}</b><span class="orderMiniSum">${rub(sum)}</span></div>
+    <div class="orderMiniMeta">
+      ${esc(c.phone||'телефон не указан')}<br>
+      ${esc(c.address||'адрес не указан')}<br>
+      Обновлено: ${date}
+    </div>
+    <div class="orderMiniActions">
+      <button class="btn s p" onclick="openCard('${c.id}')">Открыть</button>
+    </div>
+  </div>`;
+}
+function renderDashboard(){
+  if(typeof statusDash==='undefined')return;
+  const totalDone=clients.filter(c=>c.status==='Завершено').length;
+  if(typeof stDone!=='undefined')stDone.textContent=totalDone;
+  const statuses=[...STAT];
+  statusDash.innerHTML=statuses.map(st=>{
+    const list=clients.filter(c=>c.status===st);
+    const sum=list.reduce((s,c)=>s+orderSum(c),0);
+    const cls=statusClass(st);
+    return `<div class="statusCol ${cls}">
+      <div class="statusColHead">
+        <div><b>${esc(st)}</b><span>${rub(sum)}</span></div>
+        <div class="statusCount">${list.length}</div>
+      </div>
+      <div class="statusOrders">${list.length?list.slice(0,6).map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div>
+      ${list.length>6?`<div class="muted" style="margin-top:8px">Ещё: ${list.length-6}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(clients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
 
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 function setAutosaveStatus(t){
@@ -96,11 +202,12 @@ function loadCalc(ca){
   bindClientAutosave();
   setAutosaveStatus('Автосохранение включено');
 }
-function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true});recalcAndAutosave()}function addRowObj(o){
+function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true});recalcAndAutosave()}function updateWindowNumbers(){[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let c=tr.querySelector('.rownum');if(c)c.textContent='Окно '+(i+1);});}
+function addRowObj(o){
   let zqVal = o.zq ?? o.zipperQty ?? o.zippersCount ?? (o.z || o.zipper ? 2 : 2);
   let zdVal = o.zd ?? o.zipperDistance ?? o.zo ?? o.zipoff ?? o.zipperOffset ?? 0;
   let tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
+  tr.innerHTML=`<td class=rownum></td><td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
   <td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td>
   <td><input class=h2 type=number value="${o.h2??o.height2Cm??''}"></td>
   <td><input class=qty type=number value="${o.qty??1}"></td>
@@ -111,11 +218,12 @@ function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:
   <td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td>
   <td><input class=zd type=number value="${zdVal}" title="Если 2 молнии — отступ от края. Если 3 и более — расстояние между молниями."></td>
   <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывается на люверсах: разметка по бокам и снизу, шаг не более 40 см, наценка 60%."></td>
-  <td><input class=door type=checkbox ${(o.door??o.isDoor)?'checked':''} title="Проём является дверью: коэффициент сложности 2.5."></td>
+  <td><input class=door type=checkbox ${(o.door??o.isDoor)?'checked':''} title="Проём является дверью. Отдельный коэффициент не применяется, усложнение учитывается через молнии и окантовку."></td>
   <td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td>
   <td class=area>0</td><td class=rowt>0</td>
-  <td><button class="btn s r" onclick="this.closest('tr').remove();recalcAndAutosave()">×</button></td>`;
+  <td><button class="btn s r" onclick="this.closest('tr').remove();updateWindowNumbers();recalcAndAutosave()">×</button></td>`;
   rows.appendChild(tr);
+  updateWindowNumbers();
   tr.querySelectorAll('input').forEach(i=>{i.oninput=recalcAndAutosave;i.onchange=recalcAndAutosave});
 }
 function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5,scraps:!!document.getElementById('p_scraps')?.checked}}function items(){
@@ -196,12 +304,14 @@ function totals(it,pr){
     let per=w+h1+h2+Math.sqrt(w*w+(h1-h2)**2);
     let zCount=zipperCount(x);
     let zipperCost=x.z ? (x.zc/100)*zCount*x.qty*pr.zip : 0;
-    let extra=(x.ed?per*x.qty*pr.edge:0)+x.straps*x.qty*pr.strap+zipperCost+(x.inst?area*pr.inst:0);
-    const factor=(x.open?1.6:1)*(x.door?2.5:1);
+    const edgeCoef=x.z?2.5:1;
+    const edgeCost=x.ed?per*x.qty*pr.edge*edgeCoef:0;
+    let extra=edgeCost+x.straps*x.qty*pr.strap+zipperCost+(x.inst?area*pr.inst:0);
+    const factor=(x.open?1.6:1);
     const raw=base+extra;
     const markup=raw*(factor-1);
     let row=raw*factor;
-    t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra+markup;t.grandTotal+=row;t.rows.push({area,rowTotal:row,markup,factor});
+    t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra+markup;t.grandTotal+=row;t.rows.push({area,rowTotal:row,markup,factor,edgeCoef});
   });
   const sc=scrapCalc(it,pr);
   t.rollArea=sc.rollArea;
@@ -558,7 +668,7 @@ function mats(it,pr){
       const off=n(pr.off)||4.5;
       const opening=cutOpeningPoints(x);
       const cut=offsetPolyCm(opening,off);
-      edge+=(polyPerimeterCm(cut)/100)*x.qty;
+      edge+=(polyPerimeterCm(cut)/100)*x.qty*(x.z?2.5:1);
     }
   });
 
@@ -584,7 +694,7 @@ function mats(it,pr){
     oversized:opt.bad,
     details,
     layouts:opt.layouts,
-    edgingRow:{material:'Окантовка',width:fmtCm(edgeStrip)+' см',need:en,rolls:er,rest:er?er*50-en:0,comment:'Полоса '+fmtCm(edgeStrip)+' см, видимая окантовка '+fmtCm(edgeVisible)+' см. Формула: офсет '+(n(pr.off)||4.5)+'×2 + 1 см. Запас 10%'}
+    edgingRow:{material:'Окантовка',width:fmtCm(edgeStrip)+' см',need:en,rolls:er,rest:er?er*50-en:0,comment:'Полоса '+fmtCm(edgeStrip)+' см, видимая окантовка '+fmtCm(edgeVisible)+' см. Формула: офсет '+(n(pr.off)||4.5)+'×2 + 1 см. Если есть молния — расход окантовки ×2.5. Запас 10%'}
   };
 }
 function stockNormMaterial(v){
@@ -821,7 +931,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
     zDistanceLabel,
     x.open ? grommetInfoText(x) : '',
     x.open ? 'Открывание на люверсах: +60%' : '',
-    x.door ? 'Дверь: коэффициент ×2.5' : '',
+    x.door ? 'Дверь: отмечена, без отдельного коэффициента' : '',
     `Окантовка: ${edgingWidth} см`
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
@@ -1376,7 +1486,74 @@ function editStock(id){let s=stock.find(x=>x.id===id);if(!s)return;wh_mat.value=
 async function saveStockItem(){if(!db)return alert('Supabase не подключён');let id=wh_width.dataset.id||'',payload={material:wh_mat.value,width:stockNormWidth(wh_width.value),qty_m:n(wh_qty.value),unit_cost:n(wh_cost?.value),critical_m:n(wh_crit.value),updated_at:new Date().toISOString()};if(!payload.width)return alert('Укажи ширину / тип материала');let res=id?await db.from('stock_items').update(payload).eq('id',id):await db.from('stock_items').upsert(payload,{onConflict:'material,width'});if(res.error)return alert(res.error.message);wh_width.dataset.id='';wh_width.value='';wh_qty.value=0;if(typeof wh_cost!=='undefined')wh_cost.value=0;wh_crit.value=5;await loadData();show('warehouse')}
 async function deleteStock(id){if(!confirm('Удалить позицию склада?'))return;let r=await db.from('stock_items').delete().eq('id',id);if(r.error)return alert(r.error.message);await loadData();show('warehouse')}
 function currentRowsForConsumption(){let ca=curCalc(),rows=[...ca.materials.rollRows];if(ca.materials.edgingRow.need>0)rows.push(ca.materials.edgingRow);return rows}
-async function consumeCurrentMaterials(){if(!db)return alert('Supabase не подключён');let c=client();if(!c)return;let rows=currentRowsForConsumption();if(!rows.length)return alert('Нет материалов для списания');let msg=rows.map(r=>{let st=stockState(r.material,r.width,r.need);return `${r.material} ${r.width}: нужно ${r.need.toFixed(2)}, в наличии ${st.qty.toFixed(2)}, после ${st.after.toFixed(2)}${st.def>0?' — НЕ ХВАТАЕТ '+st.def.toFixed(2):''}`}).join('\n');if(!confirm('Списать материалы со склада?\n\n'+msg))return;for(let r of rows){let st=stockState(r.material,r.width,r.need),item=st.item;if(!item){let ins=await db.from('stock_items').insert({material:r.material,width:r.width,qty_m:0,critical_m:0}).select().single();if(ins.error)return alert(ins.error.message);item=ins.data;st.qty=0;st.crit=0}let newQty=st.qty-r.need;let up=await db.from('stock_items').update({qty_m:newQty,updated_at:new Date().toISOString()}).eq('id',item.id);if(up.error)return alert(up.error.message);await db.from('stock_movements').insert({stock_item_id:item.id,client_id:c.id,type:'Расход',qty_m:-r.need,note:`Материал: ${r.material} | Ширина: ${r.width} | Заказ: ${c.address||c.name||''} | Списано: ${r.need.toFixed(2)}`});if(newQty<=n(item.critical_m))await db.from('client_history').insert({client_id:c.id,type:'Склад',text:`Критический остаток: ${r.material} ${r.width}. После списания ${newQty.toFixed(2)}. Нужно докупить ${Math.max(0,n(item.critical_m)-newQty).toFixed(2)}.`})}await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Материалы списаны со склада',extra:{materials:rows}});await loadData();openCard(c.id);alert('Материалы списаны. Проверь разделы «Склад» и «Закуп».')}
+function materialsAlreadyConsumed(c){
+  return !!(c&&c.history&&c.history.some(h=>h.type==='Склад'&&String(h.text||'').includes('Материалы списаны со склада')));
+}
+async function consumeMaterialsForClient(c,rows,auto=false){
+  if(!db)throw new Error('Supabase не подключён');
+  if(!c)throw new Error('Клиент не выбран');
+  if(!rows||!rows.length)throw new Error('Нет материалов для списания');
+
+  for(let r of rows){
+    let st=stockState(r.material,r.width,r.need),item=st.item;
+    if(!item){
+      let ins=await db.from('stock_items').insert({material:r.material,width:r.width,qty_m:0,critical_m:0}).select().single();
+      if(ins.error)throw ins.error;
+      item=ins.data;st.qty=0;st.crit=0;
+    }
+    let newQty=st.qty-r.need;
+    let up=await db.from('stock_items').update({qty_m:newQty,updated_at:new Date().toISOString()}).eq('id',item.id);
+    if(up.error)throw up.error;
+    await db.from('stock_movements').insert({
+      stock_item_id:item.id,
+      client_id:c.id,
+      type:'Расход',
+      qty_m:-r.need,
+      note:`${auto?'Автосписание при статусе В производстве | ':''}Материал: ${r.material} | Ширина: ${r.width} | Заказ: ${c.address||c.name||''} | Списано: ${r.need.toFixed(2)}`
+    });
+    if(newQty<=n(item.critical_m)){
+      await db.from('client_history').insert({
+        client_id:c.id,
+        type:'Склад',
+        text:`Критический остаток: ${r.material} ${r.width}. После списания ${newQty.toFixed(2)}. Нужно докупить ${Math.max(0,n(item.critical_m)-newQty).toFixed(2)}.`
+      });
+    }
+  }
+  await db.from('client_history').insert({
+    client_id:c.id,
+    type:'Склад',
+    text:auto?'Материалы списаны со склада автоматически при статусе «В производстве»':'Материалы списаны со склада',
+    extra:{materials:rows,auto}
+  });
+}
+async function autoConsumeOnProduction(c,oldStatus,newStatus){
+  if(!c||oldStatus==='В производстве'||newStatus!=='В производстве')return false;
+  if(materialsAlreadyConsumed(c)){
+    await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Автосписание не выполнено: материалы уже были списаны ранее.'});
+    return false;
+  }
+  const rows=currentRowsForConsumption();
+  if(!rows.length){
+    await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Автосписание не выполнено: нет материалов для списания.'});
+    return false;
+  }
+  await consumeMaterialsForClient(c,rows,true);
+  return true;
+}
+async function consumeCurrentMaterials(){
+  if(!db)return alert('Supabase не подключён');
+  let c=client();if(!c)return;
+  if(materialsAlreadyConsumed(c)&&!confirm('По этому заказу материалы уже списывались. Списать ещё раз?'))return;
+  let rows=currentRowsForConsumption();
+  if(!rows.length)return alert('Нет материалов для списания');
+  let msg=rows.map(r=>{let st=stockState(r.material,r.width,r.need);return `${r.material} ${r.width}: нужно ${r.need.toFixed(2)}, в наличии ${st.qty.toFixed(2)}, после ${st.after.toFixed(2)}${st.def>0?' — НЕ ХВАТАЕТ '+st.def.toFixed(2):''}`}).join('\n');
+  if(!confirm('Списать материалы со склада?\n\n'+msg))return;
+  try{
+    await consumeMaterialsForClient(c,rows,false);
+    await loadData();openCard(c.id);
+    alert('Материалы списаны. Проверь разделы «Склад» и «Закуп».');
+  }catch(e){alert(e.message||String(e))}
+}
 
 function productionRollLayoutSvg(layout){
   const rollW=layout.rollWidthCm;
@@ -1425,6 +1602,15 @@ function productionCutPieceCard(p){
   const cutPath=(p.cutPts||[]).map(pt=>`${(pt.x+ox).toFixed(2)},${(pt.y+oy).toFixed(2)}`).join(' ');
   const openingPath=(p.openingPts||[]).map(pt=>`${(pt.x+ox).toFixed(2)},${(pt.y+oy).toFixed(2)}`).join(' ');
   const orientation=[p.rotated?'повернуть':'обычно',p.mirrored?'зеркально':''].filter(Boolean).join(' / ');
+  const src=p.source||{};
+  const hasGrommets=!!src.open;
+  const leftStep=hasGrommets?grommetStepCm(src.h1||h):0;
+  const rightStep=hasGrommets?grommetStepCm(src.h2||h):0;
+  const bottomStep=hasGrommets?grommetStepCm(src.w||w):0;
+  const leftSeg=hasGrommets?grommetSegments(src.h1||h):0;
+  const rightSeg=hasGrommets?grommetSegments(src.h2||h):0;
+  const bottomSeg=hasGrommets?grommetSegments(src.w||w):0;
+  const grommetText=hasGrommets?`<span><b>Люверсы:</b> слева ${fmtCm(leftStep)} см (${leftSeg} отр.), справа ${fmtCm(rightStep)} см (${rightSeg} отр.), низ ${fmtCm(bottomStep)} см (${bottomSeg} отр.)</span>`:'';
 
   const cutTopY=oy-10;
   const cutLeftX=ox-8;
@@ -1433,16 +1619,46 @@ function productionCutPieceCard(p){
   const openBottomY=oy+ob.minY+ob.height+7;
   const openLeftX=ox+ob.minX+7;
 
+  let grommetSvg='';
+  if(hasGrommets&&p.openingPts&&p.openingPts.length){
+    const seen=new Set();
+    function addG(px,py){
+      const key=Math.round(px)+'_'+Math.round(py);
+      if(seen.has(key))return;
+      seen.add(key);
+      grommetSvg += `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="2.2" fill="#fff" stroke="#111827" stroke-width="0.65" vector-effect="non-scaling-stroke"/>`;
+      grommetSvg += `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="0.75" fill="#111827"/>`;
+    }
+    const leftPts=[p.openingPts[0],p.openingPts[3]];
+    const rightPts=[p.openingPts[1],p.openingPts[2]];
+    for(let i=0;i<=leftSeg;i++){
+      const t=i/leftSeg;
+      addG(ox+leftPts[0].x+(leftPts[1].x-leftPts[0].x)*t, oy+leftPts[0].y+(leftPts[1].y-leftPts[0].y)*t);
+    }
+    for(let i=0;i<=rightSeg;i++){
+      const t=i/rightSeg;
+      addG(ox+rightPts[0].x+(rightPts[1].x-rightPts[0].x)*t, oy+rightPts[0].y+(rightPts[1].y-rightPts[0].y)*t);
+    }
+    for(let i=1;i<bottomSeg;i++){
+      const t=i/bottomSeg;
+      addG(ox+ob.minX+ob.width*t, oy+ob.minY+ob.height);
+    }
+    const labelY=Math.min(vbH-4, oy+ob.minY+ob.height+15);
+    grommetSvg += `<text x="${(ox+ob.minX+ob.width/2).toFixed(2)}" y="${labelY.toFixed(2)}" text-anchor="middle" font-size="7.2" font-family="Arial" font-weight="700" fill="#111827">люверсы: ${fmtCm(bottomStep)} см снизу; ${fmtCm(leftStep)}/${fmtCm(rightStep)} см бока</text>`;
+  }
+
   return `<div class="cutPieceCard">
     <div class="cutMeta">
       <b>Окно ${p.window} / деталь ${p.detail}</b>
       <span><b>Резка:</b> ${formatM(w)} × ${formatM(h)} · сплошной внешний контур</span>
       <span><b>Световой проём:</b> ${formatM(ob.width)} × ${formatM(ob.height)} · пунктир внутри</span>
+      ${grommetText}
       <span>Рулон ${(p.roll/100).toFixed(1)} м · ориентация: ${orientation || 'обычно'}</span>
     </div>
     <svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       ${cutPath?`<polygon points="${cutPath}" fill="rgba(217,45,32,.035)" stroke="#d92d20" stroke-width="0.75" vector-effect="non-scaling-stroke"/>`:''}
       ${openingPath?`<polygon points="${openingPath}" fill="none" stroke="#15803d" stroke-width="0.48" stroke-dasharray="4 2" vector-effect="non-scaling-stroke"/>`:''}
+      ${grommetSvg}
 
       <!-- Размеры резки снаружи фигуры: сплошные линии -->
       <line x1="${ox}" y1="${cutTopY}" x2="${ox+w}" y2="${cutTopY}" stroke="#111827" stroke-width="0.42" vector-effect="non-scaling-stroke"/>
@@ -1497,7 +1713,7 @@ function productionTaskHtml(c,ca){
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт. '+(zipperCount(x)===2?'отступ от края ':'шаг ')+zipperDistance(x)+' см'):'нет'}</td>
     <td>${x.open?grommetInfoText(x):'нет'}</td>
-    <td>${x.door?'да, ×2.5':'нет'}</td>
+    <td>${x.door?'да, без коэф.':'нет'}</td>
     <td>${x.inst?'да':'нет'}</td>
   </tr>`).join('');
   const details=(ca.materials.details||[]).map(d=>`<tr>
@@ -1539,8 +1755,8 @@ function productionTaskHtml(c,ca){
     .cutSheetHeader{font-weight:900;font-size:19.5px;margin:0 0 2mm;border-bottom:0;padding-bottom:0}
     .cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:2mm;align-items:stretch}
     .cutPieceCard{border:0;border-radius:0;padding:0;break-inside:avoid;page-break-inside:avoid;min-height:138mm;display:flex;flex-direction:column}
-    .cutMeta{font-size:15px;line-height:1.22;margin-bottom:1mm}
-    .cutMeta b{display:block;font-size:18px;margin-bottom:.5mm}
+    .cutMeta{font-size:14px;line-height:1.16;margin-bottom:1mm}
+    .cutMeta b{display:block;font-size:17px;margin-bottom:.5mm}
     .cutMeta span{display:block;color:#333}
     .cutPieceCard svg{width:100%;height:128mm;background:#fff;flex:1}
     @media print{
@@ -1570,9 +1786,31 @@ function productionTaskHtml(c,ca){
   </style>
   <script>
     function printCutSheetsOnly(){
-      document.body.classList.add('print-cut-only');
-      window.print();
-      setTimeout(()=>document.body.classList.remove('print-cut-only'),800);
+      const sheets=document.querySelector('.cutSheets');
+      if(!sheets){alert('Листы раскроя не найдены');return;}
+      const styles=`
+        <style>
+          @page{size:A4 portrait;margin:4mm}
+          *{box-sizing:border-box}
+          body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#111}
+          .cutSheets{display:block}
+          .cutSheetPage{page-break-before:auto;break-before:auto;min-height:auto;padding:0}
+          .cutSheetPage+.cutSheetPage{page-break-before:always;break-before:page}
+          .cutSheetHeader{font-weight:900;font-size:19.5px;margin:0 0 2mm;border-bottom:0;padding-bottom:0}
+          .cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:2mm;align-items:stretch}
+          .cutPieceCard{border:0;border-radius:0;padding:0;break-inside:avoid;page-break-inside:avoid;min-height:138mm;display:flex;flex-direction:column}
+          .cutMeta{font-size:14px;line-height:1.16;margin-bottom:1mm}
+          .cutMeta b{display:block;font-size:17px;margin-bottom:.5mm}
+          .cutMeta span{display:block;color:#333}
+          .cutPieceCard svg{width:100%;height:128mm;background:#fff;flex:1}
+        </style>`;
+      const w=window.open('','_blank');
+      if(!w){alert('Разреши всплывающие окна для печати');return;}
+      w.document.open();
+      w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Листы раскроя</title>'+styles+'</head><body>'+sheets.outerHTML+'</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(()=>w.print(),300);
     }
   <\/script>
   </head><body>
@@ -1598,7 +1836,7 @@ function productionTaskHtml(c,ca){
     <h2>Раскладка деталей на полотне рулона</h2>
     ${rollLayoutsHtml}
     <h2 class="cutSheetsTitle">Листы раскроя для печати</h2>
-    <p class="legend cutSheetsLegend">На листе до двух проёмов. Размеры резки вынесены снаружи фигуры, световой проём показан пунктиром внутри.</p>
+    <p class="legend cutSheetsLegend">На листе до двух проёмов. Размеры резки вынесены снаружи фигуры, световой проём показан пунктиром внутри. Печать открывается отдельным чистым окном без пустых страниц.</p>
     ${cutSheetsHtml}
     <h2>Схемы изделий</h2>
     <div class="grid">${ca.items.map((x,i)=>`<div class="scheme">${draw(x,i+1,ca.prices)}</div>`).join('')}</div>
@@ -1937,7 +2175,7 @@ function productionTable(){
       </td>
     </tr>`;
   }).join('')}</tbody></table></div>
-  <p class=muted>Подсказка: для полноценного движения по производству ставь статус клиента: Предоплата → В производстве → Монтаж → Завершено.</p>`;
+  <p class=muted>Подсказка: при переводе клиента в статус <b>В производстве</b> материалы автоматически списываются со склада один раз. Ручная кнопка списания остаётся как резерв.</p>`;
 }
 
 function renderBuy(){let all=[];clients.filter(c=>WORK.includes(c.status)&&c.calcs&&c.calcs[0]).forEach(c=>all.push(...c.calcs[0].items));buyList.innerHTML=matsHtml(mats(all,set));renderWarehouse()}
