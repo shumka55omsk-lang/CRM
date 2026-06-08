@@ -326,7 +326,14 @@ function scrapCalc(it,pr){
 
   return{rollArea,cutArea,scrapArea,scrapCost,purchaseM2};
 }
-function grommetSegments(cm){const len=Math.max(0,n(cm));return Math.max(3,Math.ceil(len/40));}
+function grommetSegments(cm){
+  const len=Math.max(0,n(cm));
+  if(!len)return 0;
+  const minSeg=Math.ceil(len/40);
+  if(minSeg<=3)return 3;
+  if(minSeg<=4)return 4;
+  return minSeg;
+}
 function grommetStepCm(cm){const seg=grommetSegments(cm);return seg?cm/seg:0;}
 function grommetCountForWindow(x){if(!x.open)return 0;const l=grommetSegments(x.h1),r=grommetSegments(x.h2),b=grommetSegments(x.w);return (l+1)+(r+1)+Math.max(0,b-1);}
 function grommetInfoText(x){if(!x.open)return '';return `Люверсы: слева ${fmtCm(grommetStepCm(x.h1))} см, справа ${fmtCm(grommetStepCm(x.h2))} см, низ ${fmtCm(grommetStepCm(x.w))} см, всего ${grommetCountForWindow(x)} шт.`;}
@@ -847,10 +854,11 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       }
 
       let zipperElements = '';
-      if (hasZipper && zipperCmPerSide > 0) {
+      if (hasZipper) {
         const zQty = Math.max(1, parseInt(zipperQty || 2, 10) || 2);
         const zipperDistanceCmSafe = Number(zipperDistanceCm || 0);
-        const lenPx = Math.min(zipperCmPerSide, maxHeightCm) * scale;
+        const zipperLenCm = Number(zipperCmPerSide || 0) > 0 ? Number(zipperCmPerSide || 0) : maxHeightCm;
+        const lenPx = Math.min(zipperLenCm, maxHeightCm) * scale;
         const zStart = bottomY - lenPx, zEnd = bottomY;
 
         let zipperXs = [];
@@ -911,13 +919,13 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
           grommetElements += `<circle cx="${px}" cy="${py}" r="3.7" fill="#fff" stroke="#111827" stroke-width="1.2"/>`;
           grommetElements += `<circle cx="${px}" cy="${py}" r="1.35" fill="#111827"/>`;
         }
-        const leftSeg=Math.max(3,Math.ceil(height1Cm/40));
+        const leftSeg=grommetSegments(height1Cm);
         for(let i=0;i<=leftSeg;i++){const t=i/leftSeg;addGrommet(innerX,topLeftY+(bottomY-topLeftY)*t);}
-        const rightSeg=Math.max(3,Math.ceil(height2Cm/40));
+        const rightSeg=grommetSegments(height2Cm);
         for(let i=0;i<=rightSeg;i++){const t=i/rightSeg;addGrommet(innerRightX,topRightY+(bottomY-topRightY)*t);}
-        const bottomSeg=Math.max(3,Math.ceil(widthCm/40));
+        const bottomSeg=grommetSegments(widthCm);
         for(let i=1;i<bottomSeg;i++){const t=i/bottomSeg;addGrommet(innerX+(innerRightX-innerX)*t,bottomY);}
-        grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: шаг ≤ 40 см</text>`;
+        grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: низ ${fmtCm(grommetStepCm(widthCm))} см; бока ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
       }
 
       const widthY = Math.max(34, outerTopY - 14);
