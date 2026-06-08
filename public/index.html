@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CRM мягкие окна Supabase</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#111827}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#111827;color:#fff;padding:18px}.brand{font-size:24px;font-weight:900;line-height:1.1;margin-bottom:20px}.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px;border-radius:10px;margin:3px 0;font-size:15px}.nav button.active,.nav button:hover{background:#1f2937;color:#fff}.main{padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}h1{margin:0;font-size:28px}h2{font-size:20px;margin:18px 0 10px}.panel,.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 22px #0f172a10;margin-bottom:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card .l{color:#667085;font-size:13px}.card .v{font-size:26px;font-weight:900;margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#e5e7eb;font-weight:800;cursor:pointer}.btn.p{background:#1f6feb;color:#fff}.btn.g{background:#16a34a;color:#fff}.btn.r{background:#dc2626;color:#fff}.btn.o{background:#f59e0b;color:#fff}.btn.d{background:#111827;color:#fff}.btn.s{font-size:12px;padding:7px 9px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:13px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:9px;font-size:14px}textarea{min-height:70px}.hide{display:none!important}.tw{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;font-size:14px;text-align:left}th{background:#f9fafb}.status{border-radius:999px;background:#eef2ff;color:#3730a3;padding:5px 8px;font-weight:800;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:11px}.box span{font-size:13px;color:#667085}.box b{display:block;font-size:20px;margin-top:4px}.muted{color:#667085;font-size:13px}.bar{border-radius:12px;padding:10px 12px;margin-bottom:14px;font-weight:700}.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}.warn{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}.hist{display:flex;flex-direction:column;gap:8px}.hi{border-left:4px solid #1f6feb;background:#f9fafb;border-radius:10px;padding:10px}.hi .date{color:#667085;font-size:12px;margin-bottom:4px}.calc input[type=number]{min-width:72px}.pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:14px}.pdfitem{flex:0 1 360px;max-width:420px;min-width:300px}.pdfitem svg{width:100%;height:auto;display:block}.pdfgrid.one{justify-content:flex-start}.pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}.scheme-title{font-weight:900;text-align:left;font-size:13px;margin:0 0 2px}.scheme-meta{font-size:10px;line-height:1.2;color:#1f2933;font-weight:600;margin:0 0 3px}@media(max-width:850px){.pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{min-width:130px}.top{flex-direction:column;align-items:flex-start}.main{padding:12px}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#111827}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#111827;color:#fff;padding:18px}.brand{font-size:24px;font-weight:900;line-height:1.1;margin-bottom:20px}.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px;border-radius:10px;margin:3px 0;font-size:15px}.nav button.active,.nav button:hover{background:#1f2937;color:#fff}.main{padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}h1{margin:0;font-size:28px}h2{font-size:20px;margin:18px 0 10px}.panel,.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 22px #0f172a10;margin-bottom:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card .l{color:#667085;font-size:13px}.card .v{font-size:26px;font-weight:900;margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#e5e7eb;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.btn.p{background:#1f6feb;color:#fff}.btn.g{background:#16a34a;color:#fff}.btn.r{background:#dc2626;color:#fff}.btn.o{background:#f59e0b;color:#fff}.btn.d{background:#111827;color:#fff}.btn.s{font-size:12px;padding:7px 9px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:13px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:9px;font-size:14px}textarea{min-height:70px}.hide{display:none!important}.tw{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;font-size:14px;text-align:left}th{background:#f9fafb}.status{border-radius:999px;background:#eef2ff;color:#3730a3;padding:5px 8px;font-weight:800;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:11px}.box span{font-size:13px;color:#667085}.box b{display:block;font-size:20px;margin-top:4px}.muted{color:#667085;font-size:13px}.bar{border-radius:12px;padding:10px 12px;margin-bottom:14px;font-weight:700}.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}.warn{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}.hist{display:flex;flex-direction:column;gap:8px}.hi{border-left:4px solid #1f6feb;background:#f9fafb;border-radius:10px;padding:10px}.hi .date{color:#667085;font-size:12px;margin-bottom:4px}.calc input[type=number]{min-width:72px}.pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:14px}.pdfitem{flex:0 1 360px;max-width:420px;min-width:300px}.pdfitem svg{width:100%;height:auto;display:block}.pdfgrid.one{justify-content:flex-start}.pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}.scheme-title{font-weight:900;text-align:left;font-size:13px;margin:0 0 2px}.scheme-meta{font-size:10px;line-height:1.2;color:#1f2933;font-weight:600;margin:0 0 3px}@media(max-width:850px){.pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{min-width:130px}.top{flex-direction:column;align-items:flex-start}.main{padding:12px}}
 .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.filecard{border:1px solid var(--b);border-radius:14px;padding:8px;background:#fff}.filecard img{width:100%;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--b)}.filecard a{font-size:12px;word-break:break-word}.scrap-compact{border:1px solid #f59e0b;background:#fff7ed;border-radius:14px;padding:8px 10px;margin:10px 0}.scrap-compact summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900}.scrap-compact summary span{display:flex;align-items:center;gap:8px}.scrap-compact input{width:16px;height:16px}.scrap-compact summary b{font-size:16px}.scrap-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.scrap-mini div{border:1px solid var(--b);border-radius:10px;padding:6px;background:#fff}.scrap-mini span{display:block;font-size:11px;color:var(--mut)}.scrap-mini b{font-size:13px}@media(max-width:700px){.scrap-mini{grid-template-columns:repeat(2,1fr)}}
 .statusDash{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .statusCol{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:12px;min-height:120px}
@@ -64,7 +64,41 @@ function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}funct
 function loadSet(){set=Object.assign({m2:1500,edge:120,strap:80,zip:250,inst:500,off:4.5},JSON.parse(localStorage.getItem(LS)||'{}'))}function fillSet(){s_m2.value=set.m2;s_edge.value=set.edge;s_strap.value=set.strap;s_zip.value=set.zip;s_inst.value=set.inst;s_off.value=set.off}function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5};localStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
 async function initDb(){try{let r=await fetch('/api/config'),c=await r.json();if(!c.supabaseUrl||!c.supabaseKey)throw Error('нет SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY в Vercel');db=supabase.createClient(c.supabaseUrl,c.supabaseKey);bar.className='bar ok';bar.textContent='Supabase подключён';await loadData()}catch(e){bar.className='bar warn';bar.textContent='Supabase не подключён: '+e.message}}
 function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));render()}async function newClient(){if(!db)return alert('Supabase не подключён');let {data,error}=await db.from('clients').insert({name:'',phone:'',address:'',source:'Сайт',status:'Новая заявка'}).select().single();if(error)return alert(error.message);await db.from('client_history').insert({client_id:data.id,type:'Создание',text:'Создана карточка клиента'});await loadData();openCard(data.id)}function openCard(id){cur=id;let c=client();if(!c)return;title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));render()}async function newClient(){
+  if(window.__newClientBusy)return;
+  window.__newClientBusy=true;
+  const newClientButtons=[...document.querySelectorAll('button[onclick="newClient()"]')];
+  const oldButtonState=newClientButtons.map(b=>({b,disabled:b.disabled,text:b.textContent}));
+  newClientButtons.forEach(b=>{b.disabled=true;b.textContent='Создаю...'});
+  try{
+    if(!db)return alert('Supabase не подключён');
+    let {data,error}=await db.from('clients').insert({name:'',phone:'',address:'',source:'Сайт',status:'Новая заявка'}).select().single();
+    if(error)return alert(error.message);
+    await db.from('client_history').insert({client_id:data.id,type:'Создание',text:'Создана карточка клиента'});
+    await loadData();
+    openCard(data.id);
+  }finally{
+    window.__newClientBusy=false;
+    oldButtonState.forEach(x=>{x.b.disabled=x.disabled;x.b.textContent=x.text});
+  }
+}
+function bindFastNewClientButtons(){
+  document.querySelectorAll('button[onclick="newClient()"]').forEach(btn=>{
+    if(btn.dataset.fastNewClient==='1')return;
+    btn.dataset.fastNewClient='1';
+    const run=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      newClient();
+    };
+    if(window.PointerEvent){
+      btn.addEventListener('pointerup',run,{passive:false});
+    }else{
+      btn.addEventListener('touchend',run,{passive:false});
+    }
+  });
+}
+function openCard(id){cur=id;let c=client();if(!c)return;title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
 async function saveClient(silent=false){
   let c=client();
   if(!c||!db)return;
@@ -1763,59 +1797,22 @@ function productionTaskHtml(c,ca){
       .printCutBar{display:none!important}
       .page{padding:3mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}
       body.print-cut-only .page > *{display:none!important}
-      body.print-cut-only .page > h1,
-      body.print-cut-only .page > .head,
-      body.print-cut-only .page > h2,
-      body.print-cut-only .page > table,
-      body.print-cut-only .page > p,
-      body.print-cut-only .page > .rollLayouts,
-      body.print-cut-only .page > .legend,
-      body.print-cut-only .page > .grid,
-      body.print-cut-only .page > .check{display:none!important}
-      body.print-cut-only .cutSheetsTitle,
-      body.print-cut-only .cutSheetsLegend,
+      body.print-cut-only .printCutBar{display:none!important}
+      body.print-cut-only .page{padding:4mm!important;max-width:none!important;margin:0!important}
+      body.print-cut-only .page > *{display:none!important}
       body.print-cut-only .page > .cutSheetsTitle,
       body.print-cut-only .page > .cutSheetsLegend,
-      body.print-cut-only .page > .cutSheets,
-      body.print-cut-only .cutSheets{display:block!important}
-      .cutSheetPage{page-break-before:auto;break-before:auto}.cutSheetPage+.cutSheetPage{page-break-before:always;break-before:page}
-      .cutSheetPage:first-child{page-break-before:auto;break-before:auto}
-      .cutSheetGrid{grid-template-columns:1fr 1fr}
-      .cutPieceCard svg{height:128mm}
+      body.print-cut-only .page > .cutSheets{display:block!important}
+      body.print-cut-only .cutSheetPage{page-break-before:auto!important;break-before:auto!important;min-height:auto!important;padding-top:0!important}
+      body.print-cut-only .cutSheetPage+.cutSheetPage{page-break-before:always!important;break-before:page!important}
+      body.print-cut-only .cutSheetGrid{grid-template-columns:1fr 1fr}
+      body.print-cut-only .cutPieceCard svg{height:128mm}
     }
   </style>
-  <script>
-    function printCutSheetsOnly(){
-      const sheets=document.querySelector('.cutSheets');
-      if(!sheets){alert('Листы раскроя не найдены');return;}
-      const styles='<style>'
-        +'@page{size:A4 portrait;margin:4mm}'
-        +'*{box-sizing:border-box}'
-        +'body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#111}'
-        +'.cutSheets{display:block}'
-        +'.cutSheetPage{page-break-before:auto;break-before:auto;min-height:auto;padding:0}'
-        +'.cutSheetPage+.cutSheetPage{page-break-before:always;break-before:page}'
-        +'.cutSheetHeader{font-weight:900;font-size:19.5px;margin:0 0 2mm;border-bottom:0;padding-bottom:0}'
-        +'.cutSheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:2mm;align-items:stretch}'
-        +'.cutPieceCard{border:0;border-radius:0;padding:0;break-inside:avoid;page-break-inside:avoid;min-height:138mm;display:flex;flex-direction:column}'
-        +'.cutMeta{font-size:14px;line-height:1.16;margin-bottom:1mm}'
-        +'.cutMeta b{display:block;font-size:17px;margin-bottom:.5mm}'
-        +'.cutMeta span{display:block;color:#333}'
-        +'.cutPieceCard svg{width:100%;height:128mm;background:#fff;flex:1}'
-        +'</style>';
-      const w=window.open('','_blank');
-      if(!w){alert('Разреши всплывающие окна для печати');return;}
-      w.document.open();
-      w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Листы раскроя</title>'+styles+'</head><body>'+sheets.outerHTML+'</body></html>');
-      w.document.close();
-      w.focus();
-      setTimeout(()=>w.print(),300);
-    }
-  <\/script>
   </head><body>
   <div class="printCutBar">
     <div><b>Задание в производство</b><div class="hint">Печать листов раскроя: по 2 проёма на листе</div></div>
-    <button onclick="printCutSheetsOnly()">Распечатать листы раскроя</button>
+    <button onclick="document.body.classList.add('print-cut-only');setTimeout(function(){window.print();},50);setTimeout(function(){document.body.classList.remove('print-cut-only');},1200)">Распечатать листы раскроя</button>
   </div>
   <div class="page">
     <h1>Задание в производство</h1>
@@ -2178,5 +2175,5 @@ function productionTable(){
 }
 
 function renderBuy(){let all=[];clients.filter(c=>WORK.includes(c.status)&&c.calcs&&c.calcs[0]).forEach(c=>all.push(...c.calcs[0].items));buyList.innerHTML=matsHtml(mats(all,set));renderWarehouse()}
-window.onload=async()=>{loadSet();initUi();fillSet();render();await initDb()}
+window.onload=async()=>{loadSet();initUi();fillSet();bindFastNewClientButtons();render();await initDb()}
 </script></body></html>
