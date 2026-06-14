@@ -439,6 +439,7 @@ function grommetCountPerWindow(x){if(!x.open)return 0;return ni(x.gm ?? x.gromme
 function grommetTotalQty(x){return grommetCountPerWindow(x)*Math.max(1,ni(x.qty||1));}
 function grommetInfoText(x){if(!x.open)return '';const per=grommetCountPerWindow(x),auto=grommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));const manual=per!==auto?' вручную':'';return `Люверсы${manual}: бока без верхних углов, слева шаг ${fmtCm(grommetStepCm(x.h1))} см, справа ${fmtCm(grommetStepCm(x.h2))} см, низ ${bottomGrommetCount(x.w)} шт. для прихватки, ${per} шт. на окно${qty>1?', всего '+total+' шт.':''}.`; }
 function grommetQtyText(x){if(!x.open)return 'нет';const per=grommetCountPerWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));return `${per} шт./окно${qty>1?' · всего '+total+' шт.':' · всего '+total+' шт.'}`;}
+function grommetClientText(x){if(!x.open)return 'нет';return `есть, ${grommetCountPerWindow(x)} шт./окно`;}
 function totalGrommets(items){return (items||[]).reduce((sum,x)=>sum+grommetTotalQty(x),0);}
 function totals(it,pr){
   let t={totalQty:0,totalArea:0,totalGrommets:0,baseTotal:0,extraTotal:0,scrapArea:0,scrapCost:0,scrapCostInfo:0,scrapPurchaseM2:0,rollArea:0,cutArea:0,grandTotal:0,rows:[]};
@@ -895,7 +896,8 @@ async function ensureDefaultStockPositions(){
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
 function matsHtml(m){let a=[...(m.rollRows||[])];if(m.edgingRow&&m.edgingRow.need)a.push(m.edgingRow);if(m.grommetRows&&m.grommetRows.length)a.push(...m.grommetRows);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
-function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets) {
+function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets, grommetLabelMode) {
+      grommetLabelMode = grommetLabelMode || 'detail';
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
 
@@ -1050,7 +1052,12 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         for(let i=1;i<rightSeg;i++){const t=i/rightSeg;addGrommet(innerRightX,topRightY+(bottomY-topRightY)*t);}
         const bottomCnt=bottomGrommetCount(widthCm);
         for(let i=0;i<bottomCnt;i++){const t=bottomCnt===1?0.5:i/(bottomCnt-1);addGrommet(innerX+(innerRightX-innerX)*t,bottomY);}
-        grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока шаг ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
+        if(grommetLabelMode==='simple'){
+          const autoCnt=sideGrommetCount(height1Cm)+sideGrommetCount(height2Cm)+bottomCnt;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${autoCnt} шт./окно</text>`;
+        }else if(grommetLabelMode!=='none'){
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока шаг ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
+        }
       }
 
       const widthY = Math.max(34, outerTopY - 14);
@@ -1103,7 +1110,28 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open);
-}function report(c,ca){
+}
+function drawClient(x,i,pr){
+  pr = pr || (typeof prices === 'function' ? prices() : set || {});
+  const edgingWidth = edgingVisibleWidthCm(pr);
+  const straps = ni(x.straps);
+  const hasZipper = !!x.z;
+  const zipperCm = hasZipper ? n(x.zc) : 0;
+  const zCount = hasZipper ? zipperCount(x) : 0;
+  const zDistance = hasZipper ? zipperDistance(x) : 0;
+  const qty = ni(x.qty || 1);
+  const meta = [
+    `Кол-во: ${qty} шт.`,
+    `Ремни: ${straps}`,
+    hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
+    `Люверсы: ${grommetClientText(x)}`,
+    x.door ? 'Дверь: да' : '',
+    x.ed ? `Окантовка: ${edgingWidth} см` : 'Окантовка: нет'
+  ].filter(Boolean).join('<br>');
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
+    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none');
+}
+function report(c,ca){
   const materialRows=[...(ca.materials.rollRows||[])];
   if(ca.materials.edgingRow&&ca.materials.edgingRow.need)materialRows.push(ca.materials.edgingRow);
   if(ca.materials.grommetRows&&ca.materials.grommetRows.length)materialRows.push(...ca.materials.grommetRows);
@@ -1233,7 +1261,7 @@ function clientReport(c,ca){
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
       <div>Размер проёма: ${x.w} × ${x.h1}/${x.h2} см</div>
-      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${grommetQtyText(x)} · Дверь: ${x.door?'да':'нет'}</div>
+      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${grommetClientText(x)} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
       <div>Монтаж: ${x.inst?'да':'нет'}</div>
     </div>`).join('');
@@ -1312,7 +1340,7 @@ function clientReport(c,ca){
 
   <h2>Схемы</h2>
   <div class="pdfgrid ${ca.items.length===1?'one':''}">
-    ${ca.items.map((x,i)=>`<div class="pdfitem">${draw(x,i+1,ca.prices)}</div>`).join('')}
+    ${ca.items.map((x,i)=>`<div class="pdfitem">${drawClient(x,i+1,ca.prices)}</div>`).join('')}
   </div>
 
   <div class="note">
