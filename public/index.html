@@ -55,9 +55,9 @@
 <div class="panel"><h2>Дашборд по статусам</h2><p class="muted">Заказы сгруппированы по текущему статусу. Нажми «Открыть», чтобы перейти в карточку клиента.</p><div id="statusDash" class="statusDash"></div></div>
 <div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
-<section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="1.8 м / 2.2 м / 2.4 м / 8 см / 10 см / шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="ПВХ — ₽/м²"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена для ПВХ полотна — за 1 м², для остальных — за пог.м/шт.</p></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
+<section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Люверсы 10 мм</option><option>Люверсы 42*22</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="1.8 м / 2.2 м / 2.4 м / 8 см / 10 см / шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="ПВХ — ₽/м²"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена для ПВХ полотна — за 1 м², для остальных — за пог.м/шт.</p></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
 <section id="set" class="hide"><div class="top"><h1>Настройки</h1></div><div class="panel"><div class="grid"><div><label>Цена м²</label><input id="s_m2" type="number"></div><div><label>Окантовка пог.м</label><input id="s_edge" type="number"></div><div><label>Ремень шт</label><input id="s_strap" type="number"></div><div><label>Молния пог.м</label><input id="s_zip" type="number"></div><div><label>Монтаж м²</label><input id="s_inst" type="number"></div><div><label>Офсет резки см</label><input id="s_off" type="number" step="0.1"></div></div><p><button class="btn p" onclick="saveSet()">Сохранить</button></p><p class="muted">Офлайн-режим сохраняет только клиентов и расчёты на этом устройстве. Склад, производство, фото и Telegram работают только онлайн.</p></div></section>
-<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Люверсы<br>открывается</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[];const LS='swcrm_supabase_settings_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -130,7 +130,7 @@ window.addEventListener('online',()=>initDb());
 function loadSet(){set=Object.assign({m2:1500,edge:120,strap:80,zip:250,inst:500,off:4.5},JSON.parse(localStorage.getItem(LS)||'{}'))}function fillSet(){s_m2.value=set.m2;s_edge.value=set.edge;s_strap.value=set.strap;s_zip.value=set.zip;s_inst.value=set.inst;s_off.value=set.off}function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5};localStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
 async function initDb(){try{let r=await fetch('/api/config',{cache:'no-store'}),c=await r.json();if(!c.supabaseUrl||!c.supabaseKey)throw Error('нет SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY в Vercel');if(typeof supabase==='undefined')throw Error('нет интернета для загрузки Supabase SDK');db=supabase.createClient(c.supabaseUrl,c.supabaseKey);bar.className='bar ok';bar.textContent='🟢 Онлайн: Supabase подключён';await syncOfflineClients();await loadData()}catch(e){enableOfflineMode(e.message)}}
 function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render()}async function newClient(){
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render()}async function newClient(){
   if(window.__newClientBusy)return;
   window.__newClientBusy=true;
   const newClientButtons=[...document.querySelectorAll('button[onclick="newClient()"]')];
@@ -328,6 +328,7 @@ function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:
 function addRowObj(o){
   let zqVal = o.zq ?? o.zipperQty ?? o.zippersCount ?? (o.z || o.zipper ? 2 : 2);
   let zdVal = o.zd ?? o.zipperDistance ?? o.zo ?? o.zipoff ?? o.zipperOffset ?? 0;
+  let gmVal = o.gm ?? o.grommetQty ?? o.grommetsQty ?? o.grommetCount ?? 0;
   let tr=document.createElement('tr');
   tr.innerHTML=`<td class=rownum></td><td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
   <td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td>
@@ -340,6 +341,7 @@ function addRowObj(o){
   <td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td>
   <td><input class=zd type=number value="${zdVal}" title="Если 2 молнии — отступ от края. Если 3 и более — расстояние между молниями."></td>
   <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывается на люверсах: разметка по бокам и снизу, шаг не более 40 см, наценка 60% только на изделие."></td>
+  <td><input class=gm type=number min=0 step=1 value="${gmVal}" title="Количество люверсов на одно окно. Если оставить 0 — CRM посчитает автоматически по шагу не более 40 см."></td>
   <td><input class=door type=checkbox ${(o.door??o.isDoor)?'checked':''} title="Проём является дверью. Отдельный коэффициент не применяется, усложнение учитывается через молнии и окантовку."></td>
   <td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td>
   <td class=area>0</td><td class=rowt>0</td>
@@ -353,7 +355,7 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
     const hasZ = tr.querySelector('.z').checked;
     const zq = hasZ ? Math.max(1, ni(tr.querySelector('.zq')?.value || 2)) : 0;
     const zd = hasZ ? n(tr.querySelector('.zd')?.value || 0) : 0;
-    return{
+    const item={
       index:i+1,
       w:n(tr.querySelector('.w').value),
       h1:n(tr.querySelector('.h1').value),
@@ -367,9 +369,13 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
       zc:hasZ?n(tr.querySelector('.zc').value):0,
       zd:zd,
       open:!!tr.querySelector('.open')?.checked,
+      gm:0,
       door:!!tr.querySelector('.door')?.checked,
       inst:tr.querySelector('.inst').checked
     };
+    item.gm = item.open ? (ni(tr.querySelector('.gm')?.value) || grommetCountForWindow(item)) : 0;
+    item.grommetQty = item.gm;
+    return item;
   });
 }
 function zipperCount(x){return x.z ? Math.max(1, ni(x.zq || x.zipperQty || x.zippersCount || 2)) : 0}
@@ -424,7 +430,9 @@ function grommetSegments(cm){
 }
 function grommetStepCm(cm){const seg=grommetSegments(cm);return seg?cm/seg:0;}
 function grommetCountForWindow(x){if(!x.open)return 0;const l=grommetSegments(x.h1),r=grommetSegments(x.h2),b=grommetSegments(x.w);return (l+1)+(r+1)+Math.max(0,b-1);}
-function grommetInfoText(x){if(!x.open)return '';return `Люверсы: слева ${fmtCm(grommetStepCm(x.h1))} см, справа ${fmtCm(grommetStepCm(x.h2))} см, низ ${fmtCm(grommetStepCm(x.w))} см, всего ${grommetCountForWindow(x)} шт.`;}
+function grommetCountPerWindow(x){if(!x.open)return 0;return ni(x.gm ?? x.grommetQty ?? x.grommetsQty ?? x.grommetCount) || grommetCountForWindow(x);}
+function grommetTotalQty(x){return grommetCountPerWindow(x)*Math.max(1,ni(x.qty||1));}
+function grommetInfoText(x){if(!x.open)return '';const per=grommetCountPerWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));return `Люверсы: слева ${fmtCm(grommetStepCm(x.h1))} см, справа ${fmtCm(grommetStepCm(x.h2))} см, низ ${fmtCm(grommetStepCm(x.w))} см, ${per} шт. на окно${qty>1?', всего '+total+' шт.':''}.`; }
 function totals(it,pr){
   let t={totalQty:0,totalArea:0,baseTotal:0,extraTotal:0,scrapArea:0,scrapCost:0,scrapCostInfo:0,scrapPurchaseM2:0,rollArea:0,cutArea:0,grandTotal:0,rows:[]};
   it.forEach(x=>{
@@ -770,7 +778,7 @@ function fmtCm(v){
 }
 function mats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
-  let usage={180:0,220:0,240:0},details=[],edge=0;
+  let usage={180:0,220:0,240:0},details=[],edge=0,grommetNeed=0;
   opt.layouts.forEach(layout=>{
     usage[layout.rollWidthCm]=(usage[layout.rollWidthCm]||0)+layout.totalLengthCm/100;
     layout.placements.forEach(p=>{
@@ -802,6 +810,9 @@ function mats(it,pr){
       const cut=offsetPolyCm(opening,off);
       edge+=(polyPerimeterCm(cut)/100)*x.qty*(x.z?2.5:1);
     }
+    if(x.open){
+      grommetNeed += grommetTotalQty(x);
+    }
   });
 
   let rows=[];
@@ -821,11 +832,13 @@ function mats(it,pr){
   let en=edge*1.1,er=en?Math.ceil(en/50):0;
   const edgeVisible=edgingVisibleWidthCm(pr);
   const edgeStrip=edgingStripWidthCm(pr);
+  const grommetRows=grommetNeed>0?[{material:'Люверсы 10 мм',width:'шт',need:grommetNeed,rolls:0,rest:0,comment:'Расход по столбцу «Кол-во люверсов» × количество окон. Если в строке 0 — считается автоматически по шагу не более 40 см.'}]:[];
   return{
     rollRows:rows,
     oversized:opt.bad,
     details,
     layouts:opt.layouts,
+    grommetRows,
     edgingRow:{material:'Окантовка',width:fmtCm(edgeStrip)+' см',need:en,rolls:er,rest:er?er*50-en:0,comment:'Полоса '+fmtCm(edgeStrip)+' см, видимая окантовка '+fmtCm(edgeVisible)+' см. Формула: офсет '+(n(pr.off)||4.5)+'×2 + 1 см. Если есть молния — расход окантовки ×2.5. Запас 10%'}
   };
 }
@@ -834,6 +847,7 @@ function stockNormMaterial(v){
     .trim()
     .toLowerCase()
     .replace(/ё/g,'е')
+    .replace(/[×xх]/g,'*')
     .replace(/\s+/g,' ');
 }
 function stockNormWidth(w){
@@ -859,8 +873,21 @@ function stockFind(material,width){
   let nw=stockNormWidth(width);
   return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
 }
+async function ensureDefaultStockPositions(){
+  if(!db||!Array.isArray(stock))return;
+  const defaults=[
+    {material:'Люверсы 10 мм',width:'шт'},
+    {material:'Люверсы 42*22',width:'шт'}
+  ];
+  for(const d of defaults){
+    if(stockFind(d.material,d.width))continue;
+    const res=await db.from('stock_items').insert({material:d.material,width:d.width,qty_m:0,unit_cost:0,critical_m:0,updated_at:new Date().toISOString()}).select().single();
+    if(!res.error&&res.data)stock.push(res.data);
+    else console.warn('Не удалось добавить складскую позицию',d.material,res.error&&res.error.message);
+  }
+}
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...m.rollRows];if(m.edgingRow.need)a.push(m.edgingRow);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){let a=[...(m.rollRows||[])];if(m.edgingRow&&m.edgingRow.need)a.push(m.edgingRow);if(m.grommetRows&&m.grommetRows.length)a.push(...m.grommetRows);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets) {
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -1072,6 +1099,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
 }function report(c,ca){
   const materialRows=[...(ca.materials.rollRows||[])];
   if(ca.materials.edgingRow&&ca.materials.edgingRow.need)materialRows.push(ca.materials.edgingRow);
+  if(ca.materials.grommetRows&&ca.materials.grommetRows.length)materialRows.push(...ca.materials.grommetRows);
 
   const materialCards=materialRows.length
     ? materialRows.map(r=>`<div class="mcard">
@@ -1098,7 +1126,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
       <div>Проём: ${x.w} × ${x.h1}/${x.h2} см</div>
-      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${x.open?'да':'нет'} · Дверь: ${x.door?'да':'нет'}</div>
+      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${x.open?(grommetCountPerWindow(x)+' шт./окно'):'нет'} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
     </div>`).join('');
 
@@ -1197,7 +1225,7 @@ function clientReport(c,ca){
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
       <div>Размер проёма: ${x.w} × ${x.h1}/${x.h2} см</div>
-      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${x.open?'да':'нет'} · Дверь: ${x.door?'да':'нет'}</div>
+      <div>Окантовка: ${x.ed?'да':'нет'} · Ремни: ${x.straps} · Люверсы: ${x.open?(grommetCountPerWindow(x)+' шт./окно'):'нет'} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
       <div>Монтаж: ${x.inst?'да':'нет'}</div>
     </div>`).join('');
@@ -1288,7 +1316,7 @@ function downloadClientHtml(){
   let c=client(),ca=curCalc(),fn=safe('расчет_для_клиента_'+(c.address||c.name))+'.html';
   openHtmlPreview(clientReport(c,ca),fn,'HTML для клиента');
 }
-function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
+function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(silent=false){
   let c=client(),ca=curCalc();
   if(!c)return;
@@ -1634,7 +1662,7 @@ function renderWarehouse(){if(typeof stockList==='undefined')return;stockList.in
 function editStock(id){let s=stock.find(x=>x.id===id);if(!s)return;wh_mat.value=s.material;wh_width.value=s.width;wh_qty.value=n(s.qty_m);if(typeof wh_cost!=='undefined')wh_cost.value=n(s.unit_cost);wh_crit.value=n(s.critical_m);wh_width.dataset.id=id;show('warehouse')}
 async function saveStockItem(){if(!db)return alert('Supabase не подключён');let id=wh_width.dataset.id||'',payload={material:wh_mat.value,width:stockNormWidth(wh_width.value),qty_m:n(wh_qty.value),unit_cost:n(wh_cost?.value),critical_m:n(wh_crit.value),updated_at:new Date().toISOString()};if(!payload.width)return alert('Укажи ширину / тип материала');let res=id?await db.from('stock_items').update(payload).eq('id',id):await db.from('stock_items').upsert(payload,{onConflict:'material,width'});if(res.error)return alert(res.error.message);wh_width.dataset.id='';wh_width.value='';wh_qty.value=0;if(typeof wh_cost!=='undefined')wh_cost.value=0;wh_crit.value=5;await loadData();show('warehouse')}
 async function deleteStock(id){if(!confirm('Удалить позицию склада?'))return;let r=await db.from('stock_items').delete().eq('id',id);if(r.error)return alert(r.error.message);await loadData();show('warehouse')}
-function currentRowsForConsumption(){let ca=curCalc(),rows=[...ca.materials.rollRows];if(ca.materials.edgingRow.need>0)rows.push(ca.materials.edgingRow);return rows}
+function currentRowsForConsumption(){let ca=curCalc(),rows=[...(ca.materials.rollRows||[])];if(ca.materials.edgingRow&&ca.materials.edgingRow.need>0)rows.push(ca.materials.edgingRow);if(ca.materials.grommetRows&&ca.materials.grommetRows.length)rows.push(...ca.materials.grommetRows);return rows}
 function materialsAlreadyConsumed(c){
   return !!(c&&c.history&&c.history.some(h=>h.type==='Склад'&&String(h.text||'').includes('Материалы списаны со склада')));
 }
@@ -2055,7 +2083,7 @@ function contractActHtml(c,ca){
     <td>${x.ed?'да':'нет'}</td>
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт.'):'нет'}</td>
-    <td>${x.open?'люверсы':''}${x.open&&x.door?' / ':''}${x.door?'дверь':''}</td>
+    <td>${x.open?('люверсы '+grommetCountPerWindow(x)+' шт./окно'):''}${x.open&&x.door?' / ':''}${x.door?'дверь':''}</td>
   </tr>`).join('');
 
   const totalWords='____________________________________________________________';
