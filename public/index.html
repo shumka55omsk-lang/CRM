@@ -339,7 +339,7 @@ function addRowObj(o){
   <td><input class=zq type=number min=1 value="${zqVal}"></td>
   <td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td>
   <td><input class=zd type=number value="${zdVal}" title="Если 2 молнии — отступ от края. Если 3 и более — расстояние между молниями."></td>
-  <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывается на люверсах: разметка по бокам и снизу, шаг не более 40 см, наценка 60%."></td>
+  <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывается на люверсах: разметка по бокам и снизу, шаг не более 40 см, наценка 60% только на изделие."></td>
   <td><input class=door type=checkbox ${(o.door??o.isDoor)?'checked':''} title="Проём является дверью. Отдельный коэффициент не применяется, усложнение учитывается через молнии и окантовку."></td>
   <td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td>
   <td class=area>0</td><td class=rowt>0</td>
@@ -435,12 +435,15 @@ function totals(it,pr){
     let zipperCost=x.z ? (x.zc/100)*zCount*x.qty*pr.zip : 0;
     const edgeCoef=x.z?2.5:1;
     const edgeCost=x.ed?per*x.qty*pr.edge*edgeCoef:0;
-    let extra=edgeCost+x.straps*x.qty*pr.strap+zipperCost+(x.inst?area*pr.inst:0);
+    const strapsCost=x.straps*x.qty*pr.strap;
+    const installCost=x.inst?area*pr.inst:0;
+    const productRaw=base+edgeCost+strapsCost+zipperCost;
     const factor=(x.open?1.6:1);
-    const raw=base+extra;
-    const markup=raw*(factor-1);
-    let row=raw*factor;
-    t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra+markup;t.grandTotal+=row;t.rows.push({area,rowTotal:row,markup,factor,edgeCoef});
+    const markup=productRaw*(factor-1);
+    const productTotal=productRaw+markup;
+    let row=productTotal+installCost;
+    const extra=edgeCost+strapsCost+zipperCost+installCost;
+    t.totalQty+=x.qty;t.totalArea+=area;t.baseTotal+=base;t.extraTotal+=extra+markup;t.grandTotal+=row;t.rows.push({area,rowTotal:row,markup,factor,edgeCoef,installCost,productRaw,productTotal});
   });
   const sc=scrapCalc(it,pr);
   t.rollArea=sc.rollArea;
@@ -1060,7 +1063,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
     zDistanceLabel,
     x.open ? grommetInfoText(x) : '',
-    x.open ? 'Открывание на люверсах: +60%' : '',
+    x.open ? 'Открывание на люверсах: +60% к изделию, монтаж без наценки' : '',
     x.door ? 'Дверь: отмечена, без отдельного коэффициента' : '',
     `Окантовка: ${edgingWidth} см`
   ].filter(Boolean).join('<br>');
