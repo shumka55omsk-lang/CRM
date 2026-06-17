@@ -1131,75 +1131,6 @@ function drawClient(x,i,pr){
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none');
 }
-
-function expandedOpenings(items){
-  const out=[];
-  (items||[]).forEach((x,i)=>{
-    const qty=Math.max(1,ni(x.qty||1));
-    for(let q=0;q<qty;q++)out.push({index:i+1,w:Math.max(1,n(x.w)),h1:Math.max(1,n(x.h1)),h2:Math.max(1,n(x.h2)),h:Math.max(1,n(x.h1),n(x.h2))});
-  });
-  return out;
-}
-function buildingViewGroups(items){
-  const names=['Вид спереди','Вид слева','Вид справа','Вид сзади'];
-  const expanded=expandedOpenings(items);
-  const groups=names.map(name=>({name,list:[],width:0,height:0}));
-  if(!expanded.length)return groups;
-  const total=expanded.length;
-  const base=Math.floor(total/4), rem=total%4;
-  let cursor=0;
-  for(let gi=0;gi<4;gi++){
-    let take=base+(gi<rem?1:0);
-    if(total<4)take=(gi<total?1:0);
-    for(let k=0;k<take&&cursor<total;k++)groups[gi].list.push(expanded[cursor++]);
-  }
-  while(cursor<total)groups[3].list.push(expanded[cursor++]);
-  groups.forEach(g=>{
-    g.width=g.list.reduce((s,x)=>s+x.w,0);
-    g.height=g.list.reduce((m,x)=>Math.max(m,x.h),0);
-  });
-  return groups;
-}
-function buildingViewSvg(group){
-  const list=group.list||[];
-  const vbW=320,vbH=190,fx=26,fy=28,fw=268,fh=116,bottom=fy+fh-10;
-  let labels='';
-  let openings='';
-  if(list.length){
-    const gap=8;
-    const rawWidth=list.reduce((s,x)=>s+x.w,0);
-    const rawHeight=list.reduce((m,x)=>Math.max(m,x.h),0);
-    const scale=Math.min((fw-gap*(list.length-1))/Math.max(1,rawWidth),(fh-8)/Math.max(1,rawHeight));
-    const totalScaled=list.reduce((s,x)=>s+x.w*scale,0)+gap*(list.length-1);
-    let x=fx+(fw-totalScaled)/2;
-    list.forEach((it,idx)=>{
-      const w=Math.max(12,it.w*scale), h1=Math.max(12,it.h1*scale), h2=Math.max(12,it.h2*scale);
-      const leftTop=bottom-h1, rightTop=bottom-h2;
-      openings+=`<path d="M ${x.toFixed(2)} ${bottom.toFixed(2)} L ${x.toFixed(2)} ${leftTop.toFixed(2)} L ${(x+w).toFixed(2)} ${rightTop.toFixed(2)} L ${(x+w).toFixed(2)} ${bottom.toFixed(2)} Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.4"/>`;
-      openings+=`<text x="${(x+w/2).toFixed(2)}" y="${(Math.min(leftTop,rightTop)-4).toFixed(2)}" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">О${it.index}</text>`;
-      x+=w+gap;
-    });
-    labels=`<text x="${(fx+fw/2).toFixed(2)}" y="${(fy+fh+18).toFixed(2)}" text-anchor="middle" font-size="11" font-weight="700" fill="#111827">ширина ${Math.round(group.width)} см</text>
-      <text x="14" y="${(fy+fh/2).toFixed(2)}" text-anchor="middle" font-size="11" font-weight="700" fill="#111827" transform="rotate(-90 14 ${(fy+fh/2).toFixed(2)})">высота ${Math.round(group.height)} см</text>`;
-  }else{
-    openings=`<text x="${(fx+fw/2).toFixed(2)}" y="${(fy+fh/2).toFixed(2)}" text-anchor="middle" font-size="12" fill="#6b7280">Нет проёмов</text>`;
-  }
-  return `<svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(group.name)}">
-    <rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="2" fill="#ffffff" stroke="#111827" stroke-width="2"/>
-    <path d="M ${fx-8} ${fy} L ${fx+22} ${fy-16} L ${fx+fw-22} ${fy-16} L ${fx+fw+8} ${fy}" fill="none" stroke="#6b7280" stroke-width="2"/>
-    <line x1="${fx}" y1="${bottom}" x2="${fx+fw}" y2="${bottom}" stroke="#94a3b8" stroke-dasharray="4 3" stroke-width="1.2"/>
-    ${openings}
-    ${labels}
-  </svg>`;
-}
-function buildingSketchHtml(ca,mode='full'){
-  const groups=buildingViewGroups((ca&&ca.items)||[]);
-  const note=mode==='client'
-    ? 'Чертёж постройки схематичный и нужен для общего понимания объекта. Размеры взяты из замеров, распределение проёмов по видам показано ориентировочно.'
-    : 'Чертёж постройки схематичный и нужен для общего понимания объекта. Размеры взяты из замеров, распределение проёмов по видам выполнено ориентировочно по порядку окон.';
-  return `<h2>Чертёж постройки</h2><div class="pdfgrid">${groups.map(g=>`<div class="pdfitem"><div class="scheme-title">${g.name}</div><div class="scheme-meta">${g.list.length?`Проёмов: ${g.list.length} · ширина ${Math.round(g.width)} см · высота ${Math.round(g.height)} см`:'Проёмы не указаны'}</div>${buildingViewSvg(g)}</div>`).join('')}</div><div class="note" style="margin-top:10px">${note}</div>`;
-}
-
 function report(c,ca){
   const materialRows=[...(ca.materials.rollRows||[])];
   if(ca.materials.edgingRow&&ca.materials.edgingRow.need)materialRows.push(ca.materials.edgingRow);
@@ -1313,8 +1244,6 @@ function report(c,ca){
   <h2>Изделия</h2>
   <div class="items">${itemCards}</div>
 
-  ${buildingSketchHtml(ca,'full')}
-
   <h2>Схемы</h2>
   <div class="pdfgrid ${ca.items.length===1?'one':''}">
     ${ca.items.map((x,i)=>`<div class="pdfitem">${draw(x,i+1,ca.prices)}</div>`).join('')}
@@ -1409,7 +1338,6 @@ function clientReport(c,ca){
   <h2>Изделия</h2>
   <div class="items">${itemCards}</div>
 
-  ${buildingSketchHtml(ca,'client')}
   <h2>Схемы</h2>
   <div class="pdfgrid ${ca.items.length===1?'one':''}">
     ${ca.items.map((x,i)=>`<div class="pdfitem">${drawClient(x,i+1,ca.prices)}</div>`).join('')}
@@ -1425,7 +1353,7 @@ function downloadClientHtml(){
   let c=client(),ca=curCalc(),fn=safe('расчет_для_клиента_'+(c.address||c.name))+'.html';
   openHtmlPreview(clientReport(c,ca),fn,'HTML для клиента');
 }
-function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`${buildingSketchHtml({items:it},'full')}<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
+function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(silent=false){
   let c=client(),ca=curCalc();
   if(!c)return;
@@ -2029,9 +1957,6 @@ function productionTaskHtml(c,ca){
     .scheme svg{width:100%;height:auto;max-height:70mm}
     .check{font-size:14px;line-height:1.8}
     .rollLayouts{display:grid;grid-template-columns:1fr;gap:8px;margin:6px 0 10px}
-    .objgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:6px 0 10px}
-    .objcard{border:1px solid #ddd;border-radius:10px;padding:6px;break-inside:avoid;page-break-inside:avoid}
-    .objcard svg{width:100%;height:auto;max-height:55mm;background:#fff}
     .rollLayout{border:1px solid #ddd;border-radius:10px;padding:6px;break-inside:avoid;page-break-inside:avoid}
     .rollTitle{font-weight:800;font-size:13px;margin:0 0 4px}
     .rollLayout svg{width:100%;height:auto;max-height:185mm;background:#fff}
@@ -2050,7 +1975,6 @@ function productionTaskHtml(c,ca){
     .cutPieceCard svg{width:100%;height:128mm;background:#fff;flex:1}
     @media print{
       .printCutBar{display:none!important}
-      .objcard{break-inside:avoid;page-break-inside:avoid}
       .page{padding:3mm}.grid{grid-template-columns:repeat(2,1fr)}.rollLayout svg{max-height:170mm}
       body.print-cut-only .page > *{display:none!important}
       body.print-cut-only .printCutBar{display:none!important}
@@ -2090,7 +2014,6 @@ function productionTaskHtml(c,ca){
     <h2 class="cutSheetsTitle">Листы раскроя для печати</h2>
     <p class="legend cutSheetsLegend">На листе до двух проёмов. Размеры резки вынесены снаружи фигуры, световой проём показан пунктиром внутри. Печать открывается отдельным чистым окном без пустых страниц.</p>
     ${cutSheetsHtml}
-    ${buildingSketchHtml(ca,'full').replace('<div class="pdfgrid">','<div class="objgrid">').replaceAll('<div class="pdfitem">','<div class="objcard">')}
     <h2>Схемы изделий</h2>
     <div class="grid">${ca.items.map((x,i)=>`<div class="scheme">${draw(x,i+1,ca.prices)}</div>`).join('')}</div>
     <h2>Чек-лист производства</h2>
