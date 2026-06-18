@@ -1239,15 +1239,20 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
           grommetElements += `<circle cx="${px}" cy="${py}" r="1.25" fill="#111827"/>`;
         }
         function addOval(px,py,side){
-          const sideEdge = side==='left'?edgeSides.left:(side==='right'?edgeSides.right:edgeSides.bottom);
-          const crossR = Math.max(2.1, Math.min(6.2, sideEdge*scale*0.38));
-          const longR = Math.max(crossR*1.65, Math.min(12, crossR*2.15));
+          // Овальный люверс 42×22 на схеме показываем как продолговатый слот,
+          // похожий на реальный овал с прямыми участками и скруглёнными торцами.
+          const shortSide = 5.6;
+          const longSide = 12.4;
+          const stroke = 1.35;
           if(side==='bottom'){
-            grommetElements += `<ellipse cx="${px}" cy="${py}" rx="${longR}" ry="${crossR}" fill="#fff" stroke="#111827" stroke-width="1.15"/>`;
+            const x = px - longSide/2;
+            const y = py - shortSide/2;
+            grommetElements += `<rect x="${x}" y="${y}" width="${longSide}" height="${shortSide}" rx="${shortSide/2}" ry="${shortSide/2}" fill="#fff" stroke="#111827" stroke-width="${stroke}"/>`;
           }else{
-            grommetElements += `<ellipse cx="${px}" cy="${py}" rx="${crossR}" ry="${longR}" fill="#fff" stroke="#111827" stroke-width="1.15"/>`;
+            const x = px - shortSide/2;
+            const y = py - longSide/2;
+            grommetElements += `<rect x="${x}" y="${y}" width="${shortSide}" height="${longSide}" rx="${shortSide/2}" ry="${shortSide/2}" fill="#fff" stroke="#111827" stroke-width="${stroke}"/>`;
           }
-          grommetElements += `<circle cx="${px}" cy="${py}" r="1.15" fill="#111827"/>`;
         }
         function topRoundPoint(t){
           const mx = widthCm*t;
