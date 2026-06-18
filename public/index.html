@@ -57,7 +57,7 @@
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
 <section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Люверсы 10 мм</option><option>Люверсы 42*22</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="1.8 м / 2.2 м / 2.4 м / 8 см / 10 см / шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="ПВХ — ₽/м²"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена для ПВХ полотна — за 1 м², для остальных — за пог.м/шт.</p></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
 <section id="set" class="hide"><div class="top"><h1>Настройки</h1></div><div class="panel"><div class="grid"><div><label>Цена м²</label><input id="s_m2" type="number"></div><div><label>Окантовка пог.м</label><input id="s_edge" type="number"></div><div><label>Ремень шт</label><input id="s_strap" type="number"></div><div><label>Молния пог.м</label><input id="s_zip" type="number"></div><div><label>Монтаж м²</label><input id="s_inst" type="number"></div><div><label>Офсет резки см</label><input id="s_off" type="number" step="0.1"></div></div><p><button class="btn p" onclick="saveSet()">Сохранить</button></p><p class="muted">Офлайн-режим сохраняет только клиентов и расчёты на этом устройстве. Склад, производство, фото и Telegram работают только онлайн.</p></div></section>
-<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[];const LS='swcrm_supabase_settings_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -347,8 +347,8 @@ function addRowObj(o){
   <td><input class=zq type=number min=1 value="${zqVal}"></td>
   <td><input class=zc type=number value="${o.zc??o.zipperCm??0}"></td>
   <td><input class=zd type=number value="${zdVal}" title="Если 2 молнии — отступ от края. Если 3 и более — расстояние между молниями."></td>
-  <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывается на люверсах: верхние углы не пробиваются, по бокам шаг не более 40 см, снизу 3–4 люверса для прихватки, наценка 60% только на изделие."></td>
-  <td><input class=gm type=number min=0 step=1 value="${gmVal}" title="Количество люверсов на одно окно. Если оставить 0 — CRM посчитает автоматически: верхние углы без люверсов, бока до 40 см, низ 3–4 шт."></td>
+  <td><input class=blind type=checkbox ${(o.blind??o.fixed??o.closed??o.deaf)?'checked':''} title="Глухое окно: люверсы 10 мм сверху, по бокам и снизу внутри окантовки."></td>\n  <td><input class=open type=checkbox ${(o.open??o.grommets??o.openingOnGrommets)?'checked':''} title="Открывающееся окно: сверху люверсы 10 мм для крепления, по бокам и снизу овальные люверсы внутри окантовки. Наценка 60% только на изделие."></td>
+  <td><input class=gm type=number min=0 step=1 value="${gmVal}" readonly title="Автоматическое общее количество люверсов на одно окно по выбранному режиму: глухое или открывающееся."></td>
   <td><input class=door type=checkbox ${(o.door??o.isDoor)?'checked':''} title="Проём является дверью. Отдельный коэффициент не применяется, усложнение учитывается через молнии и окантовку."></td>
   <td><input class=inst type=checkbox ${o.inst??o.install?'checked':''}></td>
   <td class=area>0</td><td class=rowt>0</td>
@@ -356,6 +356,12 @@ function addRowObj(o){
   rows.appendChild(tr);
   updateWindowNumbers();
   tr.querySelectorAll('input').forEach(i=>{i.oninput=recalcAndAutosave;i.onchange=recalcAndAutosave});
+  const blindInput=tr.querySelector('.blind');
+  const openInput=tr.querySelector('.open');
+  if(blindInput&&openInput){
+    blindInput.onchange=()=>{if(blindInput.checked)openInput.checked=false;recalcAndAutosave()};
+    openInput.onchange=()=>{if(openInput.checked)blindInput.checked=false;recalcAndAutosave()};
+  }
   const ewInput=tr.querySelector('.ew');
   if(ewInput){
     const syncAllEdges=()=>{
@@ -392,6 +398,7 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
       zq:zq,
       zc:hasZ?n(tr.querySelector('.zc').value):0,
       zd:zd,
+      blind:!!tr.querySelector('.blind')?.checked,
       open:!!tr.querySelector('.open')?.checked,
       gm:0,
       door:!!tr.querySelector('.door')?.checked,
@@ -406,7 +413,8 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
     item.edgeWidthCm = item.ew;
     item.edgeStripWidthCm = item.ew ? item.ew * 2 : 0;
     item.edgeSidesCm = {top:item.et,bottom:item.eb,left:item.el,right:item.er};
-    item.gm = item.open ? (ni(tr.querySelector('.gm')?.value) || grommetCountForWindow(item)) : 0;
+    if(item.open)item.blind=false;
+    item.gm = (item.open||item.blind) ? grommetCountForWindow(item) : 0;
     item.grommetQty = item.gm;
     return item;
   });
@@ -454,8 +462,7 @@ function scrapCalc(it,pr){
   return{rollArea,cutArea,scrapArea,scrapCost,purchaseM2};
 }
 function grommetSegments(cm){
-  // Количество промежутков по бокам: шаг не более 40 см.
-  // Верхние углы не пробиваем, поэтому сами точки по боку ставятся только внутри стороны.
+  // Количество промежутков: шаг не более 40 см, по возможности 3–4 промежутка.
   const len=Math.max(0,n(cm));
   if(!len)return 0;
   const minSeg=Math.ceil(len/40);
@@ -465,14 +472,54 @@ function grommetSegments(cm){
 }
 function grommetStepCm(cm){const seg=grommetSegments(cm);return seg?cm/seg:0;}
 function sideGrommetCount(cm){const seg=grommetSegments(cm);return Math.max(0,seg-1);}
+function topRoundGrommetCount(cm){return sideGrommetCount(cm);}
 function bottomGrommetCount(cm){const len=Math.max(0,n(cm));if(!len)return 0;return len>160?4:3;}
 function bottomGrommetStepCm(cm){const cnt=bottomGrommetCount(cm);return cnt>1?Math.max(0,n(cm))/(cnt-1):0;}
-function grommetCountForWindow(x){if(!x.open)return 0;return sideGrommetCount(x.h1)+sideGrommetCount(x.h2)+bottomGrommetCount(x.w);}
-function grommetCountPerWindow(x){if(!x.open)return 0;return ni(x.gm ?? x.grommetQty ?? x.grommetsQty ?? x.grommetCount) || grommetCountForWindow(x);}
+function isBlindGrommetWindow(x){return !!(x&&(x.blind||x.fixed||x.closed||x.deaf))&&!x.open;}
+function isOpenGrommetWindow(x){return !!(x&&x.open);}
+function roundGrommetCountForWindow(x){
+  if(!x)return 0;
+  const top=topRoundGrommetCount(x.w);
+  if(isOpenGrommetWindow(x))return top;
+  if(isBlindGrommetWindow(x))return top+sideGrommetCount(x.h1)+sideGrommetCount(x.h2)+bottomGrommetCount(x.w);
+  return 0;
+}
+function ovalGrommetCountForWindow(x){
+  if(!isOpenGrommetWindow(x))return 0;
+  return sideGrommetCount(x.h1)+sideGrommetCount(x.h2)+bottomGrommetCount(x.w);
+}
+function grommetCountForWindow(x){return roundGrommetCountForWindow(x)+ovalGrommetCountForWindow(x);}
+function grommetCountPerWindow(x){if(!(isOpenGrommetWindow(x)||isBlindGrommetWindow(x)))return 0;return ni(x.gm ?? x.grommetQty ?? x.grommetsQty ?? x.grommetCount) || grommetCountForWindow(x);}
 function grommetTotalQty(x){return grommetCountPerWindow(x)*Math.max(1,ni(x.qty||1));}
-function grommetInfoText(x){if(!x.open)return '';const per=grommetCountPerWindow(x),auto=grommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));const manual=per!==auto?' вручную':'';return `Люверсы${manual}: бока без верхних углов, слева шаг ${fmtCm(grommetStepCm(x.h1))} см, справа ${fmtCm(grommetStepCm(x.h2))} см, низ ${bottomGrommetCount(x.w)} шт. для прихватки, ${per} шт. на окно${qty>1?', всего '+total+' шт.':''}.`; }
-function grommetQtyText(x){if(!x.open)return 'нет';const per=grommetCountPerWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));return `${per} шт./окно${qty>1?' · всего '+total+' шт.':' · всего '+total+' шт.'}`;}
-function grommetClientText(x){if(!x.open)return 'нет';return `есть, ${grommetCountPerWindow(x)} шт./окно`;}
+function roundGrommetTotalQty(x){return roundGrommetCountForWindow(x)*Math.max(1,ni(x.qty||1));}
+function ovalGrommetTotalQty(x){return ovalGrommetCountForWindow(x)*Math.max(1,ni(x.qty||1));}
+function grommetInfoText(x){
+  if(isOpenGrommetWindow(x)){
+    const round=roundGrommetCountForWindow(x),oval=ovalGrommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));
+    return `Открывающееся: сверху люверсы 10 мм ${round} шт./окно; по бокам и снизу овальные люверсы ${oval} шт./окно${qty>1?', всего '+total+' шт.':''}.`;
+  }
+  if(isBlindGrommetWindow(x)){
+    const round=roundGrommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));
+    return `Глухое: люверсы 10 мм по периметру окантовки, сверху ${topRoundGrommetCount(x.w)} шт., всего ${round} шт./окно${qty>1?', всего '+total+' шт.':''}.`;
+  }
+  return '';
+}
+function grommetQtyText(x){
+  if(isOpenGrommetWindow(x)){
+    const round=roundGrommetCountForWindow(x),oval=ovalGrommetCountForWindow(x),total=grommetTotalQty(x);
+    return `10 мм ${round} шт./окно + овал ${oval} шт./окно · всего ${total} шт.`;
+  }
+  if(isBlindGrommetWindow(x)){
+    const round=roundGrommetCountForWindow(x),total=grommetTotalQty(x);
+    return `10 мм ${round} шт./окно · всего ${total} шт.`;
+  }
+  return 'нет';
+}
+function grommetClientText(x){
+  if(isOpenGrommetWindow(x))return `есть, сверху 10 мм ${roundGrommetCountForWindow(x)} шт./окно, овал ${ovalGrommetCountForWindow(x)} шт./окно`;
+  if(isBlindGrommetWindow(x))return `есть, 10 мм ${roundGrommetCountForWindow(x)} шт./окно`;
+  return 'нет';
+}
 function totalGrommets(items){return (items||[]).reduce((sum,x)=>sum+grommetTotalQty(x),0);}
 function totals(it,pr){
   let t={totalQty:0,totalArea:0,totalGrommets:0,baseTotal:0,extraTotal:0,scrapArea:0,scrapCost:0,scrapCostInfo:0,scrapPurchaseM2:0,rollArea:0,cutArea:0,grandTotal:0,rows:[]};
@@ -866,7 +913,7 @@ function fmtCm(v){
 }
 function mats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
-  let usage={180:0,220:0,240:0},details=[],edgeGroups={},grommetNeed=0;
+  let usage={180:0,220:0,240:0},details=[],edgeGroups={},grommet10Need=0,grommetOvalNeed=0;
   opt.layouts.forEach(layout=>{
     usage[layout.rollWidthCm]=(usage[layout.rollWidthCm]||0)+layout.totalLengthCm/100;
     layout.placements.forEach(p=>{
@@ -913,8 +960,9 @@ function mats(it,pr){
         edgeGroups[key].sides.add(s.name);
       });
     }
-    if(x.open){
-      grommetNeed += grommetTotalQty(x);
+    if(x.open||x.blind){
+      grommet10Need += roundGrommetTotalQty(x);
+      grommetOvalNeed += ovalGrommetTotalQty(x);
     }
   });
 
@@ -944,7 +992,9 @@ function mats(it,pr){
       comment:'Видимый кант '+fmtCm(g.visible)+' см → отрезаемая полоса '+fmtCm(g.strip)+' см. Стороны: '+[...(g.sides||[])].join(', ')+'. Расход: длина стороны по внешнему контуру резки × количество × коэффициент молнии × запас 10%.'
     };
   }).sort((a,b)=>parseFloat(a.width.replace(',','.'))-parseFloat(b.width.replace(',','.')));
-  const grommetRows=grommetNeed>0?[{material:'Люверсы 10 мм',width:'шт',need:grommetNeed,rolls:0,rest:0,comment:'Расход по столбцу «Кол-во люверсов» × количество окон. Если в строке 0 — считается автоматически: верхние углы без люверсов, бока до 40 см, низ 3–4 шт.'}]:[];
+  const grommetRows=[];
+  if(grommet10Need>0)grommetRows.push({material:'Люверсы 10 мм',width:'шт',need:grommet10Need,rolls:0,rest:0,comment:'Круглые люверсы 10 мм: у глухих по периметру, у открывающихся сверху для крепления.'});
+  if(grommetOvalNeed>0)grommetRows.push({material:'Люверсы 42*22',width:'шт',need:grommetOvalNeed,rolls:0,rest:0,comment:'Овальные люверсы для открывающихся окон: по бокам и снизу, внутри окантовки.'});
   return{
     rollRows:rows,
     oversized:opt.bad,
@@ -1180,36 +1230,60 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       let grommetElements = '';
       if (hasGrommets) {
         const seen = new Set();
-        const leftOffsetPx = Math.max(3.2, edgeSides.left * scale * 0.55);
-        const rightOffsetPx = Math.max(3.2, edgeSides.right * scale * 0.55);
-        const bottomOffsetPx = Math.max(3.2, edgeSides.bottom * scale * 0.55);
-        function addGrommet(px,py){
-          const key=Math.round(px)+'_'+Math.round(py);
+        const mode = hasGrommets === 'blind' ? 'blind' : 'open';
+        function addRound(px,py){
+          const key='r_'+Math.round(px)+'_'+Math.round(py);
           if(seen.has(key))return;
           seen.add(key);
-          grommetElements += `<circle cx="${px}" cy="${py}" r="3.7" fill="#fff" stroke="#111827" stroke-width="1.2"/>`;
-          grommetElements += `<circle cx="${px}" cy="${py}" r="1.35" fill="#111827"/>`;
+          grommetElements += `<circle cx="${px}" cy="${py}" r="3.6" fill="#fff" stroke="#111827" stroke-width="1.15"/>`;
+          grommetElements += `<circle cx="${px}" cy="${py}" r="1.25" fill="#111827"/>`;
+        }
+        function addOval(px,py,side){
+          const sideEdge = side==='left'?edgeSides.left:(side==='right'?edgeSides.right:edgeSides.bottom);
+          const crossR = Math.max(2.1, Math.min(6.2, sideEdge*scale*0.38));
+          const longR = Math.max(crossR*1.65, Math.min(12, crossR*2.15));
+          if(side==='bottom'){
+            grommetElements += `<ellipse cx="${px}" cy="${py}" rx="${longR}" ry="${crossR}" fill="#fff" stroke="#111827" stroke-width="1.15"/>`;
+          }else{
+            grommetElements += `<ellipse cx="${px}" cy="${py}" rx="${crossR}" ry="${longR}" fill="#fff" stroke="#111827" stroke-width="1.15"/>`;
+          }
+          grommetElements += `<circle cx="${px}" cy="${py}" r="1.15" fill="#111827"/>`;
+        }
+        function topRoundPoint(t){
+          const mx = widthCm*t;
+          const my = (maxHeightCm-height1Cm) + ((maxHeightCm-height2Cm)-(maxHeightCm-height1Cm))*t;
+          return {x:sx(mx + nxTop*edgeSides.top*0.55), y:sy(my + nyTop*edgeSides.top*0.55)};
+        }
+        const topSeg=grommetSegments(widthCm);
+        for(let i=1;i<topSeg;i++){
+          const p=topRoundPoint(i/topSeg);
+          addRound(p.x,p.y);
         }
         const leftSeg=grommetSegments(height1Cm);
         for(let i=1;i<leftSeg;i++){
           const t=i/leftSeg;
-          addGrommet(innerX-leftOffsetPx, topLeftY+(bottomY-topLeftY)*t);
+          const y=topLeftY+(bottomY-topLeftY)*t;
+          const x=innerX-Math.max(3.2, edgeSides.left*scale*0.55);
+          if(mode==='blind')addRound(x,y);else addOval(x,y,'left');
         }
         const rightSeg=grommetSegments(height2Cm);
         for(let i=1;i<rightSeg;i++){
           const t=i/rightSeg;
-          addGrommet(innerRightX+rightOffsetPx, topRightY+(bottomY-topRightY)*t);
+          const y=topRightY+(bottomY-topRightY)*t;
+          const x=innerRightX+Math.max(3.2, edgeSides.right*scale*0.55);
+          if(mode==='blind')addRound(x,y);else addOval(x,y,'right');
         }
         const bottomCnt=bottomGrommetCount(widthCm);
         for(let i=0;i<bottomCnt;i++){
           const t=bottomCnt===1?0.5:i/(bottomCnt-1);
-          addGrommet(innerX+(innerRightX-innerX)*t, bottomY+bottomOffsetPx);
+          const x=innerX+(innerRightX-innerX)*t;
+          const y=bottomY+Math.max(3.2, edgeSides.bottom*scale*0.55);
+          if(mode==='blind')addRound(x,y);else addOval(x,y,'bottom');
         }
         if(grommetLabelMode==='simple'){
-          const autoCnt=sideGrommetCount(height1Cm)+sideGrommetCount(height2Cm)+bottomCnt;
-          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18+Math.max(0,bottomOffsetPx-3)}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${autoCnt} шт./окно</text>`;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+22}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${mode==='blind'?'10 мм по периметру':'верх 10 мм, бока/низ овал'}</text>`;
         }else if(grommetLabelMode!=='none'){
-          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18+Math.max(0,bottomOffsetPx-3)}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока шаг ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+22}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">${mode==='blind'?'глухое: 10 мм по периметру':'открывается: верх 10 мм; бока/низ овал'}</text>`;
         }
       }
 
@@ -1257,13 +1331,14 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
     `Ремни: ${straps}`,
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
     zDistanceLabel,
-    x.open ? grommetInfoText(x) : '',
+    (x.open||x.blind) ? grommetInfoText(x) : '',
     x.open ? 'Открывание на люверсах: +60% к изделию, монтаж без наценки' : '',
+    x.blind ? 'Глухое окно: люверсы 10 мм по периметру' : '',
     x.door ? 'Дверь: отмечена, без отдельного коэффициента' : '',
     x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
   const edgeSides=itemEdgeSidesCm(x,pr);
-  const svg=makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, undefined, edgeSides);
+  const svg=makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, x.open?'open':(x.blind?'blind':false), undefined, edgeSides);
   if(arguments[3]){
     const compactMeta=[`Проём: ${x.w} × ${x.h1}/${x.h2} см`,`Кол-во: ${qty} шт.`, x.ed?`Кант: ${edgeSideLabel(x,pr)}`:'Кант: нет'].filter(Boolean).join(' · ');
     if(x.ed){
@@ -1292,7 +1367,7 @@ function drawClient(x,i,pr){
     x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
-    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none', itemEdgeSidesCm(x,pr));
+    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, x.open?'open':(x.blind?'blind':false), 'none', itemEdgeSidesCm(x,pr));
 }
 function report(c,ca){
   const materialRows=[...(ca.materials.rollRows||[])];
@@ -1516,7 +1591,7 @@ function downloadClientHtml(){
   let c=client(),ca=curCalc(),fn=safe('расчет_для_клиента_'+(c.address||c.name))+'.html';
   openHtmlPreview(clientReport(c,ca),fn,'HTML для клиента');
 }
-function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="previewgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=previewitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
+function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm)gm.value=(it[i]?.open||it[i]?.blind)?(it[i]?.gm||0):0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="previewgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=previewitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(silent=false){
   let c=client(),ca=curCalc();
   if(!c)return;
@@ -2089,7 +2164,7 @@ function productionTaskHtml(c,ca){
     <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт. '+(zipperCount(x)===2?'отступ от края ':'шаг ')+zipperDistance(x)+' см'):'нет'}</td>
-    <td>${x.open?grommetInfoText(x):'нет'}</td>
+    <td>${(x.open||x.blind)?grommetInfoText(x):'нет'}</td>
     <td>${x.door?'да, без коэф.':'нет'}</td>
     <td>${x.inst?'да':'нет'}</td>
   </tr>`).join('');
@@ -2283,7 +2358,7 @@ function contractActHtml(c,ca){
     <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт.'):'нет'}</td>
-    <td>${x.open?('люверсы '+grommetQtyText(x)):''}${x.open&&x.door?' / ':''}${x.door?'дверь':''}</td>
+    <td>${(x.open||x.blind)?('люверсы '+grommetQtyText(x)):''}${(x.open||x.blind)&&x.door?' / ':''}${x.door?'дверь':''}</td>
   </tr>`).join('');
 
   const totalWords='____________________________________________________________';
