@@ -462,7 +462,7 @@ function scrapCalc(it,pr){
   return{rollArea,cutArea,scrapArea,scrapCost,purchaseM2};
 }
 function grommetSegments(cm){
-  // Количество промежутков: шаг не более 40 см, по возможности 3–4 промежутка.
+  // Базовые промежутки: шаг не более 40 см, по возможности 3–4 промежутка.
   const len=Math.max(0,n(cm));
   if(!len)return 0;
   const minSeg=Math.ceil(len/40);
@@ -475,18 +475,45 @@ function sideGrommetCount(cm){const seg=grommetSegments(cm);return Math.max(0,se
 function topRoundGrommetCount(cm){return sideGrommetCount(cm);}
 function bottomGrommetCount(cm){const len=Math.max(0,n(cm));if(!len)return 0;return len>160?4:3;}
 function bottomGrommetStepCm(cm){const cnt=bottomGrommetCount(cm);return cnt>1?Math.max(0,n(cm))/(cnt-1):0;}
+
+function openSideOvalCount(cm){
+  const len=Math.max(0,n(cm));
+  if(!len)return 0;
+  // Для открывающихся окон: если вертикальная сторона ≤80 см — один овал 42×22 по центру высоты.
+  if(len<=80)return 1;
+  return sideGrommetCount(len);
+}
+function openSideOvalStepCm(cm){
+  const len=Math.max(0,n(cm));
+  const cnt=openSideOvalCount(len);
+  if(!cnt)return 0;
+  return cnt===1 ? 0 : len/(cnt+1);
+}
+function blindSideSegments(cm){
+  const len=Math.max(0,n(cm));
+  if(!len)return 0;
+  // Для глухих окон: люверс 10 мм сверху и ниже равными отрезками.
+  // Пример: 80 см → 3 отрезка по 26,66 см → верхний люверс + 2 ниже.
+  return Math.max(3,Math.ceil(len/40));
+}
+function blindSideRoundCount(cm){return blindSideSegments(cm);}
+function blindSideStepCm(cm){
+  const seg=blindSideSegments(cm);
+  return seg?Math.max(0,n(cm))/seg:0;
+}
+
 function isBlindGrommetWindow(x){return !!(x&&(x.blind||x.fixed||x.closed||x.deaf))&&!x.open;}
 function isOpenGrommetWindow(x){return !!(x&&x.open);}
 function roundGrommetCountForWindow(x){
   if(!x)return 0;
   const top=topRoundGrommetCount(x.w);
   if(isOpenGrommetWindow(x))return top;
-  if(isBlindGrommetWindow(x))return top+sideGrommetCount(x.h1)+sideGrommetCount(x.h2)+bottomGrommetCount(x.w);
+  if(isBlindGrommetWindow(x))return top+blindSideRoundCount(x.h1)+blindSideRoundCount(x.h2)+bottomGrommetCount(x.w);
   return 0;
 }
 function ovalGrommetCountForWindow(x){
   if(!isOpenGrommetWindow(x))return 0;
-  return sideGrommetCount(x.h1)+sideGrommetCount(x.h2)+bottomGrommetCount(x.w);
+  return openSideOvalCount(x.h1)+openSideOvalCount(x.h2)+bottomGrommetCount(x.w);
 }
 function grommetCountForWindow(x){return roundGrommetCountForWindow(x)+ovalGrommetCountForWindow(x);}
 function grommetCountPerWindow(x){if(!(isOpenGrommetWindow(x)||isBlindGrommetWindow(x)))return 0;return ni(x.gm ?? x.grommetQty ?? x.grommetsQty ?? x.grommetCount) || grommetCountForWindow(x);}
@@ -496,11 +523,13 @@ function ovalGrommetTotalQty(x){return ovalGrommetCountForWindow(x)*Math.max(1,n
 function grommetInfoText(x){
   if(isOpenGrommetWindow(x)){
     const round=roundGrommetCountForWindow(x),oval=ovalGrommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));
-    return `Открывающееся: сверху люверсы 10 мм ${round} шт./окно; по бокам и снизу овальные люверсы ${oval} шт./окно${qty>1?', всего '+total+' шт.':''}.`;
+    const lRule=x.h1<=80?'слева 1 овал по центру':'слева шаг '+fmtCm(openSideOvalStepCm(x.h1))+' см';
+    const rRule=x.h2<=80?'справа 1 овал по центру':'справа шаг '+fmtCm(openSideOvalStepCm(x.h2))+' см';
+    return `Открывающееся: сверху люверсы 10 мм ${round} шт./окно; овал 42×22 по бокам и снизу ${oval} шт./окно (${lRule}, ${rRule})${qty>1?', всего '+total+' шт.':''}.`;
   }
   if(isBlindGrommetWindow(x)){
     const round=roundGrommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));
-    return `Глухое: люверсы 10 мм по периметру окантовки, сверху ${topRoundGrommetCount(x.w)} шт., всего ${round} шт./окно${qty>1?', всего '+total+' шт.':''}.`;
+    return `Глухое: люверсы 10 мм по периметру окантовки; шаг слева ${fmtCm(blindSideStepCm(x.h1))} см, справа ${fmtCm(blindSideStepCm(x.h2))} см, всего ${round} шт./окно${qty>1?', всего '+total+' шт.':''}.`;
   }
   return '';
 }
@@ -1264,19 +1293,36 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
           const p=topRoundPoint(i/topSeg);
           addRound(p.x,p.y);
         }
-        const leftSeg=grommetSegments(height1Cm);
-        for(let i=1;i<leftSeg;i++){
-          const t=i/leftSeg;
-          const y=topLeftY+(bottomY-topLeftY)*t;
-          const x=innerX-Math.max(3.2, edgeSides.left*scale*0.55);
-          if(mode==='blind')addRound(x,y);else addOval(x,y,'left');
-        }
-        const rightSeg=grommetSegments(height2Cm);
-        for(let i=1;i<rightSeg;i++){
-          const t=i/rightSeg;
-          const y=topRightY+(bottomY-topRightY)*t;
-          const x=innerRightX+Math.max(3.2, edgeSides.right*scale*0.55);
-          if(mode==='blind')addRound(x,y);else addOval(x,y,'right');
+        if(mode==='blind'){
+          const leftSeg=blindSideSegments(height1Cm);
+          for(let i=0;i<leftSeg;i++){
+            const t=i/leftSeg;
+            const y=topLeftY+(bottomY-topLeftY)*t;
+            const x=innerX-Math.max(3.2, edgeSides.left*scale*0.55);
+            addRound(x,y);
+          }
+          const rightSeg=blindSideSegments(height2Cm);
+          for(let i=0;i<rightSeg;i++){
+            const t=i/rightSeg;
+            const y=topRightY+(bottomY-topRightY)*t;
+            const x=innerRightX+Math.max(3.2, edgeSides.right*scale*0.55);
+            addRound(x,y);
+          }
+        }else{
+          const leftCnt=openSideOvalCount(height1Cm);
+          for(let i=0;i<leftCnt;i++){
+            const t=leftCnt===1?0.5:(i+1)/(leftCnt+1);
+            const y=topLeftY+(bottomY-topLeftY)*t;
+            const x=innerX-Math.max(3.2, edgeSides.left*scale*0.55);
+            addOval(x,y,'left');
+          }
+          const rightCnt=openSideOvalCount(height2Cm);
+          for(let i=0;i<rightCnt;i++){
+            const t=rightCnt===1?0.5:(i+1)/(rightCnt+1);
+            const y=topRightY+(bottomY-topRightY)*t;
+            const x=innerRightX+Math.max(3.2, edgeSides.right*scale*0.55);
+            addOval(x,y,'right');
+          }
         }
         const bottomCnt=bottomGrommetCount(widthCm);
         for(let i=0;i<bottomCnt;i++){
@@ -1288,7 +1334,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         if(grommetLabelMode==='simple'){
           grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+22}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${mode==='blind'?'10 мм по периметру':'верх 10 мм, бока/низ овал'}</text>`;
         }else if(grommetLabelMode!=='none'){
-          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+22}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">${mode==='blind'?'глухое: 10 мм по периметру':'открывается: верх 10 мм; бока/низ овал'}</text>`;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+22}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">${mode==='blind'?'глухое: 10 мм по периметру':'открывается: верх 10 мм; ≤80 см — 1 овал по центру'}</text>`;
         }
       }
 
