@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CRM мягкие окна Supabase</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#111827}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#111827;color:#fff;padding:18px}.brand{font-size:24px;font-weight:900;line-height:1.1;margin-bottom:20px}.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px;border-radius:10px;margin:3px 0;font-size:15px}.nav button.active,.nav button:hover{background:#1f2937;color:#fff}.main{padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}h1{margin:0;font-size:28px}h2{font-size:20px;margin:18px 0 10px}.panel,.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 22px #0f172a10;margin-bottom:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card .l{color:#667085;font-size:13px}.card .v{font-size:26px;font-weight:900;margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#e5e7eb;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.btn.p{background:#1f6feb;color:#fff}.btn.g{background:#16a34a;color:#fff}.btn.r{background:#dc2626;color:#fff}.btn.o{background:#f59e0b;color:#fff}.btn.d{background:#111827;color:#fff}.btn.s{font-size:12px;padding:7px 9px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:13px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:9px;font-size:14px}textarea{min-height:70px}.hide{display:none!important}.tw{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;font-size:14px;text-align:left}th{background:#f9fafb}.status{border-radius:999px;background:#eef2ff;color:#3730a3;padding:5px 8px;font-weight:800;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:11px}.box span{font-size:13px;color:#667085}.box b{display:block;font-size:20px;margin-top:4px}.muted{color:#667085;font-size:13px}.bar{border-radius:12px;padding:10px 12px;margin-bottom:14px;font-weight:700}.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}.warn{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}.hist{display:flex;flex-direction:column;gap:8px}.hi{border-left:4px solid #1f6feb;background:#f9fafb;border-radius:10px;padding:10px}.hi .date{color:#667085;font-size:12px;margin-bottom:4px}.calc input[type=number]{min-width:72px}.pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:14px}.pdfitem{flex:0 1 360px;max-width:420px;min-width:300px}.pdfitem svg{width:100%;height:auto;display:block}.pdfgrid.one{justify-content:flex-start}.pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}.scheme-title{font-weight:900;text-align:left;font-size:13px;margin:0 0 2px}.scheme-meta{font-size:10px;line-height:1.2;color:#1f2933;font-weight:600;margin:0 0 3px}@media(max-width:850px){.pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{min-width:130px}.top{flex-direction:column;align-items:flex-start}.main{padding:12px}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#111827}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{background:#111827;color:#fff;padding:18px}.brand{font-size:24px;font-weight:900;line-height:1.1;margin-bottom:20px}.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px;border-radius:10px;margin:3px 0;font-size:15px}.nav button.active,.nav button:hover{background:#1f2937;color:#fff}.main{padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}h1{margin:0;font-size:28px}h2{font-size:20px;margin:18px 0 10px}.panel,.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 22px #0f172a10;margin-bottom:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card .l{color:#667085;font-size:13px}.card .v{font-size:26px;font-weight:900;margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#e5e7eb;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.btn.p{background:#1f6feb;color:#fff}.btn.g{background:#16a34a;color:#fff}.btn.r{background:#dc2626;color:#fff}.btn.o{background:#f59e0b;color:#fff}.btn.d{background:#111827;color:#fff}.btn.s{font-size:12px;padding:7px 9px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:13px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:9px;font-size:14px}textarea{min-height:70px}.hide{display:none!important}.tw{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}td,th{border-bottom:1px solid #e5e7eb;padding:8px;font-size:14px;text-align:left}th{background:#f9fafb}.status{border-radius:999px;background:#eef2ff;color:#3730a3;padding:5px 8px;font-weight:800;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:11px}.box span{font-size:13px;color:#667085}.box b{display:block;font-size:20px;margin-top:4px}.muted{color:#667085;font-size:13px}.bar{border-radius:12px;padding:10px 12px;margin-bottom:14px;font-weight:700}.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}.warn{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}.hist{display:flex;flex-direction:column;gap:8px}.hi{border-left:4px solid #1f6feb;background:#f9fafb;border-radius:10px;padding:10px}.hi .date{color:#667085;font-size:12px;margin-bottom:4px}.calc input[type=number]{min-width:72px}.pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:14px}.pdfitem{flex:0 1 360px;max-width:420px;min-width:300px}.pdfitem svg{width:100%;height:auto;display:block}.edgeEditor{display:grid;grid-template-rows:auto auto auto;gap:6px;margin-top:6px}.edgeEditor .edgeMiddle{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:6px;align-items:center}.edgeEditor .edgeSide{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px}.edgeEditor .edgeSide label{font-size:10px;margin:0 0 3px;color:#9a3412}.edgeEditor .edgeSide input{padding:5px;border-radius:8px;font-size:12px;text-align:center}.edgeEditor .edgeTop,.edgeEditor .edgeBottom{max-width:120px;margin:0 auto}.edgeEditor .edgeLeft,.edgeEditor .edgeRight{align-self:center}.edgeEditor .edgeSvg{min-width:0}.edgeEditor .edgeHint{text-align:center;font-size:10px;color:#9a3412;font-weight:700}@media(max-width:700px){.edgeEditor .edgeMiddle{grid-template-columns:58px minmax(0,1fr) 58px}.edgeEditor .edgeSide{padding:4px}.edgeEditor .edgeSide input{padding:4px;font-size:11px}}.pdfgrid.one{justify-content:flex-start}.pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}.scheme-title{font-weight:900;text-align:left;font-size:13px;margin:0 0 2px}.scheme-meta{font-size:10px;line-height:1.2;color:#1f2933;font-weight:600;margin:0 0 3px}@media(max-width:850px){.pdfitem,.pdfgrid.one .pdfitem{flex:0 0 100%;max-width:100%;min-width:0}}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{min-width:130px}.top{flex-direction:column;align-items:flex-start}.main{padding:12px}}
 .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.filecard{border:1px solid var(--b);border-radius:14px;padding:8px;background:#fff}.filecard img{width:100%;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--b)}.filecard a{font-size:12px;word-break:break-word}.scrap-compact{border:1px solid #f59e0b;background:#fff7ed;border-radius:14px;padding:8px 10px;margin:10px 0}.scrap-compact summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900}.scrap-compact summary span{display:flex;align-items:center;gap:8px}.scrap-compact input{width:16px;height:16px}.scrap-compact summary b{font-size:16px}.scrap-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.scrap-mini div{border:1px solid var(--b);border-radius:10px;padding:6px;background:#fff}.scrap-mini span{display:block;font-size:11px;color:var(--mut)}.scrap-mini b{font-size:13px}@media(max-width:700px){.scrap-mini{grid-template-columns:repeat(2,1fr)}}
 .statusDash{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .statusCol{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:12px;min-height:120px;display:flex;flex-direction:column}
@@ -331,13 +331,17 @@ function addRowObj(o){
   let gmVal = o.gm ?? o.grommetQty ?? o.grommetsQty ?? o.grommetCount ?? 0;
   let ewVal = o.ew ?? o.edgeWidthCm ?? o.edgingWidthCm ?? o.cantWidthCm ?? o.kantWidthCm ?? o.edgeVisibleCm ?? 0;
   if(!n(ewVal)) ewVal = (n(document.getElementById('p_off')?.value) || n(set?.off) || 4.5) + 0.5;
+  let etVal = o.et ?? o.edgeTopCm ?? o.topEdgeCm ?? o.edgeSidesCm?.top ?? ewVal;
+  let ebVal = o.eb ?? o.edgeBottomCm ?? o.bottomEdgeCm ?? o.edgeSidesCm?.bottom ?? ewVal;
+  let elVal = o.el ?? o.edgeLeftCm ?? o.leftEdgeCm ?? o.edgeSidesCm?.left ?? ewVal;
+  let erVal = o.er ?? o.edgeRightCm ?? o.rightEdgeCm ?? o.edgeSidesCm?.right ?? ewVal;
   let tr=document.createElement('tr');
   tr.innerHTML=`<td class=rownum></td><td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
   <td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td>
   <td><input class=h2 type=number value="${o.h2??o.height2Cm??''}"></td>
   <td><input class=qty type=number value="${o.qty??1}"></td>
   <td><input class=ed type=checkbox ${o.ed??o.edging?'checked':''}></td>
-  <td><input class=ew type=number min=0.5 step=0.1 value="${ewVal}" title="Видимая ширина канта по заявке, см. Для расхода со склада CRM умножает на 2: кант 5 см = полоса 10 см."></td>
+  <td><input class=ew type=number min=0.5 step=0.1 value="${ewVal}" title="Общая видимая ширина канта, см. Если изменить здесь — значение применится ко всем сторонам. В превью можно задать стороны отдельно."><input class=et type=hidden value="${etVal}"><input class=eb type=hidden value="${ebVal}"><input class=el type=hidden value="${elVal}"><input class=er type=hidden value="${erVal}"></td>
   <td><input class=straps type=number value="${o.straps??0}"></td>
   <td><input class=z type=checkbox ${o.z??o.zipper?'checked':''}></td>
   <td><input class=zq type=number min=1 value="${zqVal}"></td>
@@ -352,6 +356,15 @@ function addRowObj(o){
   rows.appendChild(tr);
   updateWindowNumbers();
   tr.querySelectorAll('input').forEach(i=>{i.oninput=recalcAndAutosave;i.onchange=recalcAndAutosave});
+  const ewInput=tr.querySelector('.ew');
+  if(ewInput){
+    const syncAllEdges=()=>{
+      ['et','eb','el','er'].forEach(cls=>{const el=tr.querySelector('.'+cls);if(el)el.value=ewInput.value});
+      recalcAndAutosave();
+    };
+    ewInput.oninput=syncAllEdges;
+    ewInput.onchange=syncAllEdges;
+  }
 }
 function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5,scraps:!!document.getElementById('p_scraps')?.checked}}function items(){
   return[...rows.querySelectorAll('tr')].map((tr,i)=>{
@@ -367,8 +380,13 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
       qty:ni(tr.querySelector('.qty').value),
       ed:tr.querySelector('.ed').checked,
       ew:0,
+      et:0,
+      eb:0,
+      el:0,
+      er:0,
       edgeWidthCm:0,
       edgeStripWidthCm:0,
+      edgeSidesCm:{top:0,bottom:0,left:0,right:0},
       straps:ni(tr.querySelector('.straps').value),
       z:hasZ,
       zq:zq,
@@ -380,8 +398,14 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
       inst:tr.querySelector('.inst').checked
     };
     item.ew = item.ed ? (n(tr.querySelector('.ew')?.value) || edgingVisibleWidthCm(prices())) : 0;
+    const defEdge=item.ew || edgingVisibleWidthCm(prices());
+    item.et = item.ed ? (n(tr.querySelector('.et')?.value) || defEdge) : 0;
+    item.eb = item.ed ? (n(tr.querySelector('.eb')?.value) || defEdge) : 0;
+    item.el = item.ed ? (n(tr.querySelector('.el')?.value) || defEdge) : 0;
+    item.er = item.ed ? (n(tr.querySelector('.er')?.value) || defEdge) : 0;
     item.edgeWidthCm = item.ew;
     item.edgeStripWidthCm = item.ew ? item.ew * 2 : 0;
+    item.edgeSidesCm = {top:item.et,bottom:item.eb,left:item.el,right:item.er};
     item.gm = item.open ? (ni(tr.querySelector('.gm')?.value) || grommetCountForWindow(item)) : 0;
     item.grommetQty = item.gm;
     return item;
@@ -798,6 +822,44 @@ function itemEdgeStripWidthCm(x,pr){
   const visible=itemEdgeVisibleCm(x,pr);
   return visible>0?visible*2:0;
 }
+function itemEdgeSidesCm(x,pr){
+  const def=itemEdgeVisibleCm(x,pr);
+  if(!x||!x.ed)return {top:0,bottom:0,left:0,right:0};
+  const src=x.edgeSidesCm||{};
+  return {
+    top:n(x.et ?? x.edgeTopCm ?? x.topEdgeCm ?? src.top) || def,
+    bottom:n(x.eb ?? x.edgeBottomCm ?? x.bottomEdgeCm ?? src.bottom) || def,
+    left:n(x.el ?? x.edgeLeftCm ?? x.leftEdgeCm ?? src.left) || def,
+    right:n(x.er ?? x.edgeRightCm ?? x.rightEdgeCm ?? src.right) || def
+  };
+}
+function edgeSideLabel(x,pr){
+  if(!x||!x.ed)return 'нет';
+  const s=itemEdgeSidesCm(x,pr);
+  if(Math.abs(s.top-s.bottom)<0.01&&Math.abs(s.top-s.left)<0.01&&Math.abs(s.top-s.right)<0.01)return fmtCm(s.top)+' см';
+  return 'верх '+fmtCm(s.top)+' / низ '+fmtCm(s.bottom)+' / лево '+fmtCm(s.left)+' / право '+fmtCm(s.right)+' см';
+}
+function edgeSideStripLabel(x,pr){
+  if(!x||!x.ed)return 'нет';
+  const s=itemEdgeSidesCm(x,pr);
+  return 'полоса: верх '+fmtCm(s.top*2)+' / низ '+fmtCm(s.bottom*2)+' / лево '+fmtCm(s.left*2)+' / право '+fmtCm(s.right*2)+' см';
+}
+function setEdgeSideWidth(rowIndex,side,value){
+  const tr=[...rows.querySelectorAll('tr')][rowIndex];
+  if(!tr)return;
+  const map={top:'et',bottom:'eb',left:'el',right:'er'};
+  const cls=map[side];
+  if(!cls)return;
+  const hidden=tr.querySelector('.'+cls);
+  if(hidden)hidden.value=n(value)||0;
+  recalcAndAutosave();
+}
+function edgeSideEditorHtml(x,rowIndex,pr){
+  if(!x||!x.ed)return '';
+  const s=itemEdgeSidesCm(x,pr);
+  const input=(side,label,val)=>`<div class="edgeSide edge${label}"><label>${label}</label><input type="number" step="0.1" min="0" value="${fmtCm(val).replace(',','.')}" onchange="setEdgeSideWidth(${rowIndex},'${side}',this.value)" title="Видимая ширина канта ${label.toLowerCase()}, см. Расход полосы = значение × 2."></div>`;
+  return {top:input('top','Верх',s.top),bottom:input('bottom','Низ',s.bottom),left:input('left','Лево',s.left),right:input('right','Право',s.right)};
+}
 function fmtCm(v){
   const x=Math.round(n(v)*10)/10;
   return Number.isInteger(x) ? String(x) : String(x).replace('.', ',');
@@ -834,11 +896,22 @@ function mats(it,pr){
       const off=n(pr.off)||4.5;
       const opening=cutOpeningPoints(x);
       const cut=offsetPolyCm(opening,off);
-      const visible=itemEdgeVisibleCm(x,pr);
-      const strip=itemEdgeStripWidthCm(x,pr);
-      const key=fmtCm(strip)+' см';
-      if(!edgeGroups[key])edgeGroups[key]={strip,visible,need:0};
-      edgeGroups[key].need+=(polyPerimeterCm(cut)/100)*x.qty*(x.z?2.5:1);
+      const sides=itemEdgeSidesCm(x,pr);
+      const coef=x.z?2.5:1;
+      const sideList=[
+        {name:'верх', visible:sides.top, a:cut[0], b:cut[1]},
+        {name:'право', visible:sides.right, a:cut[1], b:cut[2]},
+        {name:'низ', visible:sides.bottom, a:cut[2], b:cut[3]},
+        {name:'лево', visible:sides.left, a:cut[3], b:cut[0]}
+      ];
+      sideList.forEach(s=>{
+        const strip=s.visible*2;
+        const key=fmtCm(strip)+' см';
+        const len=Math.sqrt((s.b.x-s.a.x)**2+(s.b.y-s.a.y)**2)/100;
+        if(!edgeGroups[key])edgeGroups[key]={strip,visible:s.visible,need:0,sides:new Set()};
+        edgeGroups[key].need+=len*x.qty*coef;
+        edgeGroups[key].sides.add(s.name);
+      });
     }
     if(x.open){
       grommetNeed += grommetTotalQty(x);
@@ -868,7 +941,7 @@ function mats(it,pr){
       need:en,
       rolls:er,
       rest:er?er*50-en:0,
-      comment:'Видимый кант '+fmtCm(g.visible)+' см → отрезаемая полоса '+fmtCm(g.strip)+' см. Расход: внешний контур резки × количество × коэффициент молнии × запас 10%.'
+      comment:'Видимый кант '+fmtCm(g.visible)+' см → отрезаемая полоса '+fmtCm(g.strip)+' см. Стороны: '+[...(g.sides||[])].join(', ')+'. Расход: длина стороны по внешнему контуру резки × количество × коэффициент молнии × запас 10%.'
     };
   }).sort((a,b)=>parseFloat(a.width.replace(',','.'))-parseFloat(b.width.replace(',','.')));
   const grommetRows=grommetNeed>0?[{material:'Люверсы 10 мм',width:'шт',need:grommetNeed,rolls:0,rest:0,comment:'Расход по столбцу «Кол-во люверсов» × количество окон. Если в строке 0 — считается автоматически: верхние углы без люверсов, бока до 40 см, низ 3–4 шт.'}]:[];
@@ -928,7 +1001,7 @@ async function ensureDefaultStockPositions(){
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
 function matsHtml(m){let a=[...(m.rollRows||[])];if(m.edgingRows&&m.edgingRows.length)a.push(...m.edgingRows);else if(m.edgingRow&&m.edgingRow.need)a.push(m.edgingRow);if(m.grommetRows&&m.grommetRows.length)a.push(...m.grommetRows);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
-function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets, grommetLabelMode) {
+function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets, grommetLabelMode, edgeSidesCm) {
       grommetLabelMode = grommetLabelMode || 'detail';
       const svgWidth = 360, svgHeight = 320, maxRectWidth = 220, maxRectHeight = 170;
       const maxHeightCm = Math.max(height1Cm, height2Cm);
@@ -973,7 +1046,14 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         });
       }
 
-      const outer = offsetPoly(inner, edgingWidthCm);
+      const edgeSides={
+        top:n(edgeSidesCm?.top)||n(edgingWidthCm)||0,
+        bottom:n(edgeSidesCm?.bottom)||n(edgingWidthCm)||0,
+        left:n(edgeSidesCm?.left)||n(edgingWidthCm)||0,
+        right:n(edgeSidesCm?.right)||n(edgingWidthCm)||0
+      };
+      const maxEdge=Math.max(edgeSides.top,edgeSides.bottom,edgeSides.left,edgeSides.right,n(edgingWidthCm)||0);
+      const outer = offsetPoly(inner, maxEdge);
       const all = inner.concat(outer);
       const minX = Math.min(...all.map(p=>p.x)), maxX = Math.max(...all.map(p=>p.x));
       const minY = Math.min(...all.map(p=>p.y)), maxY = Math.max(...all.map(p=>p.y));
@@ -1001,6 +1081,13 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       const outerX = Math.min(...outer.map(p=>sx(p.x)));
       const outerRightX = Math.max(...outer.map(p=>sx(p.x)));
       const outerTopY = Math.min(...outer.map(p=>sy(p.y)));
+
+      const edgeBandElements = edgeSides.top+edgeSides.bottom+edgeSides.left+edgeSides.right>0 ? `
+          <line x1="${innerX}" y1="${topLeftY}" x2="${innerRightX}" y2="${topRightY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.top*scale*2)}" stroke-linecap="butt"/>
+          <line x1="${innerRightX}" y1="${topRightY}" x2="${innerRightX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.right*scale*2)}" stroke-linecap="butt"/>
+          <line x1="${innerRightX}" y1="${bottomY}" x2="${innerX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.bottom*scale*2)}" stroke-linecap="butt"/>
+          <line x1="${innerX}" y1="${bottomY}" x2="${innerX}" y2="${topLeftY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.left*scale*2)}" stroke-linecap="butt"/>
+        ` : '';
 
       let strapElements = '';
       if (straps > 0) {
@@ -1099,7 +1186,8 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
 
       return `
         <svg width="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
-          <polygon points="${pts(outer)}" fill="#f7d9c4" stroke="#8b5a2b" stroke-width="1"/>
+          <polygon points="${pts(outer)}" fill="none" stroke="#8b5a2b" stroke-width="0.8" stroke-dasharray="3 2"/>
+          ${edgeBandElements}
           <polygon points="${pts(inner)}" fill="#dfeeff" stroke="#1f6feb" stroke-width="1"/>
           <line x1="${innerX}" y1="${widthY}" x2="${innerRightX}" y2="${widthY}" stroke="#425466" stroke-width="0.9"/>
           <circle cx="${innerX}" cy="${widthY}" r="1.6" fill="#425466"/><circle cx="${innerRightX}" cy="${widthY}" r="1.6" fill="#425466"/>
@@ -1118,7 +1206,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
 
     function draw(x,i,pr){
   pr = pr || (typeof prices === 'function' ? prices() : set || {});
-  const edgingWidth = itemEdgeVisibleCm(x,pr)||edgingVisibleWidthCm(pr);
+  const edgingWidth = x.ed ? (itemEdgeVisibleCm(x,pr)||edgingVisibleWidthCm(pr)) : 0;
   const straps = ni(x.straps);
   const hasZipper = !!x.z;
   const zipperCm = hasZipper ? n(x.zc) : 0;
@@ -1138,14 +1226,19 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
     x.open ? grommetInfoText(x) : '',
     x.open ? 'Открывание на люверсах: +60% к изделию, монтаж без наценки' : '',
     x.door ? 'Дверь: отмечена, без отдельного коэффициента' : '',
-    x.ed ? `Кант: ${fmtCm(edgingWidth)} см (полоса ${fmtCm(edgingWidth*2)} см)` : 'Кант: нет'
+    x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
-  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
-    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open);
+  const edgeSides=itemEdgeSidesCm(x,pr);
+  const svg=makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, undefined, edgeSides);
+  if(arguments[3]&&x.ed){
+    const ed=edgeSideEditorHtml(x,arguments[4]??(i-1),pr);
+    return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div><div class="edgeEditor"><div class="edgeHint">Ширина видимого канта по сторонам, см</div>${ed.top}<div class="edgeMiddle">${ed.left}<div class="edgeSvg">${svg}</div>${ed.right}</div>${ed.bottom}</div>`;
+  }
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` + svg;
 }
 function drawClient(x,i,pr){
   pr = pr || (typeof prices === 'function' ? prices() : set || {});
-  const edgingWidth = itemEdgeVisibleCm(x,pr)||edgingVisibleWidthCm(pr);
+  const edgingWidth = x.ed ? (itemEdgeVisibleCm(x,pr)||edgingVisibleWidthCm(pr)) : 0;
   const straps = ni(x.straps);
   const hasZipper = !!x.z;
   const zipperCm = hasZipper ? n(x.zc) : 0;
@@ -1158,10 +1251,10 @@ function drawClient(x,i,pr){
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
     `Люверсы: ${grommetClientText(x)}`,
     x.door ? 'Дверь: да' : '',
-    x.ed ? `Кант: ${fmtCm(edgingWidth)} см (полоса ${fmtCm(edgingWidth*2)} см)` : 'Кант: нет'
+    x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
-    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none');
+    makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none', itemEdgeSidesCm(x,pr));
 }
 function report(c,ca){
   const materialRows=[...(ca.materials.rollRows||[])];
@@ -1193,7 +1286,7 @@ function report(c,ca){
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
       <div>Проём: ${x.w} × ${x.h1}/${x.h2} см</div>
-      <div>Кант: ${x.ed?fmtCm(itemEdgeVisibleCm(x,ca.prices))+' см':'нет'} · Ремни: ${x.straps} · Люверсы: ${grommetQtyText(x)} · Дверь: ${x.door?'да':'нет'}</div>
+      <div>Кант: ${edgeSideLabel(x,ca.prices)} · Ремни: ${x.straps} · Люверсы: ${grommetQtyText(x)} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
     </div>`).join('');
 
@@ -1226,7 +1319,7 @@ function report(c,ca){
   .mgrid span{color:#6b7280}
   .pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:12px}
   .pdfitem{flex:0 1 360px;max-width:420px;min-width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px}
-  .pdfitem svg{width:100%;height:auto;display:block}
+  .pdfitem svg{width:100%;height:auto;display:block}.edgeEditor{display:grid;grid-template-rows:auto auto auto;gap:6px;margin-top:6px}.edgeEditor .edgeMiddle{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:6px;align-items:center}.edgeEditor .edgeSide{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px}.edgeEditor .edgeSide label{font-size:10px;margin:0 0 3px;color:#9a3412}.edgeEditor .edgeSide input{padding:5px;border-radius:8px;font-size:12px;text-align:center}.edgeEditor .edgeTop,.edgeEditor .edgeBottom{max-width:120px;margin:0 auto}.edgeEditor .edgeLeft,.edgeEditor .edgeRight{align-self:center}.edgeEditor .edgeSvg{min-width:0}.edgeEditor .edgeHint{text-align:center;font-size:10px;color:#9a3412;font-weight:700}@media(max-width:700px){.edgeEditor .edgeMiddle{grid-template-columns:58px minmax(0,1fr) 58px}.edgeEditor .edgeSide{padding:4px}.edgeEditor .edgeSide input{padding:4px;font-size:11px}}
   .pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}
   .scheme-title{font-weight:900;text-align:left;font-size:14px;margin:0 0 2px}
   .scheme-meta{font-size:11px;line-height:1.25;color:#374151;font-weight:600;margin:0 0 5px}
@@ -1293,7 +1386,7 @@ function clientReport(c,ca){
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
       <div>Размер проёма: ${x.w} × ${x.h1}/${x.h2} см</div>
-      <div>Кант: ${x.ed?fmtCm(itemEdgeVisibleCm(x,ca.prices))+' см':'нет'} · Ремни: ${x.straps} · Люверсы: ${grommetClientText(x)} · Дверь: ${x.door?'да':'нет'}</div>
+      <div>Кант: ${edgeSideLabel(x,ca.prices)} · Ремни: ${x.straps} · Люверсы: ${grommetClientText(x)} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
       <div>Монтаж: ${x.inst?'да':'нет'}</div>
     </div>`).join('');
@@ -1323,7 +1416,7 @@ function clientReport(c,ca){
   .itemcard div{margin-top:4px}
   .pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:12px}
   .pdfitem{flex:0 1 360px;max-width:420px;min-width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px}
-  .pdfitem svg{width:100%;height:auto;display:block}
+  .pdfitem svg{width:100%;height:auto;display:block}.edgeEditor{display:grid;grid-template-rows:auto auto auto;gap:6px;margin-top:6px}.edgeEditor .edgeMiddle{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:6px;align-items:center}.edgeEditor .edgeSide{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px}.edgeEditor .edgeSide label{font-size:10px;margin:0 0 3px;color:#9a3412}.edgeEditor .edgeSide input{padding:5px;border-radius:8px;font-size:12px;text-align:center}.edgeEditor .edgeTop,.edgeEditor .edgeBottom{max-width:120px;margin:0 auto}.edgeEditor .edgeLeft,.edgeEditor .edgeRight{align-self:center}.edgeEditor .edgeSvg{min-width:0}.edgeEditor .edgeHint{text-align:center;font-size:10px;color:#9a3412;font-weight:700}@media(max-width:700px){.edgeEditor .edgeMiddle{grid-template-columns:58px minmax(0,1fr) 58px}.edgeEditor .edgeSide{padding:4px}.edgeEditor .edgeSide input{padding:4px;font-size:11px}}
   .pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}
   .scheme-title{font-weight:900;text-align:left;font-size:14px;margin:0 0 2px}
   .scheme-meta{font-size:11px;line-height:1.25;color:#374151;font-weight:600;margin:0 0 5px}
@@ -1385,7 +1478,7 @@ function downloadClientHtml(){
   let c=client(),ca=curCalc(),fn=safe('расчет_для_клиента_'+(c.address||c.name))+'.html';
   openHtmlPreview(clientReport(c,ca),fn,'HTML для клиента');
 }
-function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
+function recalc(){let pr=prices(),it=items(),to=totals(it,pr),ma=mats(it,pr);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm&&it[i]?.open&&!ni(gm.value))gm.value=it[i]?.gm||0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="pdfgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=pdfitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items();return{prices:pr,items:it,totals:totals(it,pr),materials:mats(it,pr)}}
 async function saveCalc(silent=false){
   let c=client(),ca=curCalc();
   if(!c)return;
@@ -1955,7 +2048,7 @@ function productionTaskHtml(c,ca){
     <td>${x.index}</td>
     <td>${x.w} × ${x.h1}/${x.h2} см</td>
     <td>${x.qty}</td>
-    <td>${x.ed?fmtCm(itemEdgeVisibleCm(x,ca.prices))+' см':'нет'}</td>
+    <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт. '+(zipperCount(x)===2?'отступ от края ':'шаг ')+zipperDistance(x)+' см'):'нет'}</td>
     <td>${x.open?grommetInfoText(x):'нет'}</td>
@@ -2149,7 +2242,7 @@ function contractActHtml(c,ca){
     <td>${x.index}</td>
     <td>${x.w} × ${x.h1}/${x.h2} см</td>
     <td>${x.qty}</td>
-    <td>${x.ed?fmtCm(itemEdgeVisibleCm(x,ca.prices))+' см':'нет'}</td>
+    <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
     <td>${x.z?('да, '+x.zc+' см × '+zipperCount(x)+' шт.'):'нет'}</td>
     <td>${x.open?('люверсы '+grommetQtyText(x)):''}${x.open&&x.door?' / ':''}${x.door?'дверь':''}</td>
