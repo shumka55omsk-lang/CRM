@@ -1082,10 +1082,10 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       const outerTopY = Math.min(...outer.map(p=>sy(p.y)));
 
       const edgeBandElements = edgeSides.top+edgeSides.bottom+edgeSides.left+edgeSides.right>0 ? `
-          <line x1="${innerX}" y1="${topLeftY}" x2="${innerRightX}" y2="${topRightY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.top*scale*2)}" stroke-linecap="butt"/>
-          <line x1="${innerRightX}" y1="${topRightY}" x2="${innerRightX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.right*scale*2)}" stroke-linecap="butt"/>
-          <line x1="${innerRightX}" y1="${bottomY}" x2="${innerX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.bottom*scale*2)}" stroke-linecap="butt"/>
-          <line x1="${innerX}" y1="${bottomY}" x2="${innerX}" y2="${topLeftY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.left*scale*2)}" stroke-linecap="butt"/>
+          <line x1="${innerX}" y1="${topLeftY}" x2="${innerRightX}" y2="${topRightY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.top*scale*2)}" stroke-linecap="square"/>
+          <line x1="${innerRightX}" y1="${topRightY}" x2="${innerRightX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.right*scale*2)}" stroke-linecap="square"/>
+          <line x1="${innerRightX}" y1="${bottomY}" x2="${innerX}" y2="${bottomY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.bottom*scale*2)}" stroke-linecap="square"/>
+          <line x1="${innerX}" y1="${bottomY}" x2="${innerX}" y2="${topLeftY}" stroke="#f7d9c4" stroke-width="${Math.max(0,edgeSides.left*scale*2)}" stroke-linecap="square"/>
         ` : '';
 
       let strapElements = '';
@@ -1254,7 +1254,7 @@ function drawClient(x,i,pr){
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
     `Люверсы: ${grommetClientText(x)}`,
     x.door ? 'Дверь: да' : '',
-    x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
+    x.ed ? `Кант: ${edgeSideLabel(x,pr)}` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
   return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, !!x.open, 'none', itemEdgeSidesCm(x,pr));
