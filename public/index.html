@@ -1083,7 +1083,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       const outerTopY = Math.min(...outer.map(p=>sy(p.y)));
 
       function bandPoly(points){
-        return `<polygon points="${points.map(p=>sx(p.x)+','+sy(p.y)).join(' ')}" fill="#f7d9c4" stroke="none"/>`;
+        return `<polygon points="${points.map(p=>sx(p.x)+','+sy(p.y)).join(' ')}" fill="#a86f3f" stroke="none"/>`;
       }
       let edgeBandElements = '';
       if(edgeSides.top>0||edgeSides.bottom>0||edgeSides.left>0||edgeSides.right>0){
@@ -1110,8 +1110,11 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         const spacing = (innerRightX - innerX) / (straps + 1);
         for (let i=1;i<=straps;i++) {
           const cx = innerX + spacing*i;
-          const cy = topLeftY + (topRightY-topLeftY)*(i/(straps+1));
-          strapElements += `<circle cx="${cx}" cy="${cy}" r="3" fill="#c84d3a" stroke="#9b3425" stroke-width="0.7"/>`;
+          const topEdgeY = topLeftY + (topRightY-topLeftY)*(i/(straps+1));
+          const strapTop = topEdgeY - 2;
+          const strapBottom = topEdgeY + 13;
+          strapElements += `<line x1="${cx}" y1="${strapTop}" x2="${cx}" y2="${strapBottom}" stroke="#6f3d20" stroke-width="3.1" stroke-linecap="round"/>`;
+          strapElements += `<line x1="${cx}" y1="${strapTop+1.4}" x2="${cx}" y2="${strapBottom-1.6}" stroke="#c78a52" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>`;
         }
       }
 
@@ -1174,6 +1177,9 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
       let grommetElements = '';
       if (hasGrommets) {
         const seen = new Set();
+        const leftOffsetPx = Math.max(3.2, edgeSides.left * scale * 0.55);
+        const rightOffsetPx = Math.max(3.2, edgeSides.right * scale * 0.55);
+        const bottomOffsetPx = Math.max(3.2, edgeSides.bottom * scale * 0.55);
         function addGrommet(px,py){
           const key=Math.round(px)+'_'+Math.round(py);
           if(seen.has(key))return;
@@ -1182,16 +1188,25 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
           grommetElements += `<circle cx="${px}" cy="${py}" r="1.35" fill="#111827"/>`;
         }
         const leftSeg=grommetSegments(height1Cm);
-        for(let i=1;i<leftSeg;i++){const t=i/leftSeg;addGrommet(innerX,topLeftY+(bottomY-topLeftY)*t);}
+        for(let i=1;i<leftSeg;i++){
+          const t=i/leftSeg;
+          addGrommet(innerX-leftOffsetPx, topLeftY+(bottomY-topLeftY)*t);
+        }
         const rightSeg=grommetSegments(height2Cm);
-        for(let i=1;i<rightSeg;i++){const t=i/rightSeg;addGrommet(innerRightX,topRightY+(bottomY-topRightY)*t);}
+        for(let i=1;i<rightSeg;i++){
+          const t=i/rightSeg;
+          addGrommet(innerRightX+rightOffsetPx, topRightY+(bottomY-topRightY)*t);
+        }
         const bottomCnt=bottomGrommetCount(widthCm);
-        for(let i=0;i<bottomCnt;i++){const t=bottomCnt===1?0.5:i/(bottomCnt-1);addGrommet(innerX+(innerRightX-innerX)*t,bottomY);}
+        for(let i=0;i<bottomCnt;i++){
+          const t=bottomCnt===1?0.5:i/(bottomCnt-1);
+          addGrommet(innerX+(innerRightX-innerX)*t, bottomY+bottomOffsetPx);
+        }
         if(grommetLabelMode==='simple'){
           const autoCnt=sideGrommetCount(height1Cm)+sideGrommetCount(height2Cm)+bottomCnt;
-          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${autoCnt} шт./окно</text>`;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18+Math.max(0,bottomOffsetPx-3)}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: ${autoCnt} шт./окно</text>`;
         }else if(grommetLabelMode!=='none'){
-          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока шаг ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
+          grommetElements += `<text x="${(innerX+innerRightX)/2}" y="${bottomY+18+Math.max(0,bottomOffsetPx-3)}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока шаг ${fmtCm(grommetStepCm(height1Cm))}/${fmtCm(grommetStepCm(height2Cm))} см</text>`;
         }
       }
 
