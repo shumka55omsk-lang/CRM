@@ -648,6 +648,12 @@ function rollWidthLabel(rollCm){
   if(!s.includes('.'))s+='.0';
   return s+' м';
 }
+function isPvcMaterialName(material){
+  const m=stockNormMaterial(material);
+  // Считаем ПВХ-рулоном все складские позиции, где явно есть ПВХ:
+  // «ПВХ», «ПВХ полотно», «ПВХ пленка», «ПВХ 700 2м» и т.п.
+  return m.includes('пвх');
+}
 function stockWidthToCmValue(width){
   const raw=String(width||'').trim().toLowerCase().replace(/,/g,'.').replace(/\s+/g,'');
   const val=parseFloat(raw);
@@ -658,12 +664,27 @@ function stockWidthToCmValue(width){
   // Без единицы: до 20 считаем метрами, больше 20 — сантиметрами.
   return val<=20?val*100:val;
 }
+function extractWidthCmFromText(text){
+  const raw=String(text||'').toLowerCase().replace(/,/g,'.');
+  let m=raw.match(/(\d+(?:\.\d+)?)\s*(?:м|m)\b/);
+  if(m)return parseFloat(m[1])*100;
+  m=raw.match(/(\d+(?:\.\d+)?)\s*(?:см|cm)\b/);
+  if(m)return parseFloat(m[1]);
+  return 0;
+}
+function stockPvcWidthCm(item){
+  if(!item)return 0;
+  const byWidth=stockWidthToCmValue(item.width);
+  if(byWidth>0)return Math.round(byWidth*10)/10;
+  const byMaterial=extractWidthCmFromText(item.material);
+  return byMaterial>0?Math.round(byMaterial*10)/10:0;
+}
 function stockFindPvcRollByCm(rollCm){
   const target=n(rollCm);
   if(!target)return null;
   return (stock||[]).find(s=>{
-    if(stockNormMaterial(s.material)!=='пвх полотно')return false;
-    return Math.abs(stockWidthToCmValue(s.width)-target)<0.51;
+    if(!isPvcMaterialName(s.material))return false;
+    return Math.abs(stockPvcWidthCm(s)-target)<0.51;
   });
 }
 function rollAvailableCm(rollCm){
@@ -672,13 +693,13 @@ function rollAvailableCm(rollCm){
 }
 function stockPvcRollWidthsCm(onlyWithStock=false){
   const arr=(stock||[])
-    .filter(s=>stockNormMaterial(s.material)==='пвх полотно')
+    .filter(s=>isPvcMaterialName(s.material))
     .filter(s=>!onlyWithStock||n(s.qty_m)>0)
-    .map(s=>Math.round(stockWidthToCmValue(s.width)*10)/10)
+    .map(s=>stockPvcWidthCm(s))
     .filter(w=>w>0);
   return [...new Set(arr)].sort((a,b)=>a-b);
 }
-function fallbackPvcRollWidthsCm(){return [180,220,240];}
+function fallbackPvcRollWidthsCm(){return [180,200,220,240];}
 function candidatePvcRollWidthsCm(){
   const inStock=stockPvcRollWidthsCm(true);
   if(inStock.length)return inStock;
@@ -898,7 +919,7 @@ function buildOptimizedLayouts(it,pr){
   // Экономная логика:
   // 1) берём все ширины ПВХ полотна из склада, у которых есть остаток;
   // 2) если остатков нет, используем все заведённые на складе ширины ПВХ;
-  // 3) если склад пустой, оставляем базовые рулоны 1.8 / 2.2 / 2.4 м;
+  // 3) если склад пустой, оставляем базовые рулоны 1.8 / 2.0 / 2.2 / 2.4 м;
   // 4) пробуем разложить заказ на каждом рулоне отдельно и смешанным вариантом;
   // 5) выбираем вариант с минимальной площадью расхода: ширина рулона × погонаж.
   let candidateRolls=candidatePvcRollWidthsCm();
@@ -1129,9 +1150,9 @@ function stockNormWidth(w){
 }
 function stockFind(material,width){
   let nm=stockNormMaterial(material);
-  if(nm==='пвх полотно'){
+  if(isPvcMaterialName(material)){
     const target=stockWidthToCmValue(width);
-    const match=(stock||[]).find(s=>stockNormMaterial(s.material)===nm&&Math.abs(stockWidthToCmValue(s.width)-target)<0.51);
+    const match=(stock||[]).find(s=>isPvcMaterialName(s.material)&&Math.abs(stockPvcWidthCm(s)-target)<0.51);
     if(match)return match;
   }
   let nw=stockNormWidth(width);
