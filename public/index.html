@@ -2448,7 +2448,17 @@ function productionCutPieceCard(p){
     </svg>
   </div>`;
 }
+function freshProductionCalc(ca){
+  // Задание производства всегда строим заново по текущему складу.
+  // Это исключает старую ширину ПВХ из сохранённой истории расчёта.
+  const pr=ca?.prices||prices();
+  const items=ca?.items||[];
+  const materials=mats(items,pr);
+  const newTotals=totals(items,pr);
+  return Object.assign({},ca,{prices:pr,items,materials,totals:newTotals});
+}
 function productionCutSheetsHtml(ca){
+  ca=freshProductionCalc(ca);
   const layouts=buildCutLayouts(ca);
   const pieces=layouts.flatMap(l=>(l.placements||[]).map(p=>Object.assign({roll:l.rollWidthCm},p)));
   if(!pieces.length)return '<div class="empty">Нет деталей раскроя для печати</div>';
@@ -2463,6 +2473,7 @@ function productionCutSheetsHtml(ca){
   return `<div class="cutSheets">${pages.join('')}</div>`;
 }
 function productionRollLayoutsHtml(ca){
+  ca=freshProductionCalc(ca);
   const layouts=buildCutLayouts(ca);
   if(!layouts.length)return '<div class="empty">Нет данных раскладки на рулоне</div>';
   const expected=expectedCutPieceCount(ca);
@@ -2471,6 +2482,7 @@ function productionRollLayoutsHtml(ca){
   <div class="legend"><span class="red"></span> красный контур — резка с офсетом; <span class="blue"></span> синий пунктир — габарит детали на полотне.</div>`;
 }
 function productionTaskHtml(c,ca){
+  ca=freshProductionCalc(ca);
   const today=new Date().toLocaleDateString('ru-RU');
   const itemsRows=ca.items.map(x=>`<tr>
     <td>${x.index}</td>
@@ -2483,14 +2495,19 @@ function productionTaskHtml(c,ca){
     <td>${x.door?'да, без коэф.':'нет'}</td>
     <td>${x.inst?'да':'нет'}</td>
   </tr>`).join('');
-  const details=(ca.materials.details||[]).map(d=>`<tr>
-    <td>${d.window}</td>
-    <td>${d.detail}</td>
-    <td>${rollWidthLabel(d.roll)}</td>
-    <td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td>
-    <td>${d.needM.toFixed(2)} м</td>
-    <td>${d.rotated?'повернуть':'обычно'}${d.mirrored?' / зеркально':''}</td>
-  </tr>`).join('');
+  const details=(ca.materials.details||[]).map(d=>{
+    const st=stockState('ПВХ полотно',rollWidthLabel(d.roll),d.needM);
+    const stockText=st.qty>0?`есть ${st.qty.toFixed(2)} м, после ${st.after.toFixed(2)} м`:'нет на складе';
+    return `<tr>
+      <td>${d.window}</td>
+      <td>${d.detail}</td>
+      <td>${rollWidthLabel(d.roll)}</td>
+      <td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td>
+      <td>${d.needM.toFixed(2)} м</td>
+      <td>${stockText}</td>
+      <td>${d.rotated?'повернуть':'обычно'}${d.mirrored?' / зеркально':''}</td>
+    </tr>`;
+  }).join('');
   const rollLayoutsHtml=productionRollLayoutsHtml(ca);
   const cutSheetsHtml=productionCutSheetsHtml(ca);
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Задание производство</title>
@@ -2890,7 +2907,7 @@ function productionTable(){
     <th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>Расчёт</th><th>Окон</th><th>Материалы</th><th></th>
   </tr></thead><tbody>${list.map(c=>{
     const calc=c.calcs&&c.calcs[0];
-    const mat=calc?matsHtml(calc.materials||mats(calc.items||[],calc.prices||set)):'Нет расчёта';
+    const mat=calc?matsHtml(mats(calc.items||[],calc.prices||set)):'Нет расчёта';
     return `<tr>
       <td><b>${esc(c.name||'Без имени')}</b></td>
       <td>${esc(c.phone||'-')}</td>
