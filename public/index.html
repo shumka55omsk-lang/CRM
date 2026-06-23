@@ -451,26 +451,45 @@ function zipperCount(x){return x.z ? Math.max(1, ni(x.zq || x.zipperQty || x.zip
 function zipperDistance(x){return n(x.zd || x.zipperDistance || x.zo || x.zipoff || x.zipperOffset || 0)}
 function getPvcPurchaseM2Price(width){
   const item=stockFind('ПВХ полотно', width);
-  return item?n(item.unit_cost):0;
+  if(item&&n(item.unit_cost)>0)return n(item.unit_cost);
+
+  // Если конкретная ширина не найдена или цена в ней не заполнена,
+  // берём среднюю закупочную цену по всем ПВХ-позициям склада.
+  const pvc=(stock||[]).filter(s=>isPvcMaterialName(s.material)&&n(s.unit_cost)>0);
+  if(pvc.length){
+    const totalQty=pvc.reduce((sum,s)=>sum+Math.max(0,n(s.qty_m)),0);
+    if(totalQty>0)return pvc.reduce((sum,s)=>sum+n(s.unit_cost)*Math.max(0,n(s.qty_m)),0)/totalQty;
+    return pvc.reduce((sum,s)=>sum+n(s.unit_cost),0)/pvc.length;
+  }
+  return 0;
+}
+function rollWidthMFromLabel(width){
+  const cm=stockWidthToCmValue(width);
+  if(cm>0)return cm/100;
+  const val=parseFloat(String(width||'').replace(',','.'));
+  return isNaN(val)?0:val;
 }
 function calcWeightedPvcPurchaseM2(ma){
   let sumArea=0,sumCost=0;
   (ma.rollRows||[]).forEach(r=>{
-    if(stockNormMaterial(r.material)!=='пвх полотно')return;
-    const widthM=parseFloat(String(r.width).replace(',','.'));
-    const area=(isNaN(widthM)?0:widthM)*n(r.need);
+    if(!isPvcMaterialName(r.material))return;
+    const widthM=rollWidthMFromLabel(r.width);
+    const area=widthM*n(r.need);
     const price=getPvcPurchaseM2Price(r.width);
-    sumArea+=area;
-    sumCost+=area*price;
+    if(area>0&&price>0){
+      sumArea+=area;
+      sumCost+=area*price;
+    }
   });
-  return sumArea>0?sumCost/sumArea:0;
+  if(sumArea>0)return sumCost/sumArea;
+  return getPvcPurchaseM2Price('');
 }
 function scrapCalc(it,pr){
   const ma=mats(it,pr);
   let rollArea=0;
   (ma.rollRows||[]).forEach(r=>{
-    const widthM=parseFloat(String(r.width).replace(',','.'));
-    rollArea += (isNaN(widthM)?0:widthM) * n(r.need);
+    const widthM=rollWidthMFromLabel(r.width);
+    rollArea += widthM * n(r.need);
   });
 
   let cutArea=0;
@@ -1033,6 +1052,11 @@ function mats(it,pr){
   opt.layouts.forEach(layout=>{
     usage[layout.rollWidthCm]=(usage[layout.rollWidthCm]||0)+layout.totalLengthCm/100;
     layout.placements.forEach(p=>{
+      const stockQty=rollAvailableCm(p.roll);
+      const afterStock=stockQty-(usage[p.roll]||0);
+      const pvcPrice=getPvcPurchaseM2Price(rollWidthLabel(p.roll));
+      const blankArea=(n(p.widthCm)*n(p.lengthCm))/10000;
+      const cutArea=polyAreaM2Abs(p.cutPts||[]);
       details.push({
         window:p.window,
         detail:p.detail,
@@ -1043,11 +1067,18 @@ function mats(it,pr){
         cutLengthCm:p.lengthCm,
         opening:`${p.source.w} × ${p.source.h1}/${p.source.h2} см`,
         qty:1,
-        selectedByStock:rollAvailableCm(p.roll)>0,
+        selectedByStock:stockQty>0,
         forcedFallback:false,
         xCm:p.xCm||0,
         yCm:p.yCm||0,
-        offsetCm:p.offsetCm||n(pr.off)||4.5
+        offsetCm:p.offsetCm||n(pr.off)||4.5,
+        blankAreaM2:blankArea,
+        cutAreaM2:cutArea,
+        pvcPriceM2:pvcPrice,
+        blankCost:blankArea*pvcPrice,
+        cutCost:cutArea*pvcPrice,
+        stockQtyM:stockQty,
+        stockAfterM:afterStock
       });
     });
   });
@@ -1086,13 +1117,17 @@ function mats(it,pr){
   Object.keys(usage).forEach(k=>{
     if(usage[k]){
       let rolls=Math.ceil(usage[k]/50);
+      const st=stockState('ПВХ полотно',rollWidthLabel(Number(k)),usage[k]);
       rows.push({
         material:'ПВХ полотно',
         width:rollWidthLabel(Number(k)),
         need:usage[k],
+        inStock:st.qty,
+        buyNeed:st.def,
         rolls,
         rest:rolls*50-usage[k],
-        comment:'Экономная раскладка по всем ширинам ПВХ из склада. Офсет '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
+        unitCost:getPvcPurchaseM2Price(rollWidthLabel(Number(k))),
+        comment:'Экономная раскладка по всем ширинам ПВХ из склада. В наличии '+st.qty.toFixed(2)+' м, докупить '+st.def.toFixed(2)+' м. Офсет '+(n(pr.off)||4.5)+' см. Деталей: '+details.filter(d=>String(d.roll)===String(k)).length
       });
     }
   });
@@ -1129,6 +1164,18 @@ function stockNormMaterial(v){
     .replace(/[×xх]/g,'*')
     .replace(/\s+/g,' ');
 }
+function stockMaterialKind(v){
+  const m=stockNormMaterial(v);
+  if(m.includes('пвх'))return 'pvc';
+  if(m.includes('окант')||m.includes('кант')||m.includes('лента'))return 'edge';
+  if(m.includes('молн'))return 'zip';
+  if(m.includes('рем'))return 'strap';
+  if(m.includes('люверс')&&m.includes('42'))return 'grommet_oval';
+  if(m.includes('люверс')&&m.includes('10'))return 'grommet_10';
+  if(m.includes('люверс'))return 'grommet';
+  if(m.includes('фурнит'))return 'hardware';
+  return m;
+}
 function stockNormWidth(w){
   let s=String(w||'')
     .trim()
@@ -1142,21 +1189,38 @@ function stockNormWidth(w){
   const val=parseFloat(s);
   if(!isNaN(val)){
     if(s.includes('см')||s.includes('cm')) return compactNumber(val,2)+' см';
-    if(s.includes('шт')||s.includes('pcs')) return compactNumber(val,2)+' шт';
+    if(s.includes('шт')||s.includes('pcs')) return 'шт';
     if(s.includes('м')) return compactNumber(val,2)+' м';
     return val>20 ? compactNumber(val,2)+' см' : compactNumber(val,2)+' м';
   }
+  if(s==='шт'||s==='pcs'||s==='pc')return 'шт';
   return s;
 }
+function stockWidthByMaterialOrWidth(item){
+  const byWidth=stockNormWidth(item&&item.width);
+  if(byWidth&&byWidth!=='0 м')return byWidth;
+  const fromMatCm=extractWidthCmFromText(item&&item.material);
+  if(fromMatCm>0){
+    if(fromMatCm>=100)return compactNumber(fromMatCm/100,2)+' м';
+    return compactNumber(fromMatCm,2)+' см';
+  }
+  return byWidth;
+}
 function stockFind(material,width){
-  let nm=stockNormMaterial(material);
-  if(isPvcMaterialName(material)){
+  const kind=stockMaterialKind(material);
+  const nw=stockNormWidth(width);
+  if(kind==='pvc'){
     const target=stockWidthToCmValue(width);
-    const match=(stock||[]).find(s=>isPvcMaterialName(s.material)&&Math.abs(stockPvcWidthCm(s)-target)<0.51);
+    const match=(stock||[]).find(s=>stockMaterialKind(s.material)==='pvc'&&(!target||Math.abs(stockPvcWidthCm(s)-target)<0.51));
     if(match)return match;
   }
-  let nw=stockNormWidth(width);
-  return (stock||[]).find(s=>stockNormMaterial(s.material)===nm&&stockNormWidth(s.width)===nw);
+  return (stock||[]).find(s=>{
+    if(stockMaterialKind(s.material)!==kind)return false;
+    const sw=stockNormWidth(s.width);
+    if(sw===nw)return true;
+    const smw=stockWidthByMaterialOrWidth(s);
+    return smw===nw;
+  });
 }
 async function ensureDefaultStockPositions(){
   if(!db||!Array.isArray(stock))return;
@@ -1172,7 +1236,24 @@ async function ensureDefaultStockPositions(){
   }
 }
 function stockState(material,width,need){let s=stockFind(material,width),qty=s?n(s.qty_m):0,crit=s?n(s.critical_m):0,after=qty-need,def=Math.max(0,need-qty),status=def>0?'НЕ ХВАТАЕТ':(after<=crit?'КРИТИЧЕСКИЙ':'ОК');return{item:s,qty,crit,after,def,status}}
-function matsHtml(m){let a=[...(m.rollRows||[])];if(m.edgingRows&&m.edgingRows.length)a.push(...m.edgingRows);else if(m.edgingRow&&m.edgingRow.need)a.push(m.edgingRow);if(m.grommetRows&&m.grommetRows.length)a.push(...m.grommetRows);let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{let st=stockState(r.material,r.width,r.need);let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');return`<tr><td>${r.material}</td><td>${r.width}</td><td>${r.need.toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${r.comment}</td></tr>`}).join('')}${m.oversized.map(o=>`<tr><td colspan=8 style="color:#b42318;font-weight:800">${o}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';if(m.details&&m.details.length){base += `<h3>Детали раскроя</h3><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${(d.roll/100).toFixed(1)} м</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${d.needM.toFixed(2)} м</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;}return base;}
+function matsHtml(m){
+  let a=[...(m.rollRows||[])];
+  if(m.edgingRows&&m.edgingRows.length)a.push(...m.edgingRows);else if(m.edgingRow&&m.edgingRow.need)a.push(m.edgingRow);
+  if(m.grommetRows&&m.grommetRows.length)a.push(...m.grommetRows);
+  let base=a.length||m.oversized.length?`<div class=tw><table><thead><tr><th>Материал</th><th>Ширина/тип</th><th>Нужно</th><th>В наличии</th><th>После</th><th>Докупить</th><th>Цена закуп.</th><th>Сумма докупки</th><th>Статус</th><th>Коммент.</th></tr></thead><tbody>${a.map(r=>{
+    let st=stockState(r.material,r.width,r.need);
+    let unit=n(r.unitCost||st.item?.unit_cost||0);
+    let buyCost=st.def*unit;
+    let color=st.status==='ОК'?'#166534':(st.status==='КРИТИЧЕСКИЙ'?'#9a3412':'#b42318');
+    return`<tr><td>${esc(r.material)}</td><td>${esc(r.width)}</td><td>${n(r.need).toFixed(2)}</td><td>${st.qty.toFixed(2)}</td><td>${st.after.toFixed(2)}</td><td>${st.def.toFixed(2)}</td><td>${unit?rub(unit):'—'}</td><td>${unit?rub(buyCost):'—'}</td><td style="font-weight:900;color:${color}">${st.status}</td><td>${esc(r.comment||'')}</td></tr>`;
+  }).join('')}${m.oversized.map(o=>`<tr><td colspan=10 style="color:#b42318;font-weight:800">${esc(o)}</td></tr>`).join('')}</tbody></table></div>`:'<div class=empty>Нет данных</div>';
+  if(m.details&&m.details.length){
+    const totalBlank=m.details.reduce((s,d)=>s+n(d.blankCost),0);
+    const totalCut=m.details.reduce((s,d)=>s+n(d.cutCost),0);
+    base += `<h3>Детали раскроя</h3><div class="scrap-compact"><b>Стоимость кусков:</b> заготовки ${rub(totalBlank)} / по контуру резки ${rub(totalCut)} <span class="muted">по закупочной цене ПВХ из склада</span></div><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Площадь заготовки</th><th>Цена ПВХ</th><th>Стоимость куска</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${rollWidthLabel(d.roll)}</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${n(d.needM).toFixed(2)} м</td><td>${n(d.blankAreaM2).toFixed(2)} м²</td><td>${n(d.pvcPriceM2)?rub(d.pvcPriceM2):'—'}</td><td>${n(d.blankCost)?rub(d.blankCost):'—'}</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  return base;
+}
 function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper, zipperCmPerSide, edgingWidthCm, zipperDistanceCm, zipperQty, hasGrommets, grommetLabelMode, edgeSidesCm) {
       grommetLabelMode = grommetLabelMode || 'detail';
       const svgWidth = 420, svgHeight = 360, maxRectWidth = 300, maxRectHeight = 220;
@@ -1533,9 +1614,10 @@ function report(c,ca){
   const detailCards=(ca.materials.details||[]).length
     ? (ca.materials.details||[]).map(d=>`<div class="dcard">
         <b>Окно ${d.window}, деталь ${d.detail}</b>
-        <span>Рулон: ${(d.roll/100).toFixed(1)} м</span>
+        <span>Рулон: ${rollWidthLabel(d.roll)}</span>
         <span>Размер резки: ${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</span>
         <span>Пог. м: ${n(d.needM).toFixed(2)} м</span>
+        <span>Стоимость куска: ${n(d.blankCost)?rub(d.blankCost):'—'}</span>
         <span>Ориентация: ${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</span>
       </div>`).join('')
     : '';
@@ -1750,6 +1832,14 @@ function prepareHtmlForPdf(html){
   return out;
 }
 async function browserlessPdf(html,filename){
+  // iPhone/Safari часто блокирует скачивание blob после async fetch.
+  // Поэтому вкладку открываем сразу по нажатию кнопки, а PDF подставляем после генерации.
+  const pdfWin=window.open('', '_blank');
+  if(pdfWin){
+    pdfWin.document.open();
+    pdfWin.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Создание PDF</title><style>body{font-family:Arial,sans-serif;margin:0;background:#f3f4f6;color:#111827}.box{max-width:520px;margin:24px auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;box-shadow:0 8px 28px rgba(0,0,0,.08)}.loader{width:28px;height:28px;border:4px solid #d1d5db;border-top-color:#2563eb;border-radius:50%;animation:spin .9s linear infinite;margin-bottom:12px}@keyframes spin{to{transform:rotate(360deg)}}a,button{display:inline-block;background:#2563eb;color:#fff;text-decoration:none;border:0;border-radius:10px;padding:10px 14px;font-weight:800;margin-top:10px}</style></head><body><div class="box"><div class="loader"></div><h2>Создаю PDF...</h2><p>Не закрывай вкладку. После создания файл откроется здесь.</p></div></body></html>`);
+    pdfWin.document.close();
+  }
   try{
     bar.className='bar warn';
     bar.textContent='Создаю PDF через Browserless...';
@@ -1769,10 +1859,28 @@ async function browserlessPdf(html,filename){
       throw new Error(msg);
     }
     const pdf=await res.blob();
-    blob(pdf,filename);
+    const url=URL.createObjectURL(pdf);
+
+    if(pdfWin&&!pdfWin.closed){
+      pdfWin.document.open();
+      pdfWin.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(filename)}</title><style>body{font-family:Arial,sans-serif;margin:0;background:#111827;color:#fff}.top{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px;background:#111827;box-shadow:0 2px 10px rgba(0,0,0,.25)}a{background:#22c55e;color:#fff;text-decoration:none;border-radius:10px;padding:9px 12px;font-weight:800}.hint{font-size:12px;color:#d1d5db}iframe{display:block;width:100%;height:calc(100vh - 58px);border:0;background:#fff}</style></head><body><div class="top"><div><b>PDF готов</b><div class="hint">На iPhone нажми «Открыть PDF», если просмотрщик не загрузился.</div></div><a href="${url}" target="_blank" download="${esc(filename)}">Открыть PDF</a></div><iframe src="${url}"></iframe></body></html>`);
+      pdfWin.document.close();
+      try{pdfWin.location.href=url;}catch(e){}
+      setTimeout(()=>{try{URL.revokeObjectURL(url)}catch(e){}},120000);
+    }else{
+      // Если новая вкладка заблокирована, оставляем старый способ для ПК.
+      blob(pdf,filename);
+      setTimeout(()=>{try{URL.revokeObjectURL(url)}catch(e){}},60000);
+    }
+
     bar.className='bar ok';
     bar.textContent='PDF создан';
   }catch(e){
+    if(pdfWin&&!pdfWin.closed){
+      pdfWin.document.open();
+      pdfWin.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ошибка PDF</title><style>body{font-family:Arial,sans-serif;background:#fff;color:#111827;padding:18px}.err{border:1px solid #fecaca;background:#fff1f2;border-radius:14px;padding:14px}button{background:#2563eb;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:800}</style></head><body><div class="err"><h2>PDF не создан</h2><p>${esc(e.message||e)}</p><button onclick="window.close()">Закрыть</button></div></body></html>`);
+      pdfWin.document.close();
+    }
     bar.className='bar warn';
     bar.textContent='Ошибка PDF';
     alert(e.message||e);
@@ -2378,7 +2486,7 @@ function productionTaskHtml(c,ca){
   const details=(ca.materials.details||[]).map(d=>`<tr>
     <td>${d.window}</td>
     <td>${d.detail}</td>
-    <td>${(d.roll/100).toFixed(1)} м</td>
+    <td>${rollWidthLabel(d.roll)}</td>
     <td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td>
     <td>${d.needM.toFixed(2)} м</td>
     <td>${d.rotated?'повернуть':'обычно'}${d.mirrored?' / зеркально':''}</td>
