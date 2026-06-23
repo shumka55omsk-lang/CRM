@@ -132,7 +132,7 @@ function fastShowLocalCache(){
   try{
     const cached=localLoad();
     if(Array.isArray(cached)&&cached.length){
-      clients=cached;
+      clients=cached.map(normalizeClientCalcsForCurrentStock);
       bar.className='bar warn';
       bar.textContent='🟡 Показываю сохранённую копию CRM, загружаю свежую базу...';
       render();
@@ -158,7 +158,23 @@ async function initDb(){
   }catch(e){enableOfflineMode(e.message)}
 }
 function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render()}async function newClient(){
+function normalizeCalcForCurrentStock(ca){
+  if(!ca)return ca;
+  const pr=ca.prices||set||prices();
+  const items=Array.isArray(ca.items)?ca.items:[];
+  return Object.assign({},ca,{
+    prices:pr,
+    items,
+    totals:totals(items,pr),
+    materials:mats(items,pr)
+  });
+}
+function normalizeClientCalcsForCurrentStock(c){
+  if(!c||!Array.isArray(c.calcs))return c;
+  c.calcs=c.calcs.map(normalizeCalcForCurrentStock);
+  return c;
+}
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render()}async function newClient(){
   if(window.__newClientBusy)return;
   window.__newClientBusy=true;
   const newClientButtons=[...document.querySelectorAll('button[onclick="newClient()"]')];
@@ -200,7 +216,7 @@ function bindFastNewClientButtons(){
     }
   });
 }
-function openCard(id){cur=id;let c=client();if(!c)return;title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
+function openCard(id){cur=id;let c=client();if(!c)return;normalizeClientCalcsForCurrentStock(c);title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
 async function saveClient(silent=false){
   let c=client();
   if(!c)return;
@@ -2945,7 +2961,7 @@ function productionTable(){
   return `<div class=tw><table><thead><tr>
     <th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>Расчёт</th><th>Окон</th><th>Материалы</th><th></th>
   </tr></thead><tbody>${list.map(c=>{
-    const calc=c.calcs&&c.calcs[0];
+    const calc=c.calcs&&c.calcs[0]?normalizeCalcForCurrentStock(c.calcs[0]):null;
     const mat=calc?matsHtml(mats(calc.items||[],calc.prices||set)):'Нет расчёта';
     return `<tr>
       <td><b>${esc(c.name||'Без имени')}</b></td>
