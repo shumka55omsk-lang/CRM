@@ -174,15 +174,7 @@ function normalizeClientCalcsForCurrentStock(c){
   c.calcs=c.calcs.map(normalizeCalcForCurrentStock);
   return c;
 }
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render();
-  try{
-    if(cur&&document.getElementById('card')&&!document.getElementById('card').classList.contains('hide')){
-      let c=client();
-      if(c)normalizeClientCalcsForCurrentStock(c);
-      recalc();
-    }
-  }catch(e){}
-}async function newClient(){
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render()}async function newClient(){
   if(window.__newClientBusy)return;
   window.__newClientBusy=true;
   const newClientButtons=[...document.querySelectorAll('button[onclick="newClient()"]')];
@@ -754,7 +746,7 @@ function stockPvcRollWidthsCm(onlyWithStock=false){
   if(onlyWithStock)arr=arr.filter(w=>(qtyMap[String(Math.round(w*10)/10)]||0)>0.0001);
   return [...new Set(arr)].sort((a,b)=>a-b);
 }
-function fallbackPvcRollWidthsCm(){return [180,200,240];}
+function fallbackPvcRollWidthsCm(){return [];}
 function hasPositivePvcStock(){
   return stockPvcRollWidthsCm(true).length>0;
 }
@@ -764,16 +756,10 @@ function pvcRollQtyM(rollCm){
   return Math.max(0,n(qtyMap[key]));
 }
 function candidatePvcRollWidthsCm(){
-  // Жёсткое правило склада:
-  // если на складе есть ПВХ-позиции, раскрой использует только ширины с остатком > 0.
-  // Ширины с 0 м и удалённые ширины не допускаются.
-  const allStock=stockPvcRollWidthsCm(false);
-  const inStock=stockPvcRollWidthsCm(true);
-  if(allStock.length)return inStock;
-
-  // Резерв нужен только для совсем пустого склада ПВХ.
-  // 2.20 м в резерв не входит: он используется только если реально есть на складе.
-  return fallbackPvcRollWidthsCm();
+  // Финальное правило:
+  // раскрой использует ТОЛЬКО реальные ПВХ-позиции со склада с остатком больше 0.
+  // Никаких резервных ширин, удалённых позиций и ширин с нулём.
+  return stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
 }
 function preferredRollOrder(){
   return candidatePvcRollWidthsCm();
@@ -846,18 +832,21 @@ function makePieceGeometry(x,pr,roll,rotated){
   };
 }
 function pieceVariantsForRoll(x,pr,roll){
-  if(hasPositivePvcStock()&&pvcRollQtyM(roll)<=0.0001)return [];
+  // Запрет на любые ширины, которых нет в положительных остатках склада.
+  const rounded=Math.round(n(roll)*10)/10;
+  const allowed=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
+  if(!allowed.includes(rounded))return [];
   const a=makePieceGeometry(x,pr,roll,false);
   const b=makePieceGeometry(x,pr,roll,true);
   return [a,b].filter(Boolean).sort((u,v)=>u.lengthCm-v.lengthCm||u.widthCm-v.widthCm);
 }
 function allPieceVariants(x,pr){
   const out=[];
-  preferredRollOrder().forEach(r=>out.push(...pieceVariantsForRoll(x,pr,r)));
+  stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001).forEach(r=>out.push(...pieceVariantsForRoll(x,pr,r)));
   return out;
 }
 function chooseBaseVariant(x,pr){
-  const order=preferredRollOrder();
+  const order=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
   for(const roll of order){
     const variants=pieceVariantsForRoll(x,pr,roll);
     if(variants.length){
@@ -986,20 +975,14 @@ function buildFallbackMixedLayouts(it,pr,candidateRolls){
 }
 function buildOptimizedLayouts(it,pr){
   // Экономная логика:
-  // 1) если в складе есть ПВХ-позиции — берём только ширины с остатком > 0;
-  // 2) удалённые ширины и ширины с 0 м не допускаются;
-  // 3) если склад ПВХ совсем пустой — резерв 1.8 / 2.0 / 2.4 м;
-  // 4) пробуем разложить заказ на каждом рулоне отдельно и смешанным вариантом;
-  // 5) выбираем вариант с минимальной площадью расхода: ширина рулона × погонаж.
-  let candidateRolls=candidatePvcRollWidthsCm();
-  const allStockRolls=stockPvcRollWidthsCm(false);
-  const positiveStockRolls=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0);
-  if(allStockRolls.length){
-    candidateRolls=positiveStockRolls;
-  }
+  // 1) берём только ПВХ-ширины, реально заведённые на складе с остатком > 0;
+  // 2) ширины с 0 м, удалённые ширины и резервные размеры запрещены;
+  // 3) пробуем разложить заказ на каждом доступном рулоне отдельно и смешанным вариантом;
+  // 4) выбираем вариант с минимальной площадью расхода: ширина рулона × погонаж.
+  let candidateRolls=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
 
   if(!candidateRolls.length){
-    return{layouts:[],bad:['На складе нет ПВХ-рулонов с положительным остатком. Добавь остаток ПВХ на склад или проверь ширины.'],pieces:[]};
+    return{layouts:[],bad:['На складе нет ПВХ-рулонов с положительным остатком. Раскрой не может быть построен без реального материала в наличии.'],pieces:[]};
   }
 
   const singleRollOptions=candidateRolls
@@ -1107,11 +1090,9 @@ function fmtCm(v){
 }
 function mats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
-  if(hasPositivePvcStock()){
-    const allowed=stockPvcRollWidthsCm(true);
-    opt.layouts=(opt.layouts||[]).filter(l=>allowed.includes(Math.round(n(l.rollWidthCm)*10)/10));
-    opt.pieces=(opt.pieces||[]).filter(p=>allowed.includes(Math.round(n(p.roll)*10)/10));
-  }
+  const allowed=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
+  opt.layouts=(opt.layouts||[]).filter(l=>allowed.includes(Math.round(n(l.rollWidthCm)*10)/10));
+  opt.pieces=(opt.pieces||[]).filter(p=>allowed.includes(Math.round(n(p.roll)*10)/10));
   let usage={},details=[],edgeGroups={},grommet10Need=0,grommetOvalNeed=0;
   opt.layouts.forEach(layout=>{
     usage[layout.rollWidthCm]=(usage[layout.rollWidthCm]||0)+layout.totalLengthCm/100;
@@ -2637,7 +2618,7 @@ function productionTaskHtml(c,ca){
       <div><b>Адрес:</b> ${esc(c.address||'-')}</div>
       <div><b>Статус:</b> ${esc(c.status||'-')}</div>
       <div><b>Офсет резки:</b> ${ca.prices.off} см</div>
-      <div><b>Доступные ПВХ рулоны:</b> ${candidatePvcRollWidthsCm().map(r=>rollWidthLabel(r)+' ('+pvcRollQtyM(r).toFixed(2)+' м)').join(', ')||'нет'}</div>
+      <div><b>Доступные ПВХ рулоны:</b> ${stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001).map(r=>rollWidthLabel(r)+' ('+pvcRollQtyM(r).toFixed(2)+' м)').join(', ')||'нет ПВХ в наличии'}</div>
     </div>
     <h2>Изделия</h2>
     <table><thead><tr><th>№</th><th>Проём</th><th>Кол-во</th><th>Окантовка</th><th>Ремни</th><th>Молния</th><th>Люверсы / открывание</th><th>Дверь</th><th>Монтаж</th></tr></thead><tbody>${itemsRows}</tbody></table>
