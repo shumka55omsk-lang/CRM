@@ -713,17 +713,29 @@ function rollAvailableCm(rollCm){
 function stockPvcRollWidthsCm(onlyWithStock=false){
   const arr=(stock||[])
     .filter(s=>isPvcMaterialName(s.material))
-    .filter(s=>!onlyWithStock||n(s.qty_m)>0)
+    .filter(s=>!onlyWithStock||Math.max(0,n(s.qty_m))>0.0001)
     .map(s=>stockPvcWidthCm(s))
     .filter(w=>w>0);
   return [...new Set(arr)].sort((a,b)=>a-b);
 }
 function fallbackPvcRollWidthsCm(){return [180,200,220,240];}
+function pvcRollQtyM(rollCm){
+  const item=stockFindPvcRollByCm(rollCm);
+  return item?Math.max(0,n(item.qty_m)):0;
+}
 function candidatePvcRollWidthsCm(){
-  const inStock=stockPvcRollWidthsCm(true);
+  // Жёсткое правило склада:
+  // если есть хотя бы одна ширина ПВХ с остатком > 0,
+  // раскрой использует ТОЛЬКО эти ширины. Рулоны с 0 м не допускаются.
+  const inStock=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0);
   if(inStock.length)return inStock;
+
+  // Только если вообще нет положительных остатков ПВХ,
+  // разрешаем использовать заведённые ширины как план закупа.
   const allStock=stockPvcRollWidthsCm(false);
   if(allStock.length)return allStock;
+
+  // Если склад ПВХ пустой полностью — резервный набор.
   return fallbackPvcRollWidthsCm();
 }
 function preferredRollOrder(){
@@ -942,6 +954,10 @@ function buildOptimizedLayouts(it,pr){
   // 4) пробуем разложить заказ на каждом рулоне отдельно и смешанным вариантом;
   // 5) выбираем вариант с минимальной площадью расхода: ширина рулона × погонаж.
   let candidateRolls=candidatePvcRollWidthsCm();
+  const positiveStockRolls=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0);
+  if(positiveStockRolls.length){
+    candidateRolls=candidateRolls.filter(r=>positiveStockRolls.includes(r));
+  }
 
   const singleRollOptions=candidateRolls
     .map(roll=>buildLayoutForSingleRoll(it,pr,roll))
@@ -2573,6 +2589,7 @@ function productionTaskHtml(c,ca){
       <div><b>Адрес:</b> ${esc(c.address||'-')}</div>
       <div><b>Статус:</b> ${esc(c.status||'-')}</div>
       <div><b>Офсет резки:</b> ${ca.prices.off} см</div>
+      <div><b>Доступные ПВХ рулоны:</b> ${candidatePvcRollWidthsCm().map(rollWidthLabel).join(', ')||'нет'}</div>
     </div>
     <h2>Изделия</h2>
     <table><thead><tr><th>№</th><th>Проём</th><th>Кол-во</th><th>Окантовка</th><th>Ремни</th><th>Молния</th><th>Люверсы / открывание</th><th>Дверь</th><th>Монтаж</th></tr></thead><tbody>${itemsRows}</tbody></table>
