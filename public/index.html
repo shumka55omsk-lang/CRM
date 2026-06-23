@@ -694,10 +694,17 @@ function rollWidthLabel(rollCm){
   return s+' м';
 }
 function isPvcMaterialName(material){
-  const m=stockNormMaterial(material);
-  // Считаем ПВХ-рулоном все складские позиции, где явно есть ПВХ:
-  // «ПВХ», «ПВХ полотно», «ПВХ пленка», «ПВХ 700 2м» и т.п.
-  return m.includes('пвх');
+  // ВАЖНО: stockNormMaterial заменяет букву «х» на «*» для размеров 42*22,
+  // поэтому проверка через stockNormMaterial ломала ПВХ: «пвх» превращалось в «пв*».
+  // Здесь проверяем исходный текст и смешанные варианты кириллицы/латиницы.
+  const raw=String(material||'').trim().toLowerCase().replace(/ё/g,'е').replace(/\s+/g,'');
+  if(!raw)return false;
+  if(raw.includes('pvc'))return true;
+  const mapped=raw
+    .replace(/[pр]/g,'п')
+    .replace(/[bвv]/g,'в')
+    .replace(/[xх*]/g,'х');
+  return mapped.includes('пвх');
 }
 function stockWidthToCmValue(width){
   const raw=String(width||'').trim().toLowerCase().replace(/,/g,'.').replace(/\s+/g,'');
@@ -1229,7 +1236,7 @@ function stockNormMaterial(v){
 }
 function stockMaterialKind(v){
   const m=stockNormMaterial(v);
-  if(m.includes('пвх'))return 'pvc';
+  if(isPvcMaterialName(v))return 'pvc';
   if(m.includes('окант')||m.includes('кант')||m.includes('лента'))return 'edge';
   if(m.includes('молн'))return 'zip';
   if(m.includes('рем'))return 'strap';
