@@ -128,7 +128,22 @@ async function syncOfflineClients(){
   try{localStorage.setItem(LOCAL_DB,JSON.stringify(allLocal||[]))}catch(e){}
 }
 window.addEventListener('online',()=>initDb());
-function loadSet(){set=Object.assign({m2:1500,edge:120,strap:80,zip:250,inst:500,off:4.5},JSON.parse(localStorage.getItem(LS)||'{}'))}function fillSet(){s_m2.value=set.m2;s_edge.value=set.edge;s_strap.value=set.strap;s_zip.value=set.zip;s_inst.value=set.inst;s_off.value=set.off}function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5};localStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
+function defaultSet(){return{m2:1800,edge:0,strap:0,zip:0,inst:700,off:4.5,defaultsVersion:2}}
+function loadSet(){
+  const def=defaultSet();
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(LS)||'{}')||{}}catch(e){saved={}}
+  // Сброс старых локальных дефолтов 1500/500 на iPhone/ПК.
+  // Начиная с версии 2 старт нового клиента: полотно 1800, монтаж 700, остальное 0.
+  if(saved.defaultsVersion!==2){
+    set=Object.assign({},def,{off:n(saved.off)||def.off});
+    try{localStorage.setItem(LS,JSON.stringify(set))}catch(e){}
+  }else{
+    set=Object.assign({},def,saved);
+  }
+}
+function fillSet(){s_m2.value=set.m2;s_edge.value=set.edge;s_strap.value=set.strap;s_zip.value=set.zip;s_inst.value=set.inst;s_off.value=set.off}
+function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5,defaultsVersion:2};localStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
 function fastShowLocalCache(){
   try{
     const cached=localLoad();
@@ -339,11 +354,22 @@ function scheduleClientAutosave(){
   clearTimeout(autosaveClientTimer);
   autosaveClientTimer=setTimeout(()=>saveClient(true),900);
 }
-function scheduleCalcAutosave(){
+function scheduleCalcAutosave(delay=1200){
   if(autosaveLock||!cur)return;
   setAutosaveStatus('Сохранение расчёта...');
   clearTimeout(autosaveCalcTimer);
-  autosaveCalcTimer=setTimeout(()=>saveCalc(true),1200);
+  autosaveCalcTimer=setTimeout(()=>saveCalc(true),delay);
+}
+function recalcAndSaveUrgent(){
+  recalc();
+  scheduleCalcAutosave(150);
+}
+function flushCalcAutosave(){
+  if(autosaveLock||!cur)return;
+  try{
+    clearTimeout(autosaveCalcTimer);
+    saveCalc(true);
+  }catch(e){}
 }
 function bindClientAutosave(){
   ['c_name','c_phone','c_addr','c_src','c_stat','c_date','c_comm'].forEach(id=>{
@@ -368,17 +394,20 @@ function loadCalc(ca){
   p_off.value=ca?.prices?.off??set.off;
   if(typeof p_scraps!=='undefined')p_scraps.checked=!!(ca?.prices?.scraps);
   rows.innerHTML='';
-  (ca?.items?.length?ca.items:[{w:200,h1:150,h2:150,qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true}]).forEach(addRowObj);
+  (ca?.items?.length?ca.items:[{w:200,h1:150,h2:150,qty:1,ed:true,straps:0,z:false,zq:2,zc:0,zd:0,inst:true}]).forEach(addRowObj);
   ['p_m2','p_edge','p_strap','p_zip','p_inst','p_off','p_scraps'].forEach(id=>{
     let el=document.getElementById(id);
-    if(el){el.oninput=recalcAndAutosave;el.onchange=recalcAndAutosave}
+    if(el){
+      el.oninput=recalcAndAutosave;
+      el.onchange=el.type==='checkbox'?recalcAndSaveUrgent:recalcAndAutosave;
+    }
   });
   autosaveLock=false;
   recalc();
   bindClientAutosave();
   setAutosaveStatus('Автосохранение включено');
 }
-function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:4,z:false,zq:2,zc:0,zd:0,inst:true});recalcAndAutosave()}function updateWindowNumbers(){[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let c=tr.querySelector('.rownum');if(c)c.textContent='Окно '+(i+1);});}
+function addRow(){addRowObj({w:'',h1:'',h2:'',qty:1,ed:true,straps:0,z:false,zq:2,zc:0,zd:0,inst:true});recalcAndAutosave()}function updateWindowNumbers(){[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let c=tr.querySelector('.rownum');if(c)c.textContent='Окно '+(i+1);});}
 function addRowObj(o){
   let zqVal = o.zq ?? o.zipperQty ?? o.zippersCount ?? (o.z || o.zipper ? 2 : 2);
   let zdVal = o.zd ?? o.zipperDistance ?? o.zo ?? o.zipoff ?? o.zipperOffset ?? 0;
@@ -409,12 +438,15 @@ function addRowObj(o){
   <td><button class="btn s r" onclick="this.closest('tr').remove();updateWindowNumbers();recalcAndAutosave()">×</button></td>`;
   rows.appendChild(tr);
   updateWindowNumbers();
-  tr.querySelectorAll('input').forEach(i=>{i.oninput=recalcAndAutosave;i.onchange=recalcAndAutosave});
+  tr.querySelectorAll('input').forEach(i=>{
+    i.oninput=recalcAndAutosave;
+    i.onchange=i.type==='checkbox'?recalcAndSaveUrgent:recalcAndAutosave;
+  });
   const blindInput=tr.querySelector('.blind');
   const openInput=tr.querySelector('.open');
   if(blindInput&&openInput){
-    blindInput.onchange=()=>{if(blindInput.checked)openInput.checked=false;recalcAndAutosave()};
-    openInput.onchange=()=>{if(openInput.checked)blindInput.checked=false;recalcAndAutosave()};
+    blindInput.onchange=()=>{if(blindInput.checked)openInput.checked=false;recalcAndSaveUrgent()};
+    openInput.onchange=()=>{if(openInput.checked)blindInput.checked=false;recalcAndSaveUrgent()};
   }
   const ewInput=tr.querySelector('.ew');
   if(ewInput){
@@ -2996,6 +3028,10 @@ function productionTable(){
 }
 
 function renderBuy(){let all=[];clients.filter(c=>WORK.includes(c.status)&&c.calcs&&c.calcs[0]).forEach(c=>all.push(...c.calcs[0].items));buyList.innerHTML=matsHtml(mats(all,set));renderWarehouse()}
+
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushCalcAutosave()});
+window.addEventListener('pagehide',flushCalcAutosave);
+window.addEventListener('beforeunload',flushCalcAutosave);
 
 window.onload=async()=>{loadSet();initUi();fillSet();bindFastNewClientButtons();render();await initDb()}
 </script></body></html>
