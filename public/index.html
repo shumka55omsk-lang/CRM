@@ -1125,6 +1125,74 @@ function edgeSideStripLabel(x,pr){
   const s=itemEdgeSidesCm(x,pr);
   return 'полоса: верх '+fmtCm(s.top*2)+' / низ '+fmtCm(s.bottom*2)+' / лево '+fmtCm(s.left*2)+' / право '+fmtCm(s.right*2)+' см';
 }
+function doorZipperConstructor(x,pr){
+  if(!x||!x.door)return null;
+  const qty=Math.max(1,ni(x.qty||1));
+  const openingW=n(x.w);
+  const openingH=n(x.mh||Math.max(n(x.h1),n(x.h2)));
+  const outerKant=x.ed?(itemEdgeVisibleCm(x,pr)||5):5;
+  const zipperWidth=2;       // ширина молнии 20 мм
+  const innerKant=5;         // внутренний кант 50 мм
+  const overlap=3;           // нахлёст полотна на внутренний кант
+  const zEnabled=!!x.z;
+  const zCount=zEnabled?Math.max(1,zipperCount(x)):2;
+  const zipperSides=Math.min(Math.max(zCount,1),2);
+  const zipLen=n(x.zc)||openingH;
+  const shift=outerKant+zipperWidth+innerKant-overlap;
+  const fabricW=Math.max(0,openingW-shift*zipperSides);
+  const fabricH=Math.max(0,openingH+overlap*2);
+  return{
+    qty,openingW,openingH,outerKant,zipperWidth,innerKant,overlap,zEnabled,zCount,zipperSides,zipLen,shift,
+    fabricW,fabricH,
+    zipperTotalM:(zipLen*zCount*qty)/100,
+    innerKantTotalM:(zipLen*zipperSides*qty)/100
+  };
+}
+function doorConstructorSvg(d){
+  if(!d)return '';
+  const w=360,h=86,y=24,hh=34;
+  const left=d.zipperSides>=1,right=d.zipperSides>=2;
+  const band=14,zip=6,inner=14;
+  let x0=24,x1=w-24;
+  let parts=`<rect x="${x0}" y="${y}" width="${x1-x0}" height="${hh}" fill="#dbeafe" stroke="#64748b" stroke-width="1"/>`;
+  if(left){
+    parts+=`<rect x="${x0}" y="${y}" width="${band}" height="${hh}" fill="#a86f3f"/><rect x="${x0+band}" y="${y}" width="${zip}" height="${hh}" fill="#111827"/><rect x="${x0+band+zip}" y="${y}" width="${inner}" height="${hh}" fill="#d6a15f"/>`;
+  }
+  if(right){
+    parts+=`<rect x="${x1-band}" y="${y}" width="${band}" height="${hh}" fill="#a86f3f"/><rect x="${x1-band-zip}" y="${y}" width="${zip}" height="${hh}" fill="#111827"/><rect x="${x1-band-zip-inner}" y="${y}" width="${inner}" height="${hh}" fill="#d6a15f"/>`;
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:420px;height:auto;display:block;margin:6px 0">
+    ${parts}
+    <text x="${w/2}" y="14" text-anchor="middle" font-size="11" font-family="Arial" fill="#111827">узел двери: внешний кант → молния 2 см → внутренний кант 5 см → полотно</text>
+    <text x="${w/2}" y="75" text-anchor="middle" font-size="11" font-family="Arial" fill="#111827">сдвиг на сторону молнии: ${fmtCm(d.shift)} см (${Math.round(d.shift*10)} мм)</text>
+  </svg>`;
+}
+function doorConstructorHtml(x,pr,i,mode){
+  const d=doorZipperConstructor(x,pr);
+  if(!d)return '';
+  const compact=mode==='compact';
+  const warn=d.zEnabled?'':`<div style="color:#b42318;font-weight:800;margin-top:4px">Молния в строке не включена: размеры двери показаны справочно, в стоимость/закуп молния не попадёт.</div>`;
+  const table=`<table style="width:100%;border-collapse:collapse;font-size:${compact?'11':'12'}px;margin-top:6px">
+    <tr><th style="border:1px solid #e5e7eb;padding:4px;background:#fff7ed">Деталь</th><th style="border:1px solid #e5e7eb;padding:4px;background:#fff7ed">Размер / расход</th></tr>
+    <tr><td style="border:1px solid #e5e7eb;padding:4px">Полотно двери, крой</td><td style="border:1px solid #e5e7eb;padding:4px"><b>${fmtCm(d.fabricW)} × ${fmtCm(d.fabricH)} см</b> × ${d.qty} шт.</td></tr>
+    <tr><td style="border:1px solid #e5e7eb;padding:4px">Молния 20 мм</td><td style="border:1px solid #e5e7eb;padding:4px">${fmtCm(d.zipLen)} см × ${d.zCount} шт. × ${d.qty} = <b>${d.zipperTotalM.toFixed(2)} м</b></td></tr>
+    <tr><td style="border:1px solid #e5e7eb;padding:4px">Внутренний кант 50 мм</td><td style="border:1px solid #e5e7eb;padding:4px">${fmtCm(d.zipLen)} см × ${d.zipperSides} стороны × ${d.qty} = <b>${d.innerKantTotalM.toFixed(2)} м</b></td></tr>
+  </table>`;
+  return `<div class="doorCtor" style="margin-top:10px;border:1px solid #fed7aa;background:#fff7ed;border-radius:12px;padding:${compact?'8':'10'}px;break-inside:avoid;page-break-inside:avoid">
+    <b>Конструктор двери на молниях${i?' · Окно '+i:''}</b>
+    <div style="font-size:${compact?'11':'12'}px;color:#374151;margin-top:4px">
+      Формула стороны с молнией: внешний кант ${fmtCm(d.outerKant)} см + молния ${fmtCm(d.zipperWidth)} см + внутренний кант ${fmtCm(d.innerKant)} см − нахлёст ${fmtCm(d.overlap)} см = <b>${fmtCm(d.shift)} см</b>.
+      ${d.zipperSides===2?'Для двух молний сдвиг применяется слева и справа.':'Для одной молнии сдвиг применяется с одной стороны.'}
+    </div>
+    ${doorConstructorSvg(d)}
+    ${table}
+    ${warn}
+  </div>`;
+}
+function doorConstructorsHtml(items,pr,compact=false){
+  const arr=(items||[]).map((x,i)=>doorConstructorHtml(x,pr,i+1,compact?'compact':'full')).filter(Boolean);
+  return arr.length?arr.join(''):'<div class="empty">Дверей на молниях нет</div>';
+}
 function setEdgeSideWidth(rowIndex,side,value){
   const tr=[...rows.querySelectorAll('tr')][rowIndex];
   if(!tr)return;
@@ -1666,15 +1734,16 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   ].filter(Boolean).join('<br>');
   const edgeSides=itemEdgeSidesCm(x,pr);
   const svg=makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, x.open?'open':(x.blind?'blind':false), undefined, edgeSides);
+  const doorCtor=doorConstructorHtml(x,pr,i,arguments[3]?'compact':'full');
   if(arguments[3]){
     const compactMeta=[`Проём: ${x.w} × ${x.h1}/${x.h2} см`,`Кол-во: ${qty} шт.`, x.ed?`Кант: ${edgeSideLabel(x,pr)}`:'Кант: нет'].filter(Boolean).join(' · ');
     if(x.ed){
       const ed=edgeSideEditorHtml(x,arguments[4]??(i-1),pr);
-      return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div><div class="edgeEditor">${ed.top}<div class="edgeMiddle">${ed.left}<div class="edgeSvg">${svg}</div>${ed.right}</div>${ed.bottom}</div>`;
+      return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div><div class="edgeEditor">${ed.top}<div class="edgeMiddle">${ed.left}<div class="edgeSvg">${svg}</div>${ed.right}</div>${ed.bottom}</div>${doorCtor}`;
     }
-    return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div>${svg}`;
+    return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div>${svg}${doorCtor}`;
   }
-  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` + svg;
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` + svg + doorCtor;
 }
 function drawClient(x,i,pr){
   pr = pr || (typeof prices === 'function' ? prices() : set || {});
@@ -1809,6 +1878,9 @@ function report(c,ca){
 
   <h2>Изделия</h2>
   <div class="items">${itemCards}</div>
+
+  <h2>Конструктор дверей на молниях</h2>
+  ${doorConstructorsHtml(ca.items,ca.prices,false)}
 
   <h2>Схемы</h2>
   <div class="pdfgrid ${ca.items.length===1?'one':''}">
@@ -2679,6 +2751,8 @@ function productionTaskHtml(c,ca){
     </div>
     <h2>Изделия</h2>
     <table><thead><tr><th>№</th><th>Проём</th><th>Кол-во</th><th>Окантовка</th><th>Ремни</th><th>Молния</th><th>Люверсы / открывание</th><th>Дверь</th><th>Монтаж</th></tr></thead><tbody>${itemsRows}</tbody></table>
+    <h2>Конструктор дверей на молниях</h2>
+    ${doorConstructorsHtml(ca.items,ca.prices,false)}
     <h2>Раскрой / закуп</h2>
     ${matsHtml(ca.materials)}
     <p><b>Обрезки:</b> ${ca.totals.scrapArea.toFixed(2)} м² / ${ca.prices.scraps?rub(ca.totals.scrapCost):(rub(ca.totals.scrapCostInfo)+' справочно')}.</p>
