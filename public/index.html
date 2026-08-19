@@ -1828,8 +1828,9 @@ function report(c,ca){
   .mgrid{display:grid;grid-template-columns:1fr auto;gap:4px 10px}
   .mgrid span{color:#6b7280}
   .pdfgrid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;gap:12px}
-  .pdfitem{flex:0 1 360px;max-width:420px;min-width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px}
-  .pdfitem svg{width:100%;height:auto;display:block}.edgeEditor{display:grid;grid-template-rows:auto auto auto;gap:6px;margin-top:6px}.edgeEditor .edgeMiddle{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:6px;align-items:center}.edgeEditor .edgeSide{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px}.edgeEditor .edgeSide label{font-size:10px;margin:0 0 3px;color:#9a3412}.edgeEditor .edgeSide input{padding:5px;border-radius:8px;font-size:12px;text-align:center}.edgeEditor .edgeTop,.edgeEditor .edgeBottom{max-width:120px;margin:0 auto}.edgeEditor .edgeLeft,.edgeEditor .edgeRight{align-self:center}.edgeEditor .edgeSvg{min-width:0}.edgeEditor .edgeHint{text-align:center;font-size:10px;color:#9a3412;font-weight:700}@media(max-width:700px){.edgeEditor .edgeMiddle{grid-template-columns:58px minmax(0,1fr) 58px}.edgeEditor .edgeSide{padding:4px}.edgeEditor .edgeSide input{padding:4px;font-size:11px}}
+  .pdfitem{flex:0 1 360px;max-width:420px;min-width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px;position:relative;overflow:hidden}
+  .pdfitem svg{width:100%;height:auto;display:block}
+  .client-watermark{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) rotate(-18deg);z-index:5;pointer-events:none;white-space:nowrap;font-size:25px;font-weight:900;letter-spacing:.4px;color:rgba(17,24,39,.16);text-shadow:0 1px 0 rgba(255,255,255,.65)}.edgeEditor{display:grid;grid-template-rows:auto auto auto;gap:6px;margin-top:6px}.edgeEditor .edgeMiddle{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:6px;align-items:center}.edgeEditor .edgeSide{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px}.edgeEditor .edgeSide label{font-size:10px;margin:0 0 3px;color:#9a3412}.edgeEditor .edgeSide input{padding:5px;border-radius:8px;font-size:12px;text-align:center}.edgeEditor .edgeTop,.edgeEditor .edgeBottom{max-width:120px;margin:0 auto}.edgeEditor .edgeLeft,.edgeEditor .edgeRight{align-self:center}.edgeEditor .edgeSvg{min-width:0}.edgeEditor .edgeHint{text-align:center;font-size:10px;color:#9a3412;font-weight:700}@media(max-width:700px){.edgeEditor .edgeMiddle{grid-template-columns:58px minmax(0,1fr) 58px}.edgeEditor .edgeSide{padding:4px}.edgeEditor .edgeSide input{padding:4px;font-size:11px}}
   .pdfgrid.one .pdfitem{flex:0 0 420px;max-width:420px}
   .scheme-title{font-weight:900;text-align:left;font-size:14px;margin:0 0 2px}
   .scheme-meta{font-size:11px;line-height:1.25;color:#374151;font-weight:600;margin:0 0 5px}
@@ -1978,7 +1979,7 @@ function clientReport(c,ca){
 
   <h2>Схемы</h2>
   <div class="pdfgrid ${ca.items.length===1?'one':''}">
-    ${ca.items.map((x,i)=>`<div class="pdfitem">${drawClient(x,i+1,ca.prices)}</div>`).join('')}
+    ${ca.items.map((x,i)=>`<div class="pdfitem">${drawClient(x,i+1,ca.prices)}<div class="client-watermark">Мягкиеокна55.рф</div></div>`).join('')}
   </div>
 
   <div class="note">
