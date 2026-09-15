@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: BOTTOM_HARDWARE_EQUAL_SPACING_V1_2026-09-15 -->
 <!-- CRM_BUILD: ACTUAL_HARDWARE_ECONOMICS_V1_2026-09-15 -->
 <!-- CRM_BUILD: SOFTGLASS_HARDWARE_VISUALS_V2_2026-09-07 -->
 <!-- CRM_BUILD: WATERMARK_V2_CONTRACT_NO_DOOR_CONSTRUCTOR_2026-08-19 --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CRM мягкие окна Supabase</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
@@ -612,8 +613,8 @@ function grommetSegments(cm){
 function grommetStepCm(cm){const seg=grommetSegments(cm);return seg?cm/seg:0;}
 function sideGrommetCount(cm){const seg=grommetSegments(cm);return Math.max(0,seg-1);}
 function topRoundGrommetCount(cm){return sideGrommetCount(cm);}
-function bottomGrommetCount(cm){const len=Math.max(0,n(cm));if(!len)return 0;return len>160?4:3;}
-function bottomGrommetStepCm(cm){const cnt=bottomGrommetCount(cm);return cnt>1?Math.max(0,n(cm))/(cnt-1):0;}
+function bottomGrommetCount(cm){return sideGrommetCount(cm);}
+function bottomGrommetStepCm(cm){return grommetStepCm(Math.max(0,n(cm)));}
 
 function openSideOvalCount(cm){
   const len=Math.max(0,n(cm));
@@ -655,7 +656,7 @@ function ovalGrommetCountForWindow(x){
   return openSideOvalCount(x.h1)+openSideOvalCount(x.h2)+bottomGrommetCount(x.w);
 }
 function grommetCountForWindow(x){return roundGrommetCountForWindow(x)+ovalGrommetCountForWindow(x);}
-function grommetCountPerWindow(x){if(!(isOpenGrommetWindow(x)||isBlindGrommetWindow(x)))return 0;return ni(x.gm ?? x.grommetQty ?? x.grommetsQty ?? x.grommetCount) || grommetCountForWindow(x);}
+function grommetCountPerWindow(x){return grommetCountForWindow(x);}
 function grommetTotalQty(x){return grommetCountPerWindow(x)*Math.max(1,ni(x.qty||1));}
 function roundGrommetTotalQty(x){return roundGrommetCountForWindow(x)*Math.max(1,ni(x.qty||1));}
 function ovalGrommetTotalQty(x){return ovalGrommetCountForWindow(x)*Math.max(1,ni(x.qty||1));}
@@ -1875,7 +1876,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         }
         const bottomCnt=bottomGrommetCount(widthCm);
         for(let i=0;i<bottomCnt;i++){
-          const t=bottomCnt===1?0.5:i/(bottomCnt-1);
+          const t=(i+1)/(bottomCnt+1);
           const x=innerX+(innerRightX-innerX)*t;
           const y=bottomY+sideBandPx('bottom')*0.5;
           if(mode==='blind')addRound(x,y,'bottom');else addTurnBracket(x,y,'bottom');
@@ -2819,7 +2820,7 @@ function productionCutPieceCard(p){
       addG(ox+rightPts[0].x+(rightPts[1].x-rightPts[0].x)*t, oy+rightPts[0].y+(rightPts[1].y-rightPts[0].y)*t);
     }
     for(let i=0;i<bottomCnt;i++){
-      const t=bottomCnt===1?0.5:i/(bottomCnt-1);
+      const t=(i+1)/(bottomCnt+1);
       addG(ox+ob.minX+ob.width*t, oy+ob.minY+ob.height);
     }
     const labelY=Math.min(vbH-4, oy+ob.minY+ob.height+15);
