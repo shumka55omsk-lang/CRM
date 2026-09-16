@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: TPU_FILM_V1_2026-09-16 -->
 <!-- CRM_BUILD: VERTICAL_BOTTOM_CORNERS_V1_2026-09-15 -->
 <!-- CRM_BUILD: BOTTOM_HARDWARE_EQUAL_SPACING_V1_2026-09-15 -->
 <!-- CRM_BUILD: ACTUAL_HARDWARE_ECONOMICS_V1_2026-09-15 -->
@@ -70,9 +71,9 @@
 <div class="panel"><h2>Дашборд по статусам</h2><p class="muted">Заказы сгруппированы по текущему статусу. Нажми «Открыть», чтобы перейти в карточку клиента.</p><div id="statusDash" class="statusDash"></div></div>
 <div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
-<section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Люверсы 10 мм</option><option>Люверсы 42*22</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="ПВХ: 1.8 м / 2.25 м / 3 м; кант: 8 см / 10 см; люверсы: шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="ПВХ — ₽/м²"></div><div><label>Установка / работа</label><input id="wh_labor" type="number" step="0.01" value="0" placeholder="₽ за шт. или пог.м"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена ПВХ — за 1 м². Для ремней и люверсов цены указываются за штуку, для молнии — за погонный метр. Поле «Установка / работа» используется в экономике заказа.</p><div class="economyWarning">Чтобы стоимость установки синхронизировалась между всеми устройствами, один раз выполните файл <b>sql/stock_installation_cost.sql</b> в Supabase SQL Editor. До этого цена работы сохраняется локально на текущем устройстве.</div></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
+<section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>TPU полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Люверсы 10 мм</option><option>Люверсы 42*22</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="ПВХ: 1.8 м / 2.25 м / 3 м; кант: 8 см / 10 см; люверсы: шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="Полотно — ₽/м²"></div><div><label>Установка / работа</label><input id="wh_labor" type="number" step="0.01" value="0" placeholder="₽ за шт. или пог.м"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена ПВХ и TPU — за 1 м². Для ремней и люверсов цены указываются за штуку, для молнии — за погонный метр. Поле «Установка / работа» используется в экономике заказа.</p><div class="economyWarning">Чтобы стоимость установки синхронизировалась между всеми устройствами, один раз выполните файл <b>sql/stock_installation_cost.sql</b> в Supabase SQL Editor. До этого цена работы сохраняется локально на текущем устройстве.</div></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
 <section id="set" class="hide"><div class="top"><h1>Настройки</h1></div><div class="panel"><div class="grid"><div><label>Цена м²</label><input id="s_m2" type="number"></div><div><label>Окантовка пог.м</label><input id="s_edge" type="number"></div><div><label>Ремень шт</label><input id="s_strap" type="number"></div><div><label>Молния пог.м</label><input id="s_zip" type="number"></div><div><label>Монтаж м²</label><input id="s_inst" type="number"></div><div><label>Офсет резки см</label><input id="s_off" type="number" step="0.1"></div></div><p><button class="btn p" onclick="saveSet()">Сохранить</button></p><p class="muted">Офлайн-режим сохраняет только клиентов и расчёты на этом устройстве. Склад, производство, фото и Telegram работают только онлайн.</p></div></section>
-<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>Цена м²</label><input id="p_m2" type="number"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп ПВХ</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+<section id="card" class="hide"><div class="top"><h1 id="title">Клиент</h1><div class="actions"><button class="btn" onclick="show('clients')">← Назад</button><button class="btn p" onclick="saveClient()">Сохранить клиента</button><span id="autosaveStatus" class="muted" style="align-self:center">Автосохранение включено</span></div></div><div class="panel"><h2>Данные клиента</h2><div class="grid"><div><label>Имя</label><input id="c_name"></div><div><label>Телефон</label><input id="c_phone"></div><div><label>Адрес замера</label><input id="c_addr"></div><div><label>Источник</label><select id="c_src"><option>Сайт</option><option>Авито</option><option>WhatsApp</option><option>Telegram</option><option>Max</option><option>Звонок</option></select></div><div><label>Статус</label><select id="c_stat"></select></div><div><label>Дата замера</label><input id="c_date" type="date"></div></div><p><label>Комментарий</label><textarea id="c_comm"></textarea></p></div><div class="panel"><h2>Калькулятор</h2><div class="grid"><div><label>ПВХ — цена м²</label><input id="p_m2" type="number"></div><div><label>TPU — цена м²</label><input id="p_tpu" type="number" min="0" placeholder="Укажите цену TPU"></div><div><label>Окантовка</label><input id="p_edge" type="number"></div><div><label>Ремень</label><input id="p_strap" type="number"></div><div><label>Молния</label><input id="p_zip" type="number"></div><div><label>Монтаж м²</label><input id="p_inst" type="number"></div><div><label>Офсет SVG</label><input id="p_off" type="number" step="0.1"></div></div><details class="scrap-compact"><summary><span><input id="p_scraps" type="checkbox"> Учитывать стоимость обрезков</span><b id="t_scrap_cost">0 ₽</b></summary><div class="scrap-mini"><div><span>Погонаж</span><b id="t_roll_area">0 м²</b></div><div><span>Детали с офсетом</span><b id="t_cut_area">0 м²</b></div><div><span>Обрезки</span><b id="t_scrap_area">0 м²</b></div><div><span>Закуп полотна</span><b id="t_scrap_price">0 ₽/м²</b></div></div><p class="muted">Если включено, сумма обрезков добавляется в итог заказа.</p></details><h2>Окна</h2><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Полотно</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2>Превью</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[],stockLoaded=false,stockLabor={};const LS='swcrm_supabase_settings_v1',STOCK_LABOR_LS='swcrm_stock_installation_cost_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -423,6 +424,7 @@ function recalcAndAutosave(){
 function loadCalc(ca){
   autosaveLock=true;
   p_m2.value=ca?.prices?.m2??set.m2;
+  p_tpu.value=ca?.prices?.tpu??0;
   p_edge.value=ca?.prices?.edge??set.edge;
   p_strap.value=ca?.prices?.strap??set.strap;
   p_zip.value=ca?.prices?.zip??set.zip;
@@ -431,7 +433,7 @@ function loadCalc(ca){
   if(typeof p_scraps!=='undefined')p_scraps.checked=!!(ca?.prices?.scraps);
   rows.innerHTML='';
   (ca?.items?.length?ca.items:[{w:200,h1:150,h2:150,qty:1,ed:true,straps:0,z:false,zq:2,zc:0,zd:0,inst:true}]).forEach(addRowObj);
-  ['p_m2','p_edge','p_strap','p_zip','p_inst','p_off','p_scraps'].forEach(id=>{
+  ['p_m2','p_tpu','p_edge','p_strap','p_zip','p_inst','p_off','p_scraps'].forEach(id=>{
     let el=document.getElementById(id);
     if(el){
       el.oninput=recalcAndAutosave;
@@ -455,7 +457,7 @@ function addRowObj(o){
   let elVal = o.el ?? o.edgeLeftCm ?? o.leftEdgeCm ?? o.edgeSidesCm?.left ?? ewVal;
   let erVal = o.er ?? o.edgeRightCm ?? o.rightEdgeCm ?? o.edgeSidesCm?.right ?? ewVal;
   let tr=document.createElement('tr');
-  tr.innerHTML=`<td class=rownum></td><td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
+  tr.innerHTML=`<td class=rownum></td><td><select class=film><option value="pvc">ПВХ</option><option value="tpu" ${filmKind(o)==='tpu'?'selected':''}>TPU</option></select></td><td><input class=w type=number value="${o.w??o.widthCm??''}"></td>
   <td><input class=h1 type=number value="${o.h1??o.height1Cm??''}"></td>
   <td><input class=h2 type=number value="${o.h2??o.height2Cm??''}"></td>
   <td><input class=qty type=number value="${o.qty??1}"></td>
@@ -474,7 +476,7 @@ function addRowObj(o){
   <td><button class="btn s r" onclick="this.closest('tr').remove();updateWindowNumbers();recalcAndAutosave()">×</button></td>`;
   rows.appendChild(tr);
   updateWindowNumbers();
-  tr.querySelectorAll('input').forEach(i=>{
+  tr.querySelectorAll('input,select').forEach(i=>{
     i.oninput=recalcAndAutosave;
     i.onchange=i.type==='checkbox'?recalcAndSaveUrgent:recalcAndAutosave;
   });
@@ -494,13 +496,14 @@ function addRowObj(o){
     ewInput.onchange=syncAllEdges;
   }
 }
-function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5,scraps:!!document.getElementById('p_scraps')?.checked}}function items(){
+function prices(){return{m2:n(p_m2.value),tpu:n(p_tpu.value),edge:n(p_edge.value),strap:n(p_strap.value),zip:n(p_zip.value),inst:n(p_inst.value),off:n(p_off.value)||4.5,scraps:!!document.getElementById('p_scraps')?.checked}}function items(){
   return[...rows.querySelectorAll('tr')].map((tr,i)=>{
     const hasZ = tr.querySelector('.z').checked;
     const zq = hasZ ? Math.max(1, ni(tr.querySelector('.zq')?.value || 2)) : 0;
     const zd = hasZ ? n(tr.querySelector('.zd')?.value || 0) : 0;
     const item={
       index:i+1,
+      film:tr.querySelector('.film').value,
       w:n(tr.querySelector('.w').value),
       h1:n(tr.querySelector('.h1').value),
       h2:n(tr.querySelector('.h2').value),
@@ -543,13 +546,19 @@ function prices(){return{m2:n(p_m2.value),edge:n(p_edge.value),strap:n(p_strap.v
 }
 function zipperCount(x){return x.z ? Math.max(1, ni(x.zq || x.zipperQty || x.zippersCount || 2)) : 0}
 function zipperDistance(x){return n(x.zd || x.zipperDistance || x.zo || x.zipoff || x.zipperOffset || 0)}
+let activeFilm='pvc';
+function filmKind(x){return x&&x.film==='tpu'?'tpu':'pvc';}
+function filmName(kind){return kind==='tpu'?'TPU полотно':'ПВХ полотно';}
+function isTpuMaterialName(v){return /tpu|тпу/i.test(String(v||''));}
+function isActiveFilm(v){return activeFilm==='tpu'?isTpuMaterialName(v):isPvcMaterialName(v);}
+function withFilm(kind,fn){const previous=activeFilm;activeFilm=kind;try{return fn();}finally{activeFilm=previous;}}
 function getPvcPurchaseM2Price(width){
-  const item=stockFind('ПВХ полотно', width);
+  const item=stockFind(filmName(activeFilm), width);
   if(item&&n(item.unit_cost)>0)return n(item.unit_cost);
 
   // Если конкретная ширина не найдена или цена в ней не заполнена,
   // берём среднюю закупочную цену по всем ПВХ-позициям склада.
-  const pvc=(stock||[]).filter(s=>isPvcMaterialName(s.material)&&n(s.unit_cost)>0);
+  const pvc=(stock||[]).filter(s=>isActiveFilm(s.material)&&n(s.unit_cost)>0);
   if(pvc.length){
     const totalQty=pvc.reduce((sum,s)=>sum+Math.max(0,n(s.qty_m)),0);
     if(totalQty>0)return pvc.reduce((sum,s)=>sum+n(s.unit_cost)*Math.max(0,n(s.qty_m)),0)/totalQty;
@@ -566,10 +575,10 @@ function rollWidthMFromLabel(width){
 function calcWeightedPvcPurchaseM2(ma){
   let sumArea=0,sumCost=0;
   (ma.rollRows||[]).forEach(r=>{
-    if(!isPvcMaterialName(r.material))return;
+    if(!isPvcMaterialName(r.material)&&!isTpuMaterialName(r.material))return;
     const widthM=rollWidthMFromLabel(r.width);
     const area=widthM*n(r.need);
-    const price=getPvcPurchaseM2Price(r.width);
+    const price=n(r.unitCost);
     if(area>0&&price>0){
       sumArea+=area;
       sumCost+=area*price;
@@ -598,7 +607,13 @@ function scrapCalc(it,pr,materialData){
 
   const scrapArea=Math.max(0,rollArea-cutArea);
   const purchaseM2=calcWeightedPvcPurchaseM2(ma);
-  const scrapCost=scrapArea*purchaseM2;
+  const scrapCost=['pvc','tpu'].reduce((sum,kind)=>{
+    const rr=(ma.rollRows||[]).filter(r=>stockMaterialKind(r.material)===kind);
+    const area=rr.reduce((a,r)=>a+rollWidthMFromLabel(r.width)*n(r.need),0);
+    const cost=rr.reduce((a,r)=>a+rollWidthMFromLabel(r.width)*n(r.need)*n(r.unitCost),0);
+    const cut=it.filter(x=>filmKind(x)===kind).reduce((a,x)=>a+polyAreaM2Abs(offsetPolyCm(cutOpeningPoints(x),n(pr.off)||4.5))*ni(x.qty),0);
+    return sum+(area?Math.max(0,area-cut)*cost/area:0);
+  },0);
 
   return{rollArea,cutArea,scrapArea,scrapCost,purchaseM2};
 }
@@ -766,12 +781,13 @@ function orderEconomics(it,pr,ma,t){
   const margin=clientTotal?profit/clientTotal*100:0;
   const missingPurchase=rows.filter(r=>r.qty>0&&r.purchaseUnit<=0).map(r=>r.material+' '+r.width);
   const missingLabor=rows.filter(r=>r.category==='hardware'&&r.qty>0&&r.laborUnit<=0).map(r=>r.material+' '+r.width);
-  return{rows,materialPurchaseCost,hardwarePurchaseCost,hardwareLaborCost,siteInstallationCost,productionCost,fullCost,clientTotal,profit,margin,missingPurchase:[...new Set(missingPurchase)],missingLabor:[...new Set(missingLabor)]};
+  return{materialWarnings:[...(ma.oversized||[]),...(it.some(x=>filmKind(x)==='tpu')&&n(pr.tpu)<=0?['Не указана цена TPU за м².']:[])],rows,materialPurchaseCost,hardwarePurchaseCost,hardwareLaborCost,siteInstallationCost,productionCost,fullCost,clientTotal,profit,margin,missingPurchase:[...new Set(missingPurchase)],missingLabor:[...new Set(missingLabor)]};
 }
 function economyHtml(e){
   if(!e)return '<div class="empty">Экономика пока не рассчитана</div>';
   const profitClass=e.profit>=0?'positive':'negative';
   const warnings=[];
+  if(e.materialWarnings)warnings.push(...e.materialWarnings);
   if(e.missingPurchase&&e.missingPurchase.length)warnings.push('Не заполнена закупочная цена: '+e.missingPurchase.join(', ')+'.');
   if(e.missingLabor&&e.missingLabor.length)warnings.push('Не заполнена стоимость установки: '+e.missingLabor.join(', ')+'.');
   const warning=warnings.length?`<div class="economyWarning">${esc(warnings.join(' '))} Себестоимость и прибыль пока неполные.</div>`:'';
@@ -791,7 +807,7 @@ function totals(it,pr,materialData){
   let t={totalQty:0,totalArea:0,totalGrommets:0,baseTotal:0,extraTotal:0,hardwareChargeTotal:0,hardwarePurchaseTotal:0,hardwareLaborTotal:0,installTotal:0,scrapArea:0,scrapCost:0,scrapCostInfo:0,scrapPurchaseM2:0,rollArea:0,cutArea:0,grandTotal:0,rows:[]};
   it.forEach(x=>{
     let w=x.w/100,h1=x.h1/100,h2=x.h2/100,mh=x.mh/100;
-    let area=w*mh*x.qty,base=area*pr.m2;
+    let area=w*mh*x.qty,base=area*(filmKind(x)==='tpu'?n(pr.tpu):pr.m2);
     let per=w+h1+h2+Math.sqrt(w*w+(h1-h2)**2);
     const edgeCoef=x.z?2.5:1;
     const edgeCost=x.ed?per*x.qty*pr.edge*edgeCoef:0;
@@ -899,7 +915,7 @@ function stockFindPvcRollByCm(rollCm){
   const target=n(rollCm);
   if(!target)return null;
   const matches=(stock||[]).filter(s=>{
-    if(!isPvcMaterialName(s.material))return false;
+    if(!isActiveFilm(s.material))return false;
     return Math.abs(stockPvcWidthCm(s)-target)<0.51;
   });
   return matches.find(s=>Math.max(0,n(s.qty_m))>0.0001)||matches[0]||null;
@@ -913,7 +929,7 @@ function stockPvcRollQtyByWidth(){
   // не могла попасть в раскрой, если её остаток по складу равен нулю.
   const map={};
   (stock||[]).forEach(s=>{
-    if(!isPvcMaterialName(s.material))return;
+    if(!isActiveFilm(s.material))return;
     const w=stockPvcWidthCm(s);
     if(!w)return;
     const key=String(Math.round(w*10)/10);
@@ -1171,7 +1187,7 @@ function buildOptimizedLayouts(it,pr){
   let candidateRolls=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
 
   if(!candidateRolls.length){
-    return{layouts:[],bad:['На складе нет ПВХ-рулонов с положительным остатком. Раскрой не может быть построен без реального материала в наличии.'],pieces:[]};
+    return{layouts:[],bad:[filmName(activeFilm)+': нет рулонов с положительным остатком. Добавьте материал на склад для расчёта раскроя и себестоимости.'],pieces:[]};
   }
 
   const singleRollOptions=candidateRolls
@@ -1346,6 +1362,21 @@ function fmtCm(v){
   return Number.isInteger(x) ? String(x) : String(x).replace('.', ',');
 }
 function mats(it,pr){
+  const groups=['pvc','tpu'].map(kind=>({kind,items:it.filter(x=>filmKind(x)===kind)})).filter(g=>g.items.length);
+  const result={rollRows:[],oversized:[],details:[],layouts:[],accessoryRows:[],grommetRows:[],hardwareRows:[],edgingRows:[],edgingRow:null};
+  for(const g of groups){
+    const part=withFilm(g.kind,()=>filmMats(g.items,pr));
+    for(const key of Object.keys(result)){if(Array.isArray(result[key]))result[key].push(...(part[key]||[]));}
+  }
+  for(const key of ['accessoryRows','grommetRows','hardwareRows','edgingRows']){
+    const merged=new Map();
+    for(const row of result[key]){const id=row.material+'|'+row.width;if(merged.has(id))merged.get(id).need+=row.need;else merged.set(id,{...row});}
+    result[key]=[...merged.values()];
+  }
+  result.edgingRow=result.edgingRows.length===1?result.edgingRows[0]:null;
+  return result;
+}
+function filmMats(it,pr){
   const opt=buildOptimizedLayouts(it,pr);
   const allowed=stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001);
   opt.layouts=(opt.layouts||[]).filter(l=>allowed.includes(Math.round(n(l.rollWidthCm)*10)/10));
@@ -1361,6 +1392,7 @@ function mats(it,pr){
       const cutArea=polyAreaM2Abs(p.cutPts||[]);
       details.push({
         window:p.window,
+        material:filmName(activeFilm),
         detail:p.detail,
         roll:p.roll,
         needM:p.lengthCm/100,
@@ -1422,9 +1454,9 @@ function mats(it,pr){
   Object.keys(usage).forEach(k=>{
     if(usage[k]){
       let rolls=Math.ceil(usage[k]/50);
-      const st=stockState('ПВХ полотно',rollWidthLabel(Number(k)),usage[k]);
+      const st=stockState(filmName(activeFilm),rollWidthLabel(Number(k)),usage[k]);
       rows.push({
-        material:'ПВХ полотно',
+        material:filmName(activeFilm),
         width:rollWidthLabel(Number(k)),
         need:usage[k],
         inStock:st.qty,
@@ -1459,7 +1491,7 @@ function mats(it,pr){
     rollRows:rows,
     oversized:opt.bad,
     details,
-    layouts:opt.layouts,
+    layouts:opt.layouts.map(l=>({...l,material:filmName(activeFilm)})),
     accessoryRows,
     grommetRows,
     hardwareRows,
@@ -1477,6 +1509,7 @@ function stockNormMaterial(v){
 }
 function stockMaterialKind(v){
   const m=stockNormMaterial(v);
+  if(isTpuMaterialName(v))return 'tpu';
   if(isPvcMaterialName(v))return 'pvc';
   if(m.includes('окант')||m.includes('кант')||m.includes('лента'))return 'edge';
   if(m.includes('молн'))return 'zip';
@@ -1520,9 +1553,9 @@ function stockWidthByMaterialOrWidth(item){
 function stockFind(material,width){
   const kind=stockMaterialKind(material);
   const nw=stockNormWidth(width);
-  if(kind==='pvc'){
+  if(kind==='pvc'||kind==='tpu'){
     const target=stockWidthToCmValue(width);
-    const match=(stock||[]).find(s=>stockMaterialKind(s.material)==='pvc'&&(!target||Math.abs(stockPvcWidthCm(s)-target)<0.51));
+    const match=(stock||[]).find(s=>stockMaterialKind(s.material)===kind&&(!target||Math.abs(stockPvcWidthCm(s)-target)<0.51));
     if(match)return match;
   }
   const exact=(stock||[]).find(s=>{
@@ -1569,7 +1602,7 @@ function matsHtml(m){
   if(m.details&&m.details.length){
     const totalBlank=m.details.reduce((s,d)=>s+n(d.blankCost),0);
     const totalCut=m.details.reduce((s,d)=>s+n(d.cutCost),0);
-    base += `<h3>Детали раскроя</h3><div class="scrap-compact"><b>Стоимость кусков:</b> заготовки ${rub(totalBlank)} / по контуру резки ${rub(totalCut)} <span class="muted">по закупочной цене ПВХ из склада</span></div><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Площадь заготовки</th><th>Цена ПВХ</th><th>Стоимость куска</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${rollWidthLabel(d.roll)}</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${n(d.needM).toFixed(2)} м</td><td>${n(d.blankAreaM2).toFixed(2)} м²</td><td>${n(d.pvcPriceM2)?rub(d.pvcPriceM2):'—'}</td><td>${n(d.blankCost)?rub(d.blankCost):'—'}</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;
+    base += `<h3>Детали раскроя</h3><div class="scrap-compact"><b>Стоимость кусков:</b> заготовки ${rub(totalBlank)} / по контуру резки ${rub(totalCut)} <span class="muted">по закупочной цене выбранного полотна из склада</span></div><div class=tw><table><thead><tr><th>Окно</th><th>Деталь</th><th>Рулон</th><th>Размер резки</th><th>Пог. м</th><th>Площадь заготовки</th><th>Цена полотна</th><th>Стоимость куска</th><th>Ориентация</th><th>Позиция</th><th>Выбор</th></tr></thead><tbody>${m.details.map(d=>`<tr><td>${d.window}</td><td>${d.detail}</td><td>${esc(d.material||'ПВХ полотно')} ${rollWidthLabel(d.roll)}</td><td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td><td>${n(d.needM).toFixed(2)} м</td><td>${n(d.blankAreaM2).toFixed(2)} м²</td><td>${n(d.pvcPriceM2)?rub(d.pvcPriceM2):'—'}</td><td>${n(d.blankCost)?rub(d.blankCost):'—'}</td><td>${d.rotated?'повернуто':'без поворота'}${d.mirrored?' / зеркально':''}</td><td>x ${((d.xCm||0)/100).toFixed(2)} м / y ${((d.yCm||0)/100).toFixed(2)} м</td><td>${d.selectedByStock?'есть на складе':'к закупу'}</td></tr>`).join('')}</tbody></table></div>`;
   }
   return base;
 }
@@ -1929,6 +1962,7 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
     : '';
   const qty = ni(x.qty || 1);
   const meta = [
+    `Полотно: ${filmName(filmKind(x))}`,
     `Кол-во: ${qty} шт.`,
     `Ремни: ${straps}`,
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
@@ -1943,14 +1977,15 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
   const svg=makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, x.open?'open':(x.blind?'blind':false), undefined, edgeSides);
   const doorCtor=doorConstructorHtml(x,pr,i,arguments[3]?'compact':'full');
   if(arguments[3]){
-    const compactMeta=[`Проём: ${x.w} × ${x.h1}/${x.h2} см`,`Кол-во: ${qty} шт.`, x.ed?`Кант: ${edgeSideLabel(x,pr)}`:'Кант: нет'].filter(Boolean).join(' · ');
+    const compactMeta=[`Проём: ${x.w} × ${x.h1}/${x.h2} см`,`Полотно: ${filmName(filmKind(x))}`,
+    `Кол-во: ${qty} шт.`, x.ed?`Кант: ${edgeSideLabel(x,pr)}`:'Кант: нет'].filter(Boolean).join(' · ');
     if(x.ed){
       const ed=edgeSideEditorHtml(x,arguments[4]??(i-1),pr);
       return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div><div class="edgeEditor">${ed.top}<div class="edgeMiddle">${ed.left}<div class="edgeSvg">${svg}</div>${ed.right}</div>${ed.bottom}</div>${doorCtor}`;
     }
     return `<div class="scheme-title">Окно ${i}</div><div class="preview-meta">${compactMeta}</div>${svg}${doorCtor}`;
   }
-  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` + svg + doorCtor;
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт. · ${filmName(filmKind(x))}</div><div class="scheme-meta">${meta}</div>` + svg + doorCtor;
 }
 function drawClient(x,i,pr){
   pr = pr || (typeof prices === 'function' ? prices() : set || {});
@@ -1962,6 +1997,7 @@ function drawClient(x,i,pr){
   const zDistance = hasZipper ? zipperDistance(x) : 0;
   const qty = ni(x.qty || 1);
   const meta = [
+    `Полотно: ${filmName(filmKind(x))}`,
     `Кол-во: ${qty} шт.`,
     `Ремни: ${straps}`,
     hasZipper ? `Молния: ${zipperCm} см × ${zCount} шт.` : 'Молния: нет',
@@ -1969,7 +2005,7 @@ function drawClient(x,i,pr){
     x.door ? 'Дверь: да' : '',
     x.ed ? `Кант: ${edgeSideLabel(x,pr)} (${edgeSideStripLabel(x,pr)})` : 'Кант: нет'
   ].filter(Boolean).join('<br>');
-  return `<div class="scheme-title">Окно ${i} — ${qty} шт.</div><div class="scheme-meta">${meta}</div>` +
+  return `<div class="scheme-title">Окно ${i} — ${qty} шт. · ${filmName(filmKind(x))}</div><div class="scheme-meta">${meta}</div>` +
     makeDrawingSVG(x.w, x.h1, x.h2, i, straps, hasZipper, zipperCm, edgingWidth, zDistance, zCount, x.open?'open':(x.blind?'blind':false), 'none', itemEdgeSidesCm(x,pr));
 }
 function report(c,ca){
@@ -2122,7 +2158,7 @@ function clientDrawingWithWatermark(x,i,pr){
 function clientReport(c,ca){
   const itemCards=(ca.items||[]).map((x,i)=>`<div class="itemcard">
       <div><b>Окно ${i+1}</b> — ${x.qty} шт.</div>
-      <div>Размер проёма: ${x.w} × ${x.h1}/${x.h2} см</div>
+      <div>Полотно: ${filmName(filmKind(x))}. Размер проёма: ${x.w} × ${x.h1}/${x.h2} см</div>
       <div>Кант: ${edgeSideLabel(x,ca.prices)} · Ремни: ${x.straps} · Люверсы: ${grommetClientText(x)} · Дверь: ${x.door?'да':'нет'}</div>
       <div>Молния: ${x.z?`${x.zc} см × ${zipperCount(x)} шт.`:'нет'}</div>
       <div>Монтаж: ${x.inst?'да':'нет'}</div>
@@ -2536,7 +2572,7 @@ function combinedCutLayoutSvg(layouts,c,ca){
     const yBaseMm=yBase*10;
 
     rollLayer += `<rect x="0" y="${yBaseMm.toFixed(2)}" width="${(rollWcm*10).toFixed(2)}" height="${(rollLcm*10).toFixed(2)}" fill="none" stroke="#8b4513" stroke-width="0.5"/>`;
-    labelLayer += `<text x="${((rollWcm*10)/2).toFixed(2)}" y="${(yBaseMm+12).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial" fill="#8b4513">Рулон ${(rollWcm/100).toFixed(1)} м · погонаж ${formatM(rollLcm)} · деталей ${(layout.placements||[]).length}</text>`;
+    labelLayer += `<text x="${((rollWcm*10)/2).toFixed(2)}" y="${(yBaseMm+12).toFixed(2)}" text-anchor="middle" font-size="18" font-family="Arial" fill="#8b4513">${esc(layout.material||'ПВХ полотно')} · Рулон ${(rollWcm/100).toFixed(1)} м · погонаж ${formatM(rollLcm)} · деталей ${(layout.placements||[]).length}</text>`;
 
     (layout.placements||[]).forEach((p)=>{
       const x=p.xCm||0, y=(p.yCm||0)+yBase;
@@ -2602,7 +2638,7 @@ function stockRowsHtml(){
     <th>Материал</th><th>Ширина / тип</th><th>В наличии</th><th>Закупочная цена</th><th>Установка / работа</th><th>Критический остаток</th><th>Статус</th><th></th>
   </tr></thead><tbody>${stock.map(s=>{
     let qty=n(s.qty_m),crit=n(s.critical_m),cost=n(s.unit_cost),labor=stockInstallationCost(s),st=qty<=crit?'КРИТИЧЕСКИЙ':'ОК',color=qty<=crit?'#b42318':'#166534';
-    const costLabel = stockNormMaterial(s.material)==='пвх полотно' ? rub(cost).replace(' ₽','')+' ₽/м²' : rub(cost).replace(' ₽','')+' ₽';
+    const costLabel = ['pvc','tpu'].includes(stockMaterialKind(s.material)) ? rub(cost).replace(' ₽','')+' ₽/м²' : rub(cost).replace(' ₽','')+' ₽';
     return`<tr><td>${esc(s.material)}</td><td>${esc(s.width)}</td><td>${qty.toFixed(2)}</td><td>${costLabel}</td><td>${labor?rub(labor):'—'}</td><td>${crit.toFixed(2)}</td><td style="font-weight:900;color:${color}">${st}</td><td class="actions"><button class="btn s" onclick="editStock('${s.id}')">Изм.</button><button class="btn s r" onclick="deleteStock('${s.id}')">Удалить</button></td></tr>`
   }).join('')}</tbody></table></div>`;
 }
@@ -2759,7 +2795,7 @@ function productionRollLayoutSvg(layout){
   });
 
   return `<div class="rollLayout">
-    <div class="rollTitle">Рулон ${(rollW/100).toFixed(1)} м · погонаж ${formatM(rollL)} · размер холста ${(rollW/100).toFixed(1)} м × ${formatM(rollL)}</div>
+    <div class="rollTitle">${esc(layout.material||'ПВХ полотно')} · Рулон ${(rollW/100).toFixed(1)} м · погонаж ${formatM(rollL)} · размер холста ${(rollW/100).toFixed(1)} м × ${formatM(rollL)}</div>
     <svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet">
       <rect x="0" y="0" width="${vbW}" height="${vbH}" fill="#fff" stroke="#8b4513" stroke-width="0.55" vector-effect="non-scaling-stroke"/>
       ${pieces}
@@ -2835,7 +2871,7 @@ function productionCutPieceCard(p){
       <span><b>Резка:</b> ${formatM(w)} × ${formatM(h)} · сплошной внешний контур</span>
       <span><b>Световой проём:</b> ${formatM(ob.width)} × ${formatM(ob.height)} · пунктир внутри</span>
       ${grommetText}
-      <span>Рулон ${(p.roll/100).toFixed(1)} м · ориентация: ${orientation || 'обычно'}</span>
+      <span>${filmName(filmKind(src))} · Рулон ${(p.roll/100).toFixed(1)} м · ориентация: ${orientation || 'обычно'}</span>
     </div>
     <svg viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       ${cutPath?`<polygon points="${cutPath}" fill="rgba(217,45,32,.035)" stroke="#d92d20" stroke-width="0.75" vector-effect="non-scaling-stroke"/>`:''}
@@ -2901,7 +2937,7 @@ function productionTaskHtml(c,ca){
   const today=new Date().toLocaleDateString('ru-RU');
   const itemsRows=ca.items.map(x=>`<tr>
     <td>${x.index}</td>
-    <td>${x.w} × ${x.h1}/${x.h2} см</td>
+    <td>${filmName(filmKind(x))}<br>${x.w} × ${x.h1}/${x.h2} см</td>
     <td>${x.qty}</td>
     <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
@@ -2911,12 +2947,12 @@ function productionTaskHtml(c,ca){
     <td>${x.inst?'да':'нет'}</td>
   </tr>`).join('');
   const details=(ca.materials.details||[]).map(d=>{
-    const st=stockState('ПВХ полотно',rollWidthLabel(d.roll),d.needM);
+    const st=stockState(d.material||'ПВХ полотно',rollWidthLabel(d.roll),d.needM);
     const stockText=st.qty>0?`есть ${st.qty.toFixed(2)} м, после ${st.after.toFixed(2)} м`:'нет на складе';
     return `<tr>
       <td>${d.window}</td>
       <td>${d.detail}</td>
-      <td>${rollWidthLabel(d.roll)}</td>
+      <td>${esc(d.material||'ПВХ полотно')} ${rollWidthLabel(d.roll)}</td>
       <td>${formatM(d.cutWidthCm)} × ${formatM(d.cutLengthCm)}</td>
       <td>${d.needM.toFixed(2)} м</td>
       <td>${stockText}</td>
@@ -2988,7 +3024,7 @@ function productionTaskHtml(c,ca){
       <div><b>Адрес:</b> ${esc(c.address||'-')}</div>
       <div><b>Статус:</b> ${esc(c.status||'-')}</div>
       <div><b>Офсет резки:</b> ${ca.prices.off} см</div>
-      <div><b>Доступные ПВХ рулоны:</b> ${stockPvcRollWidthsCm(true).filter(r=>pvcRollQtyM(r)>0.0001).map(r=>rollWidthLabel(r)+' ('+pvcRollQtyM(r).toFixed(2)+' м)').join(', ')||'нет ПВХ в наличии'}</div>
+      <div><b>Доступные рулоны:</b> ${['pvc','tpu'].map(kind=>withFilm(kind,()=>filmName(kind)+': '+(stockPvcRollWidthsCm(true).map(r=>rollWidthLabel(r)+' ('+pvcRollQtyM(r).toFixed(2)+' м)').join(', ')||'нет в наличии'))).join('; ')}</div>
     </div>
     <h2>Изделия</h2>
     <table><thead><tr><th>№</th><th>Проём</th><th>Кол-во</th><th>Окантовка</th><th>Ремни</th><th>Молния</th><th>Люверсы / открывание</th><th>Дверь</th><th>Монтаж</th></tr></thead><tbody>${itemsRows}</tbody></table>
@@ -3103,7 +3139,7 @@ function contractActHtml(c,ca){
   const contractNo=(c.id||'').slice(0,8).toUpperCase();
   const items=(ca.items||[]).map(x=>`<tr>
     <td>${x.index}</td>
-    <td>${x.w} × ${x.h1}/${x.h2} см</td>
+    <td>${filmName(filmKind(x))}<br>${x.w} × ${x.h1}/${x.h2} см</td>
     <td>${x.qty}</td>
     <td>${edgeSideLabel(x,ca.prices)}</td>
     <td>${x.straps}</td>
@@ -3166,7 +3202,7 @@ function contractActHtml(c,ca){
   </p>
 
   <h3>1. Предмет договора</h3>
-  <p>1.1. Исполнитель обязуется выполнить работы и/или оказать услуги по изготовлению, комплектации и при необходимости монтажу мягких окон из ПВХ-материала, а Заказчик обязуется принять результат работ и оплатить его.</p>
+  <p>1.1. Исполнитель обязуется выполнить работы и/или оказать услуги по изготовлению, комплектации и при необходимости монтажу мягких окон из материала, указанного в спецификации (ПВХ или TPU), а Заказчик обязуется принять результат работ и оплатить его.</p>
   <p>1.2. Адрес объекта: <b>${esc(c.address||'________________________________')}</b>.</p>
   <p>1.3. Состав, размеры, количество изделий и стоимость определяются расчётом/сметой, являющимися приложением к настоящему договору.</p>
 
