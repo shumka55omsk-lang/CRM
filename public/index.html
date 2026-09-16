@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: VERTICAL_BOTTOM_CORNERS_V1_2026-09-15 -->
 <!-- CRM_BUILD: BOTTOM_HARDWARE_EQUAL_SPACING_V1_2026-09-15 -->
 <!-- CRM_BUILD: ACTUAL_HARDWARE_ECONOMICS_V1_2026-09-15 -->
 <!-- CRM_BUILD: SOFTGLASS_HARDWARE_VISUALS_V2_2026-09-07 -->
@@ -619,21 +620,21 @@ function bottomGrommetStepCm(cm){return grommetStepCm(Math.max(0,n(cm)));}
 function openSideOvalCount(cm){
   const len=Math.max(0,n(cm));
   if(!len)return 0;
-  // Для открывающихся окон: если вертикальная сторона ≤80 см — один овал 42×22 по центру высоты.
-  if(len<=80)return 1;
-  return sideGrommetCount(len);
+  // Вертикальная сторона включает нижний угол; на короткой стороне также остаётся крепление по центру.
+  if(len<=80)return 2;
+  return grommetSegments(len);
 }
 function openSideOvalStepCm(cm){
   const len=Math.max(0,n(cm));
   const cnt=openSideOvalCount(len);
   if(!cnt)return 0;
-  return cnt===1 ? 0 : len/(cnt+1);
+  return len/cnt;
 }
 function blindSideSegments(cm){
   const len=Math.max(0,n(cm));
   if(!len)return 0;
-  // Для глухих окон: люверс 10 мм сверху и ниже равными отрезками.
-  // Пример: 80 см → 3 отрезка по 26,66 см → верхний люверс + 2 ниже.
+  // Для глухих окон: первый люверс в нижнем углу, далее вверх равными отрезками, без верхнего угла.
+  // Пример: 80 см → нижний угол и два крепления выше с шагом 26,66 см.
   return Math.max(3,Math.ceil(len/40));
 }
 function blindSideRoundCount(cm){return blindSideSegments(cm);}
@@ -663,8 +664,8 @@ function ovalGrommetTotalQty(x){return ovalGrommetCountForWindow(x)*Math.max(1,n
 function grommetInfoText(x){
   if(isOpenGrommetWindow(x)){
     const round=roundGrommetCountForWindow(x),oval=ovalGrommetCountForWindow(x),total=grommetTotalQty(x),qty=Math.max(1,ni(x.qty||1));
-    const lRule=x.h1<=80?'слева 1 овал по центру':'слева шаг '+fmtCm(openSideOvalStepCm(x.h1))+' см';
-    const rRule=x.h2<=80?'справа 1 овал по центру':'справа шаг '+fmtCm(openSideOvalStepCm(x.h2))+' см';
+    const lRule='слева от нижнего угла, шаг '+fmtCm(openSideOvalStepCm(x.h1))+' см';
+    const rRule='справа от нижнего угла, шаг '+fmtCm(openSideOvalStepCm(x.h2))+' см';
     return `Открывающееся: сверху люверсы 10 мм ${round} шт./окно; овал 42×22 по бокам и снизу ${oval} шт./окно (${lRule}, ${rRule})${qty>1?', всего '+total+' шт.':''}.`;
   }
   if(isBlindGrommetWindow(x)){
@@ -1846,14 +1847,14 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         if(mode==='blind'){
           const leftSeg=blindSideSegments(height1Cm);
           for(let i=0;i<leftSeg;i++){
-            const t=i/leftSeg;
+            const t=1-i/leftSeg;
             const y=topLeftY+(bottomY-topLeftY)*t;
             const x=innerX-sideBandPx('left')*0.5;
             addRound(x,y,'left');
           }
           const rightSeg=blindSideSegments(height2Cm);
           for(let i=0;i<rightSeg;i++){
-            const t=i/rightSeg;
+            const t=1-i/rightSeg;
             const y=topRightY+(bottomY-topRightY)*t;
             const x=innerRightX+sideBandPx('right')*0.5;
             addRound(x,y,'right');
@@ -1861,14 +1862,14 @@ function makeDrawingSVG(widthCm, height1Cm, height2Cm, index, straps, hasZipper,
         }else{
           const leftCnt=openSideOvalCount(height1Cm);
           for(let i=0;i<leftCnt;i++){
-            const t=leftCnt===1?0.5:(i+1)/(leftCnt+1);
+            const t=1-i/leftCnt;
             const y=topLeftY+(bottomY-topLeftY)*t;
             const x=innerX-sideBandPx('left')*0.5;
             addTurnBracket(x,y,'left');
           }
           const rightCnt=openSideOvalCount(height2Cm);
           for(let i=0;i<rightCnt;i++){
-            const t=rightCnt===1?0.5:(i+1)/(rightCnt+1);
+            const t=1-i/rightCnt;
             const y=topRightY+(bottomY-topRightY)*t;
             const x=innerRightX+sideBandPx('right')*0.5;
             addTurnBracket(x,y,'right');
@@ -2784,11 +2785,11 @@ function productionCutPieceCard(p){
   const orientation=[p.rotated?'повернуть':'обычно',p.mirrored?'зеркально':''].filter(Boolean).join(' / ');
   const src=p.source||{};
   const hasGrommets=!!src.open;
-  const leftStep=hasGrommets?grommetStepCm(src.h1||h):0;
-  const rightStep=hasGrommets?grommetStepCm(src.h2||h):0;
+  const leftStep=hasGrommets?openSideOvalStepCm(src.h1||h):0;
+  const rightStep=hasGrommets?openSideOvalStepCm(src.h2||h):0;
   const bottomStep=hasGrommets?bottomGrommetStepCm(src.w||w):0;
-  const leftSeg=hasGrommets?grommetSegments(src.h1||h):0;
-  const rightSeg=hasGrommets?grommetSegments(src.h2||h):0;
+  const leftSeg=hasGrommets?openSideOvalCount(src.h1||h):0;
+  const rightSeg=hasGrommets?openSideOvalCount(src.h2||h):0;
   const bottomCnt=hasGrommets?bottomGrommetCount(src.w||w):0;
   const grommetText=hasGrommets?`<span><b>Люверсы:</b> верхние углы без люверсов, слева ${fmtCm(leftStep)} см, справа ${fmtCm(rightStep)} см, низ ${bottomCnt} шт. (${fmtCm(bottomStep)} см между ними)</span>`:'';
 
@@ -2811,17 +2812,18 @@ function productionCutPieceCard(p){
     }
     const leftPts=[p.openingPts[0],p.openingPts[3]];
     const rightPts=[p.openingPts[1],p.openingPts[2]];
-    for(let i=1;i<leftSeg;i++){
+    for(let i=1;i<=leftSeg;i++){
       const t=i/leftSeg;
       addG(ox+leftPts[0].x+(leftPts[1].x-leftPts[0].x)*t, oy+leftPts[0].y+(leftPts[1].y-leftPts[0].y)*t);
     }
-    for(let i=1;i<rightSeg;i++){
+    for(let i=1;i<=rightSeg;i++){
       const t=i/rightSeg;
       addG(ox+rightPts[0].x+(rightPts[1].x-rightPts[0].x)*t, oy+rightPts[0].y+(rightPts[1].y-rightPts[0].y)*t);
     }
     for(let i=0;i<bottomCnt;i++){
       const t=(i+1)/(bottomCnt+1);
-      addG(ox+ob.minX+ob.width*t, oy+ob.minY+ob.height);
+      const a=p.openingPts[3],b=p.openingPts[2];
+      addG(ox+a.x+(b.x-a.x)*t, oy+a.y+(b.y-a.y)*t);
     }
     const labelY=Math.min(vbH-4, oy+ob.minY+ob.height+15);
     grommetSvg += `<text x="${(ox+ob.minX+ob.width/2).toFixed(2)}" y="${labelY.toFixed(2)}" text-anchor="middle" font-size="7.2" font-family="Arial" font-weight="700" fill="#111827">люверсы: верх без углов; низ ${bottomCnt} шт; бока ${fmtCm(leftStep)}/${fmtCm(rightStep)} см</text>`;
