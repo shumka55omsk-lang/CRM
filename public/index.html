@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: ACCORDION_UI_V1_2026-09-27 -->
 <!-- CRM_BUILD: TPU_FILM_V1_2026-09-16 -->
 <!-- CRM_BUILD: VERTICAL_BOTTOM_CORNERS_V1_2026-09-15 -->
 <!-- CRM_BUILD: BOTTOM_HARDWARE_EQUAL_SPACING_V1_2026-09-15 -->
@@ -59,16 +60,25 @@
 .economyTable th,.economyTable td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:left}
 .economyWarning{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:12px;padding:10px;margin:10px 0;font-weight:700}
 
-</style></head><body><div class="app"><aside class="side"><div class="brand">CRM<br>Мягкие окна</div><div class="nav"><button class="active" data-v="dash" onclick="show('dash')">Панель</button><button data-v="clients" onclick="show('clients')">Клиенты</button><button data-v="prod" onclick="show('prod')">Производство</button><button data-v="buy" onclick="show('buy')">Закуп</button><button data-v="warehouse" onclick="show('warehouse')">Склад</button><button data-v="set" onclick="show('set')">Настройки</button></div></aside><main class="main"><div id="bar" class="bar warn">Подключение Supabase...</div>
+
+/* Approved order list design */
+.brand-sub{display:block;font-size:11px;color:#a6bacf;letter-spacing:1px;text-transform:uppercase;font-weight:500;margin-top:8px}
+:root{--ui-bg:#f4f7fb;--ui-line:#e2e8f0;--ui-blue:#1765db;--ui-muted:#64748b}
+body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#17243a}
+.app{grid-template-columns:224px minmax(0,1fr)}.side{background:#122337;padding:26px 16px}.brand{font-size:23px;letter-spacing:-.7px;margin-bottom:32px}.nav button{min-height:46px;font-weight:600}.nav button.active{background:#24486d;box-shadow:inset 3px 0 #60a5fa}.main{padding:26px;min-width:0}.top{margin-bottom:22px}h1{font-size:28px;letter-spacing:-.7px}.panel,.card{box-shadow:0 2px 8px #17243a04;border-color:var(--ui-line);border-radius:12px}.btn{min-height:40px}.btn.p{background:var(--ui-blue)}.bar{font-size:12px;font-weight:500;border-radius:8px}.cards{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.card .v{font-size:clamp(20px,2.1vw,30px);font-variant-numeric:tabular-nums}.card:last-child{grid-column:auto}.card:last-child .v{color:#168349}.metric-note{font-size:11px;color:var(--ui-muted);margin-top:7px}.dashboard-panel{padding:20px}.dashboard-panel h2{margin:0 0 6px}.dash-tools{display:flex;gap:12px;align-items:end;margin:20px 0 16px}.dash-tools>div{flex:1}.dash-tools>div:last-child{max-width:220px}.dash-tools input,.dash-tools select{min-height:44px;background:#fff}.statusDash{display:flex;flex-direction:column;gap:14px}.statusCol,.statusCol.new,.statusCol.work,.statusCol.done,.statusCol.cancel{display:block;min-height:0;padding:0;background:#fff;border:1px solid var(--ui-line);border-radius:10px;overflow:hidden}.statusColHead{display:flex;align-items:center;justify-content:flex-start;gap:10px;margin:0;padding:15px 18px;background:#f8fafc;cursor:pointer;list-style:none;min-height:60px}.statusColHead::-webkit-details-marker,.orderMiniTop::-webkit-details-marker{display:none}.statusColHead::before,.orderMiniTop::before{content:'›';font-size:22px;line-height:1;color:var(--ui-muted);width:12px;flex-shrink:0;transform:rotate(0deg)}details[open]>.statusColHead::before,details[open]>.orderMiniTop::before{transform:rotate(90deg)}.statusColHead b{font-size:15px}.statusColHead .status-total{margin-left:auto;text-align:right;color:#168349;font-size:16px;font-weight:700}.statusColHead small{display:block;color:var(--ui-muted);font-size:11px;font-weight:400;margin-top:3px}.statusCount{background:#e9eef5;color:#4a5a72;font-weight:600}.status-dot{width:9px;height:9px;border-radius:50%;background:#94a3b8;flex-shrink:0}.work .status-dot{background:#3b82f6}.done .status-dot{background:#22a06b}.cancel .status-dot{background:#ef4444}.statusOrders{display:block;max-height:540px;overflow-y:auto;padding:0;scrollbar-gutter:auto}.orderMini{padding:0;border:0;border-radius:0;border-top:1px solid #edf1f6;background:#fff}.orderMiniTop{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer;list-style:none;min-height:62px}.orderMiniTop:hover{background:#f7faff}.order-name{flex:1;min-width:0}.order-name b{display:block;font-size:14px;overflow-wrap:anywhere}.order-name small{display:block;font-size:12px;font-weight:400;color:var(--ui-muted);margin-top:4px;overflow-wrap:anywhere}.orderMiniSum{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}.orderMiniBody{background:#f8faff;padding:18px 44px;border-top:1px solid #edf1f6}.orderMiniMeta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0;font-size:13px;color:#334155}.orderMiniMeta span{display:block;font-size:11px;color:var(--ui-muted);margin-bottom:5px}.orderMiniMeta div{overflow-wrap:anywhere}.orderMiniActions{margin-top:16px}.orderMiniActions .btn{min-height:44px;padding:10px 16px}.statusEmpty{padding:18px;color:var(--ui-muted)}summary:focus-visible,.btn:focus-visible,.nav button:focus-visible{outline:3px solid #60a5fa;outline-offset:-3px}
+@media(max-width:1000px){.app{grid-template-columns:190px minmax(0,1fr)}.main{padding:18px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.card:last-child{grid-column:span 2}}
+@media(max-width:850px){.app{display:block}.side{padding:14px}.brand{font-size:19px;margin-bottom:12px}.brand br{display:none}.brand br:after{content:' '}.nav{display:flex;gap:6px;overflow:auto}.nav button{width:auto;min-width:110px;white-space:nowrap;text-align:center}.main{padding:14px}.top{flex-direction:row;align-items:center;gap:12px}h1{font-size:23px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:13px;margin-bottom:4px}.card:last-child{grid-column:span 2}.card .v{font-size:25px}.dashboard-panel{padding:12px}.dash-tools{flex-direction:column;align-items:stretch;gap:10px}.dash-tools>div:last-child{max-width:none}.statusColHead{padding:13px 10px;gap:7px}.statusColHead b{font-size:13px}.statusColHead .status-total{font-size:14px}.statusCount{padding:4px 7px}.orderMiniTop{flex-direction:row;padding:14px 10px;gap:9px}.orderMiniTop b{font-size:13px}.orderMiniSum{font-size:13px}.orderMiniBody{padding:16px}.orderMiniMeta{grid-template-columns:1fr}.statusOrders{max-height:65vh}}
+
+</style></head><body><div class="app"><aside class="side"><div class="brand">Мягкие окна<span class="brand-sub">CRM производства</span></div><div class="nav"><button class="active" data-v="dash" onclick="show('dash')">Панель</button><button data-v="clients" onclick="show('clients')">Клиенты</button><button data-v="prod" onclick="show('prod')">Производство</button><button data-v="buy" onclick="show('buy')">Закуп</button><button data-v="warehouse" onclick="show('warehouse')">Склад</button><button data-v="set" onclick="show('set')">Настройки</button></div></aside><main class="main"><div id="bar" class="bar warn">Подключение Supabase...</div>
 <section id="dash"><div class="top"><h1>Панель заказов</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div>
 <div class="cards">
   <div class="card"><div class="l">Все заказы</div><div class="v" id="stC">0</div></div>
   <div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div>
   <div class="card"><div class="l">В работе</div><div class="v" id="stW">0</div></div>
   <div class="card"><div class="l">Выполнено</div><div class="v" id="stDone">0</div></div>
-  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div></div>
+  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div><div class="metric-note">Без новых заявок</div></div>
 </div>
-<div class="panel"><h2>Дашборд по статусам</h2><p class="muted">Заказы сгруппированы по текущему статусу. Нажми «Открыть», чтобы перейти в карточку клиента.</p><div id="statusDash" class="statusDash"></div></div>
+<div class="panel dashboard-panel"><h2>Заказы по статусам</h2><p class="muted">Нажмите на статус или заказ, чтобы раскрыть детали.</p><div class="dash-tools"><div><label for="dashSearch">Поиск заказа</label><input id="dashSearch" type="search" placeholder="Имя, телефон или адрес" oninput="renderDashboard()"></div><div><label for="dashStatus">Статус</label><select id="dashStatus" onchange="renderDashboard()"><option value="">Все статусы</option></select></div></div><div id="statusDash" class="statusDash"></div></div>
 <div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
 <section id="clients" class="hide"><div class="top"><h1>Клиенты</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div><div class="panel"><div class="grid"><div><label>Поиск</label><input id="q" oninput="render()"></div><div><label>Статус</label><select id="fstat" onchange="render()"></select></div></div></div><div class="panel" id="clientList"></div></section>
 <section id="prod" class="hide"><div class="top"><h1>Производство</h1></div><div class="panel" id="prodList"></div></section><section id="buy" class="hide"><div class="top"><h1>Закуп</h1></div><div class="panel"><p class="muted">Сводка по статусам: Предоплата, В производстве, Монтаж. Учитываются остатки склада.</p><div id="buyList"></div></div></section><section id="warehouse" class="hide"><div class="top"><h1>Склад</h1><button class="btn p" onclick="saveStockItem()">Сохранить позицию</button></div><div class="panel"><h2>Материал в наличии</h2><div class="grid"><div><label>Материал</label><select id="wh_mat"><option>ПВХ полотно</option><option>TPU полотно</option><option>Окантовка</option><option>Молния</option><option>Ремни</option><option>Люверсы 10 мм</option><option>Люверсы 42*22</option><option>Фурнитура</option></select></div><div><label>Ширина / тип</label><input id="wh_width" placeholder="ПВХ: 1.8 м / 2.25 м / 3 м; кант: 8 см / 10 см; люверсы: шт"></div><div><label>В наличии</label><input id="wh_qty" type="number" step="0.01" value="0"></div><div><label>Закупочная цена</label><input id="wh_cost" type="number" step="0.01" value="0" placeholder="Полотно — ₽/м²"></div><div><label>Установка / работа</label><input id="wh_labor" type="number" step="0.01" value="0" placeholder="₽ за шт. или пог.м"></div><div><label>Критический остаток</label><input id="wh_crit" type="number" step="0.01" value="5"></div></div><p class="muted">Для полотна указывай погонные метры по ширине рулона. Окантовка подбирается по формуле: ширина полосы = офсет × 2 + 1 см. Например офсет 4.5 → полоса 10 см, видимая окантовка 5 см; офсет 3.5 → полоса 8 см, видимая окантовка 4 см. Закупочная цена ПВХ и TPU — за 1 м². Для ремней и люверсов цены указываются за штуку, для молнии — за погонный метр. Поле «Установка / работа» используется в экономике заказа.</p><div class="economyWarning">Чтобы стоимость установки синхронизировалась между всеми устройствами, один раз выполните файл <b>sql/stock_installation_cost.sql</b> в Supabase SQL Editor. До этого цена работы сохраняется локально на текущем устройстве.</div></div><div class="panel"><h2>Остатки склада</h2><div id="stockList"></div></div><div class="panel"><h2>Что докупить</h2><p class="muted">Считается по всем активным заказам с учётом текущих остатков.</p><div id="stockNeedList"></div></div><div class="panel"><h2>Движения склада</h2><div id="stockMovements"></div></div></section>
@@ -344,39 +354,31 @@ function statusClass(st){
   if(st==='Отказ')return 'cancel';
   return '';
 }
+const dashboardGroups=new Map(), dashboardOrders=new Map();
 function dashboardCard(c){
-  const sum=orderSum(c);
   const date=c.updatedAt?new Date(c.updatedAt).toLocaleDateString('ru-RU'):'—';
-  const title=esc(c.name||c.address||'Без имени');
-  return `<div class="orderMini">
-    <div class="orderMiniTop"><b>${title}</b><span class="orderMiniSum">${rub(sum)}</span></div>
-    <div class="orderMiniMeta">
-      ${esc(c.phone||'телефон не указан')}<br>
-      ${esc(c.address||'адрес не указан')}<br>
-      Обновлено: ${date}
-    </div>
-    <div class="orderMiniActions">
-      <button class="btn s p" onclick="openCard('${c.id}')">Открыть</button>
-    </div>
-  </div>`;
+  return `<details class="orderMini" data-order="${esc(c.id)}" ${dashboardOrders.get(String(c.id))?'open':''}>
+    <summary class="orderMiniTop"><div class="order-name"><b>${esc(c.name||'Без имени')}</b><small>${esc(c.address||'Адрес не указан')}</small></div><span class="orderMiniSum">${rub(orderSum(c))}</span></summary>
+    <div class="orderMiniBody"><div class="orderMiniMeta"><div><span>Телефон</span>${esc(c.phone||'Не указан')}</div><div><span>Обновлено</span>${date}</div><div><span>Статус</span>${esc(c.status)}</div></div><div class="orderMiniActions"><button class="btn p" data-open-client="${esc(c.id)}">Открыть заказ</button></div></div></details>`;
 }
 function renderDashboard(){
-  if(typeof statusDash==='undefined')return;
-  const totalDone=clients.filter(c=>c.status==='Завершено').length;
-  if(typeof stDone!=='undefined')stDone.textContent=totalDone;
-  const statuses=[...STAT];
-  statusDash.innerHTML=statuses.map(st=>{
-    const list=clients.filter(c=>c.status===st);
-    const sum=list.reduce((s,c)=>s+orderSum(c),0);
-    const cls=statusClass(st);
-    return `<div class="statusCol ${cls}">
-      <div class="statusColHead">
-        <div><b>${esc(st)}</b><span>${rub(sum)}</span></div>
-        <div class="statusCount">${list.length}</div>
-      </div>
-      <div class="statusOrders">${list.length?list.map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div>
-    </div>`;
-  }).join('');
+  const root=document.getElementById('statusDash');if(!root)return;
+  root.querySelectorAll('details[data-status]').forEach(el=>{if(el.querySelector('.orderMini'))dashboardGroups.set(el.dataset.status,el.open)});
+  root.querySelectorAll('details[data-order]').forEach(el=>dashboardOrders.set(el.dataset.order,el.open));
+  stDone.textContent=clients.filter(c=>c.status==='Завершено').length;
+  const select=document.getElementById('dashStatus');
+  if(select.options.length===1)select.innerHTML='<option value="">Все статусы</option>'+STAT.map(st=>`<option>${esc(st)}</option>`).join('');
+  const query=document.getElementById('dashSearch').value.trim().toLowerCase();
+  const statuses=STAT.filter(st=>!select.value||st===select.value);
+  const matching=clients.filter(c=>!query||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(query));
+  root.innerHTML=statuses.map(st=>{
+    const list=matching.filter(c=>c.status===st);if(query&&!list.length)return '';
+    const isNew=st==='Новая заявка';
+    const sum=isNew?0:list.reduce((sum,c)=>sum+orderSum(c),0);
+    const expanded=query||select.value?true:(dashboardGroups.has(st)?dashboardGroups.get(st):list.length>0);
+    return `<details class="statusCol ${statusClass(st)}" data-status="${esc(st)}" ${expanded?'open':''}><summary class="statusColHead"><i class="status-dot" aria-hidden="true"></i><b>${esc(st)}</b><div class="statusCount">${list.length}</div><div class="status-total">${rub(sum)}${isNew?'<small>Не входит в общий итог</small>':''}</div></summary><div class="statusOrders">${list.length?list.map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div></details>`;
+  }).join('')||'<div class="statusEmpty">Заказы не найдены. Измените поиск или статус.</div>';
+  root.querySelectorAll('[data-open-client]').forEach(button=>button.addEventListener('click',()=>openCard(button.dataset.openClient)));
 }
 function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.filter(c=>c.status!=='Новая заявка').reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(clients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
 
