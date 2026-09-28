@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: DURABLE_DRAFTS_V2_2026-09-28 -->
 <!-- CRM_BUILD: ACCORDION_UI_V1_2026-09-27 -->
 <!-- CRM_BUILD: TPU_FILM_V1_2026-09-16 -->
 <!-- CRM_BUILD: VERTICAL_BOTTOM_CORNERS_V1_2026-09-15 -->
@@ -70,7 +71,7 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
 @media(max-width:850px){.app{display:block}.side{padding:14px}.brand{font-size:19px;margin-bottom:12px}.brand br{display:none}.brand br:after{content:' '}.nav{display:flex;gap:6px;overflow:auto}.nav button{width:auto;min-width:110px;white-space:nowrap;text-align:center}.main{padding:14px}.top{flex-direction:row;align-items:center;gap:12px}h1{font-size:23px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:13px;margin-bottom:4px}.card:last-child{grid-column:span 2}.card .v{font-size:25px}.dashboard-panel{padding:12px}.dash-tools{flex-direction:column;align-items:stretch;gap:10px}.dash-tools>div:last-child{max-width:none}.statusColHead{padding:13px 10px;gap:7px}.statusColHead b{font-size:13px}.statusColHead .status-total{font-size:14px}.statusCount{padding:4px 7px}.orderMiniTop{flex-direction:row;padding:14px 10px;gap:9px}.orderMiniTop b{font-size:13px}.orderMiniSum{font-size:13px}.orderMiniBody{padding:16px}.orderMiniMeta{grid-template-columns:1fr}.statusOrders{max-height:65vh}}
 
 </style></head><body><div class="app"><aside class="side"><div class="brand">Мягкие окна<span class="brand-sub">CRM производства</span></div><div class="nav"><button class="active" data-v="dash" onclick="show('dash')">Панель</button><button data-v="clients" onclick="show('clients')">Клиенты</button><button data-v="prod" onclick="show('prod')">Производство</button><button data-v="buy" onclick="show('buy')">Закуп</button><button data-v="warehouse" onclick="show('warehouse')">Склад</button><button data-v="set" onclick="show('set')">Настройки</button></div></aside><main class="main"><div id="bar" class="bar warn">Подключение Supabase...</div>
-<section id="dash"><div class="top"><h1>Панель заказов</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div>
+<div class="actions" style="margin-bottom:12px"><button class="btn" onclick="showLocalRecovery()">Локальные копии и восстановление</button><button class="btn" onclick="syncDrafts()">Повторить отправку черновиков</button></div><div id="localRecovery" class="panel hide"><h2>Локальные копии</h2><p class="muted">Выгрузка содержит данные только с этого устройства: старый кэш, черновики и резервные версии. Файл содержит персональные данные клиентов — передавайте его только доверенному получателю.</p><button class="btn p" onclick="exportLocalRecovery()">Скачать локальные данные JSON</button><div id="draftList" style="margin-top:12px"></div></div><section id="dash"><div class="top"><h1>Панель заказов</h1><button class="btn p" onclick="newClient()">+ Новый клиент</button></div>
 <div class="cards">
   <div class="card"><div class="l">Все заказы</div><div class="v" id="stC">0</div></div>
   <div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div>
@@ -124,6 +125,7 @@ function enableOfflineMode(msg){
   db=null;
   stockLoaded=false;
   clients=localLoad();
+  overlayDrafts();
   stock=stock||[];stockMoves=stockMoves||[];clientFiles=clientFiles||[];
   bar.className='bar warn';
   bar.innerHTML='🔴 Офлайн: сохраняются только клиенты и расчёты на этом устройстве. '+esc(msg||'Нет подключения к Supabase');
@@ -138,7 +140,7 @@ function addLocalHistory(c,type,text,amount=0,extra={}){
 async function syncOfflineClients(){
   if(!db)return;
   let allLocal=localLoad();
-  let local=allLocal.filter(isLocalDirty);
+  let local=allLocal.filter(c=>isLocalDirty(c)&&!readDrafts()[c.id]?.pending);
   if(!local.length)return;
   bar.className='bar warn';
   bar.textContent='🟡 Онлайн: синхронизирую локальных клиентов и расчёты...';
@@ -215,12 +217,13 @@ async function initDb(){
     bar.className='bar ok';
     bar.textContent='🟢 Онлайн: загружаю свежую базу...';
     await syncOfflineClients();
+    await syncDrafts();
     await loadData();
     bar.className='bar ok';
     bar.textContent='🟢 Онлайн: база загружена';
   }catch(e){enableOfflineMode(e.message)}
 }
-function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
+function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){if(v!=='card')flushCalcAutosave();document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
 function normalizeCalcForCurrentStock(ca){
   if(!ca)return ca;
   if(!stockLoaded)return ca;
@@ -239,7 +242,7 @@ function normalizeClientCalcsForCurrentStock(c){
   c.calcs=c.calcs.map(normalizeCalcForCurrentStock);
   return c;
 }
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();stockLoaded=true;clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));localSave();render();
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();stockLoaded=true;clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));overlayDrafts();localSave();render();
   try{
     if(cur&&document.getElementById('card')&&!document.getElementById('card').classList.contains('hide')){
       let c=client();
@@ -254,7 +257,7 @@ async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.
   newClientButtons.forEach(b=>{b.disabled=true;b.textContent='Создаю...'});
   try{
     if(!db){
-      let data={id:localId('client'),name:'',phone:'',address:'',source:'Сайт',status:'Новая заявка',measureDate:'',comment:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),calcs:[],history:[],files:[],_localDirty:true,_localNew:true};
+      let data={id:crypto.randomUUID(),name:'',phone:'',address:'',source:'Сайт',status:'Новая заявка',measureDate:'',comment:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),calcs:[],history:[],files:[],_localDirty:true,_localNew:true};
       clients.unshift(data);
       addLocalHistory(data,'Создание','Создана локальная карточка клиента');
       localSave();
@@ -288,61 +291,7 @@ function bindFastNewClientButtons(){
     }
   });
 }
-function openCard(id){cur=id;let c=client();if(!c)return;normalizeClientCalcsForCurrentStock(c);title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
-async function saveClient(silent=false){
-  let c=client();
-  if(!c)return;
-  if(!db){
-    let old=c.status;
-    Object.assign(c,{name:c_name.value,phone:c_phone.value,address:c_addr.value,source:c_src.value,status:c_stat.value,measureDate:c_date.value||'',comment:c_comm.value,updatedAt:new Date().toISOString()});
-    markOfflineDirty(c);
-    if(!silent)addLocalHistory(c,old!==c.status?'Статус':'Сохранение',old!==c.status?`Статус изменён: ${old} → ${c.status}`:'Данные клиента обновлены');
-    localSave();render();setAutosaveStatus('Сохранено локально');
-    if(!silent)alert('Сохранено локально на этом устройстве');
-    return;
-  }
-  let old=c.status,p={
-    name:c_name.value,
-    phone:c_phone.value,
-    address:c_addr.value,
-    source:c_src.value,
-    status:c_stat.value,
-    measure_date:c_date.value||null,
-    comment:c_comm.value,
-    updated_at:new Date().toISOString()
-  };
-  let {error}=await db.from('clients').update(p).eq('id',c.id);
-  if(error){
-    Object.assign(c,{name:p.name,phone:p.phone,address:p.address,source:p.source,status:p.status,measureDate:p.measure_date||'',comment:p.comment,updatedAt:p.updated_at});
-    markOfflineDirty(c);
-    localSave();
-    db=null;
-    bar.className='bar warn';
-    bar.textContent='🔴 Офлайн: клиент сохранён локально, синхронизация будет при появлении интернета';
-    setAutosaveStatus('Клиент сохранён локально');
-    if(!silent)alert('Нет связи с Supabase. Клиент сохранён локально на этом устройстве.');
-    return;
-  }
-  let autoConsumed=false,autoError='';
-  if(old!==p.status&&p.status==='В производстве'){
-    try{
-      autoConsumed=await autoConsumeOnProduction(c,old,p.status);
-    }catch(e){
-      autoError=e.message||String(e);
-      await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Ошибка автосписания материалов: '+autoError});
-    }
-  }
-  if(!silent){
-    await db.from('client_history').insert({client_id:c.id,type:old!==p.status?'Статус':'Сохранение',text:old!==p.status?`Статус изменён: ${old} → ${p.status}`:'Данные клиента обновлены'});
-    await loadData();openCard(c.id);alert('Сохранено'+(autoConsumed?'\nМатериалы автоматически списаны со склада.':(autoError?'\nОшибка автосписания: '+autoError:'')));
-  }else{
-    Object.assign(c,{
-      name:p.name,phone:p.phone,address:p.address,source:p.source,status:p.status,measureDate:p.measure_date||'',comment:p.comment,updatedAt:p.updated_at
-    });
-    setAutosaveStatus(autoConsumed?'Клиент сохранён, материалы списаны':'Клиент сохранён');
-    if(autoConsumed||autoError){await loadData();openCard(c.id);}
-  }
-}
+function openCard(id){flushCalcAutosave();cur=id;let c=client();if(!c)return;normalizeClientCalcsForCurrentStock(c);title.textContent=c.name?'Клиент: '+c.name:'Новый клиент';c_name.value=c.name||'';c_phone.value=c.phone||'';c_addr.value=c.address||'';c_src.value=c.source||'Сайт';c_stat.value=c.status||STAT[0];c_date.value=c.measureDate||'';c_comm.value=c.comment||'';loadCalc(c.calcs&&c.calcs[0]);show('card');renderHist();renderClientFiles();bindClientAutosave();setAutosaveStatus('Автосохранение включено')}
 async function delClient(id){if(!confirm('Удалить клиента?'))return;if(!db){clients=clients.filter(c=>c.id!==id);localSave();cur=null;render();return}let {error}=await db.from('clients').delete().eq('id',id);if(error)return alert(error.message);await loadData()}
 function table(list){if(!list.length)return'<div class="empty">Нет данных</div>';return`<div class="tw"><table><thead><tr><th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>История</th><th>Сумма</th><th></th></tr></thead><tbody>${list.map(c=>{let ca=c.calcs&&c.calcs[0];return`<tr><td><b>${esc(c.name||'Без имени')}</b></td><td>${esc(c.phone||'-')}</td><td>${esc(c.address||'-')}</td><td><span class="status">${esc(c.status)}</span></td><td>${(c.history||[]).length}</td><td>${rub(ca?ca.totals.grandTotal:0)}</td><td class="actions"><button class="btn s p" onclick="openCard('${c.id}')">Открыть</button><button class="btn s r" onclick="delClient('${c.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
 
@@ -383,32 +332,117 @@ function renderDashboard(){
 function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.filter(c=>c.status!=='Новая заявка').reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(clients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
 
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
+// Durable local journal: independent from the server cache, preserved before startup sync.
+const DRAFT_KEY='swcrm_drafts_v2', LEGACY_BACKUP='swcrm_recovery_before_v2';
+try{if(localStorage.getItem(LEGACY_BACKUP)===null)localStorage.setItem(LEGACY_BACKUP,localStorage.getItem(LOCAL_DB)||'[]')}catch(e){console.warn('Recovery backup unavailable',e)}
+let draftSyncPromise=null;
+function readDrafts(){const raw=localStorage.getItem(DRAFT_KEY);return raw?JSON.parse(raw):{}}
+function writeDrafts(data){localStorage.setItem(DRAFT_KEY,JSON.stringify(data))}
+function draftCopy(value){return JSON.parse(JSON.stringify(value))}
+function draftNotice(id,text){if(cur===id)setAutosaveStatus(text)}
+function captureDraft(kind='client',manual=false){
+  if(autosaveLock||!cur||document.getElementById('card').classList.contains('hide'))return null;
+  const c=client();if(!c)return null;
+  try{
+    if(String(c.id).startsWith('client_')){c.id=crypto.randomUUID();cur=c.id;c._localNew=true;}
+    const all=readDrafts(), previous=all[c.id];
+    const metadata={id:c.id,name:c_name.value,phone:c_phone.value,address:c_addr.value,source:c_src.value,status:c_stat.value,measureDate:c_date.value||'',comment:c_comm.value,updatedAt:new Date().toISOString()};
+    const calc=kind==='calc'?curCalc():(previous?.pending?previous.calc:null);
+    const calcId=(previous?.pending?previous.calcId:null)||(c.calcs?.[0]?.id&&!String(c.calcs[0].id).startsWith('calc_')?c.calcs[0].id:crypto.randomUUID());
+    const signature=JSON.stringify({client:{...metadata,updatedAt:''},calc});
+    if(previous?.signature===signature&&!manual)return previous;
+    const versions=previous?.versions||[];
+    if(previous&&(!versions.length||Date.now()-Date.parse(versions[versions.length-1].savedAt)>60000))versions.push({client:previous.client,calc:previous.calc,savedAt:previous.savedAt});
+    const entry={client:metadata,calc,calcId,signature,revision:crypto.randomUUID(),savedAt:metadata.updatedAt,pending:true,baseStatus:previous?.baseStatus||c.status,versions:versions.slice(-12),historyType:manual?(kind==='calc'?'Расчёт':'Сохранение'):previous?.historyType||null};
+    all[c.id]=entry;writeDrafts(all);
+    Object.assign(c,metadata);
+    if(calc){const saved={...draftCopy(calc),id:calcId,date:c.calcs?.[0]?.date||metadata.updatedAt};if(c.calcs?.length)c.calcs[0]=saved;else c.calcs=[saved];}
+    localSave();draftNotice(c.id,'Сохранено на устройстве · ожидает отправки');return entry;
+  }catch(e){setAutosaveStatus('Не удалось сохранить черновик: '+e.message);alert('Не удалось сохранить на устройстве. Не закрывайте расчёт. Сделайте скриншоты или выгрузите HTML. '+e.message);return null;}
+}
+function overlayDrafts(){
+  const all=readDrafts();
+  for(const d of Object.values(all)){
+    let c=clients.find(x=>x.id===d.client.id);
+    if(!d.pending&&(!c||Date.parse(d.savedAt)<=Date.parse(c.updatedAt||0)))continue;
+    if(!c){c={...d.client,calcs:[],history:[],files:[]};clients.unshift(c)}else Object.assign(c,d.client);
+    if(d.calc){const ca={...draftCopy(d.calc),id:d.calcId,date:d.savedAt};if(c.calcs?.length)c.calcs[0]=ca;else c.calcs=[ca];}
+  }
+}
+async function draftRequest(make){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{const result=await make().abortSignal(controller.signal);if(result.error)throw result.error;if(!result.data)throw Error('Сервер не подтвердил сохранение');return result.data}finally{clearTimeout(timer)}
+}
+function syncDrafts(){
+  if(draftSyncPromise)return draftSyncPromise;
+  draftSyncPromise=(async()=>{
+    if(!db)return false;
+    for(;;){
+      const entry=Object.values(readDrafts()).find(d=>d.pending);if(!entry)return true;
+      const snap=draftCopy(entry),c=snap.client,connection=db;
+      draftNotice(c.id,'Черновик на устройстве · отправляю в базу…');
+      try{
+        await draftRequest(()=>connection.from('clients').upsert({id:c.id,name:c.name,phone:c.phone,address:c.address,source:c.source,status:c.status,measure_date:c.measureDate||null,comment:c.comment,updated_at:c.updatedAt}).select('id').single());
+        if(snap.calc)await draftRequest(()=>connection.from('calculations').upsert({id:snap.calcId,client_id:c.id,prices:snap.calc.prices,items:snap.calc.items,totals:snap.calc.totals,materials:snap.calc.materials}).select('id').single());
+        if(snap.historyType||snap.baseStatus!==c.status)await draftRequest(()=>connection.from('client_history').upsert({id:snap.revision,client_id:c.id,type:snap.baseStatus!==c.status?'Статус':snap.historyType,text:snap.baseStatus!==c.status?`Статус изменён: ${snap.baseStatus} → ${c.status}`:(snap.historyType==='Расчёт'?`Сохранён расчёт на ${rub(snap.calc?.totals?.grandTotal||0)}`:'Данные клиента обновлены'),amount:snap.historyType==='Расчёт'?(snap.calc?.totals?.grandTotal||0):0,extra:{calculation_id:snap.calcId}}).select('id').single());
+        const all=readDrafts(),latest=all[c.id];
+        if(latest){latest.baseStatus=c.status;if(latest.revision===snap.revision){latest.pending=false;latest.historyType=null;latest.syncedAt=new Date().toISOString();}writeDrafts(all);}
+        const active=clients.find(x=>x.id===c.id);
+        if(active&&latest&&!latest.pending){delete active._localNew;active._localDirty=!!active.history?.some(h=>h._localDirty);(active.calcs||[]).forEach(ca=>{delete ca._localDirty;delete ca._localNew});}
+        localSave();draftNotice(c.id,latest?.pending?'Новые изменения сохранены на устройстве':'Сохранено на устройстве и в базе');
+        if(snap.baseStatus!==c.status&&c.status==='В производстве'){
+          try{await autoConsumeOnProduction({...active,...c},snap.baseStatus,c.status,snap.calc||active?.calcs?.[0]);}
+          catch(e){draftNotice(c.id,'Заказ сохранён. Ошибка списания склада: '+e.message);alert('Заказ сохранён, но автоматическое списание материалов не завершено. Проверьте склад: '+e.message);}
+        }
+      }catch(e){draftNotice(c.id,'Сохранено на устройстве · база недоступна, повторим отправку');console.warn('Draft sync pending',e.message);return false;}
+    }
+  })().finally(()=>{draftSyncPromise=null});
+  return draftSyncPromise;
+}
+async function saveClient(silent=false){
+  const entry=captureDraft('client',!silent);if(!entry)return;
+  await syncDrafts();render();
+  if(!silent)alert(readDrafts()[entry.client.id]?.pending?'Сохранено на этом устройстве. Отправка в базу ожидает соединения.':'Клиент сохранён на устройстве и в базе');
+}
+async function saveCalc(silent=false){
+  const entry=captureDraft('calc',!silent);if(!entry)return;
+  await syncDrafts();render();
+  if(!silent)alert(readDrafts()[entry.client.id]?.pending?'Расчёт сохранён на этом устройстве. Отправка в базу ожидает соединения.':'Расчёт сохранён на устройстве и в базе');
+}
+function exportLocalRecovery(){
+  const payload={format:'soft-windows-recovery-v2',exportedAt:new Date().toISOString(),legacyBackup:localStorage.getItem(LEGACY_BACKUP),localClients:localStorage.getItem(LOCAL_DB),drafts:localStorage.getItem(DRAFT_KEY)};
+  blob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'CRM-local-recovery-'+new Date().toISOString().slice(0,10)+'.json');
+}
+function showLocalRecovery(){
+  const all=readDrafts(),box=document.getElementById('localRecovery');box.classList.toggle('hide');
+  const entries=Object.values(all).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
+  document.getElementById('draftList').innerHTML=entries.length?entries.map(d=>`<div class="box"><b>${esc(d.client.address||d.client.name||'Без имени и адреса')}</b><p class="muted">${esc(new Date(d.savedAt).toLocaleString('ru-RU'))} · ${d.calc?.items?.length||0} окон · ${d.pending?'Ожидает отправки':'Сохранено в базе'}</p><button class="btn" data-draft-open="${esc(d.client.id)}">Открыть локальную копию</button></div>`).join(''):'<p class="muted">Новых черновиков пока нет. Выгрузка также включает старый локальный кэш, если он сохранился на этом устройстве.</p>';
+  box.querySelectorAll('[data-draft-open]').forEach(button=>button.onclick=()=>{
+    const d=readDrafts()[button.dataset.draftOpen];if(!d)return;
+    if(!confirm('Открыть локальную копию? В базу она будет отправлена только после редактирования или сохранения.'))return;
+    flushCalcAutosave();let c=clients.find(x=>x.id===d.client.id);if(!c){c={...d.client,calcs:[],history:[],files:[]};clients.unshift(c)}else Object.assign(c,d.client);
+    if(d.calc)c.calcs=[{...draftCopy(d.calc),id:d.calcId,date:d.savedAt}];openCard(c.id);setAutosaveStatus('Открыта локальная копия от '+new Date(d.savedAt).toLocaleString('ru-RU'));
+  });
+}
+setInterval(()=>{if(db)syncDrafts()},30000);
+
 function setAutosaveStatus(t){
   const el=document.getElementById('autosaveStatus');
   if(el)el.textContent=t;
 }
 function scheduleClientAutosave(){
-  if(autosaveLock||!cur)return;
-  setAutosaveStatus('Сохранение клиента...');
-  clearTimeout(autosaveClientTimer);
-  autosaveClientTimer=setTimeout(()=>saveClient(true),900);
+  if(!captureDraft('client'))return;
+  clearTimeout(autosaveClientTimer);autosaveClientTimer=setTimeout(()=>syncDrafts(),900);
 }
 function scheduleCalcAutosave(delay=1200){
-  if(autosaveLock||!cur)return;
-  setAutosaveStatus('Сохранение расчёта...');
-  clearTimeout(autosaveCalcTimer);
-  autosaveCalcTimer=setTimeout(()=>saveCalc(true),delay);
+  if(!captureDraft('calc'))return;
+  clearTimeout(autosaveCalcTimer);autosaveCalcTimer=setTimeout(()=>syncDrafts(),delay);
 }
-function recalcAndSaveUrgent(){
-  recalc();
-  scheduleCalcAutosave(150);
-}
+function recalcAndSaveUrgent(){scheduleCalcAutosave(150);recalc()}
 function flushCalcAutosave(){
-  if(autosaveLock||!cur)return;
-  try{
-    clearTimeout(autosaveCalcTimer);
-    saveCalc(true);
-  }catch(e){}
+  clearTimeout(autosaveCalcTimer);clearTimeout(autosaveClientTimer);
+  // Input handlers already saved the exact edited snapshot; never save default form values on blur.
+  syncDrafts();
 }
 function bindClientAutosave(){
   ['c_name','c_phone','c_addr','c_src','c_stat','c_date','c_comm'].forEach(id=>{
@@ -420,8 +454,8 @@ function bindClientAutosave(){
   });
 }
 function recalcAndAutosave(){
-  recalc();
   scheduleCalcAutosave();
+  recalc();
 }
 function loadCalc(ca){
   autosaveLock=true;
@@ -2282,7 +2316,8 @@ async function browserlessPdf(html,filename){
     const res=await fetch('/api/export-pdf',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({html:prepareHtmlForPdf(html),filename})
+      body:JSON.stringify({html:prepareHtmlForPdf(html),filename}),
+      signal:AbortSignal.timeout(45000)
     });
     if(!res.ok){
       let msg='Ошибка создания PDF';
@@ -2318,86 +2353,39 @@ async function browserlessPdf(html,filename){
       pdfWin.document.close();
     }
     bar.className='bar warn';
-    bar.textContent='Ошибка PDF';
+    bar.textContent='PDF не создан. Расчёт сохранён на устройстве.';
     alert(e.message||e);
   }
 }
 function exportPdfClient(){
+  if(!captureDraft('calc'))return;
+  syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(clientReport(c,ca),safe('расчет_для_клиента_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfFull(){
+  if(!captureDraft('calc'))return;
+  syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(report(c,ca),safe('расчет_полный_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfProduction(){
+  if(!captureDraft('calc'))return;
+  syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(productionTaskHtml(c,ca),safe('задание_производство_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfContract(){
+  if(!captureDraft('calc'))return;
+  syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(contractActHtml(c,ca),safe('договор_акт_'+(c.address||c.name))+'.pdf');
 }
 function recalc(){let pr=prices(),it=items(),ma=mats(it,pr),to=totals(it,pr,ma);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);if(typeof economyBox!=='undefined')economyBox.innerHTML=economyHtml(to.economics);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm)gm.value=(it[i]?.open||it[i]?.blind)?(it[i]?.gm||0):0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="previewgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=previewitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`}function curCalc(){let pr=prices(),it=items(),ma=mats(it,pr),to=totals(it,pr,ma);return{prices:pr,items:it,totals:to,materials:ma,economics:to.economics}}
-async function saveCalc(silent=false){
-  let c=client(),ca=curCalc();
-  if(!c)return;
-  if(!db){
-    const calcObj={id:(c.calcs&&c.calcs[0]&&c.calcs[0].id)||localId('calc'),date:new Date().toISOString(),prices:ca.prices,items:ca.items,totals:ca.totals,materials:ca.materials,_localDirty:true,_localNew:!((c.calcs&&c.calcs[0]&&c.calcs[0].id)&&!String(c.calcs[0].id).startsWith('calc_'))};
-    markOfflineDirty(c);
-    if(c.calcs&&c.calcs.length)c.calcs[0]=calcObj;else c.calcs=[calcObj];
-    if(!silent)addLocalHistory(c,'Расчёт',`Сохранён локальный расчёт на ${rub(ca.totals.grandTotal)}`,ca.totals.grandTotal,{calculation_id:calcObj.id});
-    localSave();render();setAutosaveStatus('Расчёт сохранён локально');
-    if(!silent)alert('Расчёт сохранён локально на этом устройстве');
-    return;
-  }
-  let latest=c.calcs&&c.calcs[0];
-  let data=null,error=null;
-  if(latest&&latest.id){
-    let res=await db.from('calculations').update({
-      prices:ca.prices,
-      items:ca.items,
-      totals:ca.totals,
-      materials:ca.materials
-    }).eq('id',latest.id).select().single();
-    data=res.data;error=res.error;
-  }else{
-    let res=await db.from('calculations').insert({
-      client_id:c.id,
-      prices:ca.prices,
-      items:ca.items,
-      totals:ca.totals,
-      materials:ca.materials
-    }).select().single();
-    data=res.data;error=res.error;
-  }
-  if(error){
-    const calcObj={id:(c.calcs&&c.calcs[0]&&c.calcs[0].id)||localId('calc'),date:new Date().toISOString(),prices:ca.prices,items:ca.items,totals:ca.totals,materials:ca.materials,_localDirty:true,_localNew:!((c.calcs&&c.calcs[0]&&c.calcs[0].id)&&!String(c.calcs[0].id).startsWith('calc_'))};
-    if(c.calcs&&c.calcs.length)c.calcs[0]=calcObj;else c.calcs=[calcObj];
-    markOfflineDirty(c);
-    localSave();
-    db=null;
-    bar.className='bar warn';
-    bar.textContent='🔴 Офлайн: расчёт сохранён локально, синхронизация будет при появлении интернета';
-    setAutosaveStatus('Расчёт сохранён локально');
-    if(!silent)alert('Нет связи с Supabase. Расчёт сохранён локально на этом устройстве.');
-    return;
-  }
-  await db.from('clients').update({updated_at:new Date().toISOString()}).eq('id',c.id);
-
-  if(silent){
-    const calcObj={id:data.id,date:data.created_at||new Date().toISOString(),prices:ca.prices,items:ca.items,totals:ca.totals,materials:ca.materials};
-    if(c.calcs&&c.calcs.length)c.calcs[0]=calcObj;else c.calcs=[calcObj];
-    setAutosaveStatus('Расчёт сохранён');
-  }else{
-    await db.from('client_history').insert({client_id:c.id,type:'Расчёт',text:`Сохранён расчёт на ${rub(ca.totals.grandTotal)}`,amount:ca.totals.grandTotal,extra:{calculation_id:data.id}});
-    await loadData();openCard(c.id);alert('Расчёт сохранён');
-  }
-}
 function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}
 function openHtmlPreview(html, filename, title){
   const crmUrl = window.location.href;
@@ -2704,7 +2692,8 @@ async function saveStockItem(){
   if(localFallback)alert('Позиция сохранена. Стоимость установки пока сохранена только на этом устройстве. Для синхронизации выполните sql/stock_installation_cost.sql в Supabase.');
 }
 async function deleteStock(id){if(!confirm('Удалить позицию склада?'))return;let r=await db.from('stock_items').delete().eq('id',id);if(r.error)return alert(r.error.message);await loadData();show('warehouse')}
-function currentRowsForConsumption(){let ca=curCalc(),rows=[...(ca.materials.rollRows||[])];if(ca.materials.edgingRows&&ca.materials.edgingRows.length)rows.push(...ca.materials.edgingRows);else if(ca.materials.edgingRow&&ca.materials.edgingRow.need>0)rows.push(ca.materials.edgingRow);if(ca.materials.hardwareRows&&ca.materials.hardwareRows.length)rows.push(...ca.materials.hardwareRows);else if(ca.materials.grommetRows&&ca.materials.grommetRows.length)rows.push(...ca.materials.grommetRows);return rows}
+function currentRowsForConsumption(){return materialRowsForCalculation(curCalc())}
+function materialRowsForCalculation(ca){let rows=[...(ca.materials?.rollRows||[])];if(ca.materials?.edgingRows?.length)rows.push(...ca.materials.edgingRows);else if(ca.materials?.edgingRow?.need>0)rows.push(ca.materials.edgingRow);if(ca.materials?.hardwareRows?.length)rows.push(...ca.materials.hardwareRows);else if(ca.materials?.grommetRows?.length)rows.push(...ca.materials.grommetRows);return rows}
 function materialsAlreadyConsumed(c){
   return !!(c&&c.history&&c.history.some(h=>h.type==='Склад'&&String(h.text||'').includes('Материалы списаны со склада')));
 }
@@ -2745,13 +2734,13 @@ async function consumeMaterialsForClient(c,rows,auto=false){
     extra:{materials:rows,auto}
   });
 }
-async function autoConsumeOnProduction(c,oldStatus,newStatus){
+async function autoConsumeOnProduction(c,oldStatus,newStatus,savedCalc=null){
   if(!c||oldStatus==='В производстве'||newStatus!=='В производстве')return false;
   if(materialsAlreadyConsumed(c)){
     await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Автосписание не выполнено: материалы уже были списаны ранее.'});
     return false;
   }
-  const rows=currentRowsForConsumption();
+  const rows=savedCalc?materialRowsForCalculation(savedCalc):currentRowsForConsumption();
   if(!rows.length){
     await db.from('client_history').insert({client_id:c.id,type:'Склад',text:'Автосписание не выполнено: нет материалов для списания.'});
     return false;
