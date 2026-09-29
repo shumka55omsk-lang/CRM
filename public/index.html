@@ -1,4 +1,22 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: COLORED_COLLAPSED_STATUSES_2026-09-29 -->
+<style>
+/* Distinct, readable status headers; labels remain the primary status cue. */
+.statusCol[data-status]{--status-bg:#eff6ff;--status-ink:#1e40af;--status-accent:#2563eb}
+.statusCol[data-status="Связаться"]{--status-bg:#fff7ed;--status-ink:#9a3412;--status-accent:#ea580c}
+.statusCol[data-status="Замер назначен"]{--status-bg:#f5f3ff;--status-ink:#5b21b6;--status-accent:#7c3aed}
+.statusCol[data-status="Замер выполнен"]{--status-bg:#ecfeff;--status-ink:#155e75;--status-accent:#0891b2}
+.statusCol[data-status="Расчёт отправлен"]{--status-bg:#eef2ff;--status-ink:#3730a3;--status-accent:#4f46e5}
+.statusCol[data-status="Предоплата"]{--status-bg:#fefce8;--status-ink:#854d0e;--status-accent:#ca8a04}
+.statusCol[data-status="В производстве"]{--status-bg:#fdf2f8;--status-ink:#9d174d;--status-accent:#db2777}
+.statusCol[data-status="Монтаж"]{--status-bg:#f0fdfa;--status-ink:#115e59;--status-accent:#0d9488}
+.statusCol[data-status="Завершено"]{--status-bg:#f0fdf4;--status-ink:#166534;--status-accent:#16a34a}
+.statusCol[data-status="Отказ"]{--status-bg:#fef2f2;--status-ink:#991b1b;--status-accent:#dc2626}
+.statusCol[data-status]>.statusColHead{background:var(--status-bg);color:var(--status-ink);border-left:4px solid var(--status-accent)}
+.statusCol[data-status]>.statusColHead::before,.statusCol[data-status]>.statusColHead .status-total,.statusCol[data-status]>.statusColHead small{color:var(--status-ink)}
+.statusCol[data-status]>.statusColHead .status-dot{background:var(--status-accent)}
+.statusCol[data-status]>.statusColHead .statusCount{background:#ffffffc9;color:var(--status-ink)}
+</style>
 <!-- CRM_BUILD: DURABLE_DRAFTS_V2_2026-09-28 -->
 <!-- CRM_BUILD: ACCORDION_UI_V1_2026-09-27 -->
 <!-- CRM_BUILD: TPU_FILM_V1_2026-09-16 -->
@@ -324,7 +342,7 @@ function renderDashboard(){
     const list=matching.filter(c=>c.status===st);if(query&&!list.length)return '';
     const isNew=st==='Новая заявка';
     const sum=isNew?0:list.reduce((sum,c)=>sum+orderSum(c),0);
-    const expanded=query||select.value?true:(dashboardGroups.has(st)?dashboardGroups.get(st):list.length>0);
+    const expanded=query||select.value?true:(dashboardGroups.get(st)===true);
     return `<details class="statusCol ${statusClass(st)}" data-status="${esc(st)}" ${expanded?'open':''}><summary class="statusColHead"><i class="status-dot" aria-hidden="true"></i><b>${esc(st)}</b><div class="statusCount">${list.length}</div><div class="status-total">${rub(sum)}${isNew?'<small>Не входит в общий итог</small>':''}</div></summary><div class="statusOrders">${list.length?list.map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div></details>`;
   }).join('')||'<div class="statusEmpty">Заказы не найдены. Измените поиск или статус.</div>';
   root.querySelectorAll('[data-open-client]').forEach(button=>button.addEventListener('click',()=>openCard(button.dataset.openClient)));
