@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: DASHBOARD_EXCLUDES_REJECTED_2026-09-29 -->
 <!-- CRM_BUILD: COLORED_COLLAPSED_STATUSES_2026-09-29 -->
 <style>
 /* Distinct, readable status headers; labels remain the primary status cue. */
@@ -95,7 +96,7 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
   <div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div>
   <div class="card"><div class="l">В работе</div><div class="v" id="stW">0</div></div>
   <div class="card"><div class="l">Выполнено</div><div class="v" id="stDone">0</div></div>
-  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div><div class="metric-note">Без новых заявок</div></div>
+  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div><div class="metric-note">Без новых заявок и отказов</div></div>
 </div>
 <div class="panel dashboard-panel"><h2>Заказы по статусам</h2><p class="muted">Нажмите на статус или заказ, чтобы раскрыть детали.</p><div class="dash-tools"><div><label for="dashSearch">Поиск заказа</label><input id="dashSearch" type="search" placeholder="Имя, телефон или адрес" oninput="renderDashboard()"></div><div><label for="dashStatus">Статус</label><select id="dashStatus" onchange="renderDashboard()"><option value="">Все статусы</option></select></div></div><div id="statusDash" class="statusDash"></div></div>
 <div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
@@ -334,9 +335,9 @@ function renderDashboard(){
   root.querySelectorAll('details[data-order]').forEach(el=>dashboardOrders.set(el.dataset.order,el.open));
   stDone.textContent=clients.filter(c=>c.status==='Завершено').length;
   const select=document.getElementById('dashStatus');
-  if(select.options.length===1)select.innerHTML='<option value="">Все статусы</option>'+STAT.map(st=>`<option>${esc(st)}</option>`).join('');
+  if(select.options.length===1)select.innerHTML='<option value="">Все статусы</option>'+STAT.filter(st=>st!=='Отказ').map(st=>`<option>${esc(st)}</option>`).join('');
   const query=document.getElementById('dashSearch').value.trim().toLowerCase();
-  const statuses=STAT.filter(st=>!select.value||st===select.value);
+  const statuses=STAT.filter(st=>st!=='Отказ'&&(!select.value||st===select.value));
   const matching=clients.filter(c=>!query||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(query));
   root.innerHTML=statuses.map(st=>{
     const list=matching.filter(c=>c.status===st);if(query&&!list.length)return '';
@@ -347,7 +348,7 @@ function renderDashboard(){
   }).join('')||'<div class="statusEmpty">Заказы не найдены. Измените поиск или статус.</div>';
   root.querySelectorAll('[data-open-client]').forEach(button=>button.addEventListener('click',()=>openCard(button.dataset.openClient)));
 }
-function render(){stC.textContent=clients.length;stN.textContent=clients.filter(c=>c.status==='Новая заявка').length;stW.textContent=clients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(clients.filter(c=>c.status!=='Новая заявка').reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(clients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
+function render(){const dashboardClients=clients.filter(c=>c.status!=='Отказ');stC.textContent=dashboardClients.length;stN.textContent=dashboardClients.filter(c=>c.status==='Новая заявка').length;stW.textContent=dashboardClients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(dashboardClients.filter(c=>c.status!=='Новая заявка').reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(dashboardClients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
 
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 // Durable local journal: independent from the server cache, preserved before startup sync.
