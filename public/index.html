@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: COMPACT_LOCAL_STORAGE_2026-10-11 -->
 <!-- CRM_BUILD: SCREEN_FILM_2026-10-08 -->
 <!-- CRM_BUILD: SHARED_LABOR_PRICES_2026-10-01 -->
 <!-- CRM_BUILD: DASHBOARD_EXCLUDES_REJECTED_2026-09-29 -->
@@ -136,7 +137,37 @@ function localLoad(){
   try{return JSON.parse(localStorage.getItem(LOCAL_DB)||'[]')}catch(e){return []}
 }
 function localSave(){
-  try{localStorage.setItem(LOCAL_DB,JSON.stringify(clients||[]))}catch(e){alert('Не удалось сохранить локально: '+e.message)}
+  try{localStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(clients||[])));return true}catch(e){console.warn('Local cache unavailable',e);localStorageNotice(true);return false}
+}
+// Keep source data and costing summaries; regenerated drawing geometry is not a backup.
+function compactLocalCalc(ca){
+  if(!ca)return ca;
+  const out={...ca};
+  if(ca.materials){out.materials={...ca.materials};delete out.materials.layouts;delete out.materials.details;}
+  if(ca.totals){out.totals={...ca.totals};delete out.totals.rows;}
+  return out;
+}
+function compactLocalClients(list){return list.map(c=>({...c,calcs:(c.calcs||[]).map(compactLocalCalc)}))}
+function draftSignature(metadata,calc){return JSON.stringify({client:{...metadata,updatedAt:''},prices:calc?.prices||null,items:calc?.items||null})}
+function compactLocalDrafts(data){
+  const out={};
+  for(const [id,d] of Object.entries(data)){
+    const calc=compactLocalCalc(d.calc);
+    out[id]={...d,calc,signature:draftSignature(d.client,calc),versions:(d.versions||[]).map(v=>({...v,calc:compactLocalCalc(v.calc)}))};
+  }
+  return out;
+}
+function compactStoredCopies(){
+  // Replace each key atomically. A failed write leaves its original data intact.
+  for(const [key,convert] of [[LOCAL_DB,compactLocalClients],['swcrm_recovery_before_v2',compactLocalClients],['swcrm_drafts_v2',compactLocalDrafts]]){
+    try{const raw=localStorage.getItem(key);if(raw!==null){const next=JSON.stringify(convert(JSON.parse(raw)));if(next.length<raw.length)localStorage.setItem(key,next)}}catch(e){console.warn('Local compaction skipped',key,e.message)}
+  }
+}
+function localStorageNotice(show){
+  let el=document.getElementById('localStorageNotice');
+  if(!show){if(el)el.remove();return}
+  if(!el){el=document.createElement('div');el.id='localStorageNotice';el.setAttribute('role','alert');el.style.cssText='position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:1000;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:10px;padding:12px;font-size:14px;box-shadow:0 4px 18px #0002;pointer-events:none';document.body.appendChild(el)}
+  el.textContent='Не удалось сохранить черновик на устройстве. Ввод доступен. Не закрывайте расчёт; сохраните размеры скриншотами или выгрузите HTML.';
 }
 function localId(prefix='local'){
   return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
@@ -192,7 +223,7 @@ async function syncOfflineClients(){
     lc.id=onlineId;
     cleanOfflineFlags(lc);
   }
-  try{localStorage.setItem(LOCAL_DB,JSON.stringify(allLocal||[]))}catch(e){}
+  try{localStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(allLocal||[])))}catch(e){}
 }
 window.addEventListener('online',()=>initDb());
 function defaultSet(){return{m2:1800,edge:0,strap:0,zip:0,inst:700,off:4.5,defaultsVersion:2}}
@@ -354,10 +385,14 @@ function render(){const dashboardClients=clients.filter(c=>c.status!=='Отка�
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 // Durable local journal: independent from the server cache, preserved before startup sync.
 const DRAFT_KEY='swcrm_drafts_v2', LEGACY_BACKUP='swcrm_recovery_before_v2';
-try{if(localStorage.getItem(LEGACY_BACKUP)===null)localStorage.setItem(LEGACY_BACKUP,localStorage.getItem(LOCAL_DB)||'[]')}catch(e){console.warn('Recovery backup unavailable',e)}
+compactStoredCopies();
+try{if(localStorage.getItem(LEGACY_BACKUP)===null)localStorage.setItem(LEGACY_BACKUP,JSON.stringify(compactLocalClients(localLoad())))}catch(e){console.warn('Recovery backup unavailable',e)}
 let draftSyncPromise=null;
 function readDrafts(){const raw=localStorage.getItem(DRAFT_KEY);return raw?JSON.parse(raw):{}}
-function writeDrafts(data){localStorage.setItem(DRAFT_KEY,JSON.stringify(data))}
+function writeDrafts(data){
+  const payload=JSON.stringify(compactLocalDrafts(data));
+  try{localStorage.setItem(DRAFT_KEY,payload)}catch(e){compactStoredCopies();localStorage.setItem(DRAFT_KEY,payload)}
+}
 function draftCopy(value){return JSON.parse(JSON.stringify(value))}
 function draftNotice(id,text){if(cur===id)setAutosaveStatus(text)}
 function captureDraft(kind='client',manual=false){
@@ -367,9 +402,9 @@ function captureDraft(kind='client',manual=false){
     if(String(c.id).startsWith('client_')){c.id=crypto.randomUUID();cur=c.id;c._localNew=true;}
     const all=readDrafts(), previous=all[c.id];
     const metadata={id:c.id,name:c_name.value,phone:c_phone.value,address:c_addr.value,source:c_src.value,status:c_stat.value,measureDate:c_date.value||'',comment:c_comm.value,updatedAt:new Date().toISOString()};
-    const calc=kind==='calc'?curCalc():(previous?.pending?previous.calc:null);
+    const calc=compactLocalCalc(kind==='calc'?curCalc():(previous?.pending?previous.calc:null));
     const calcId=(previous?.pending?previous.calcId:null)||(c.calcs?.[0]?.id&&!String(c.calcs[0].id).startsWith('calc_')?c.calcs[0].id:crypto.randomUUID());
-    const signature=JSON.stringify({client:{...metadata,updatedAt:''},calc});
+    const signature=draftSignature(metadata,calc);
     if(previous?.signature===signature&&!manual)return previous;
     const versions=previous?.versions||[];
     if(previous&&(!versions.length||Date.now()-Date.parse(versions[versions.length-1].savedAt)>60000))versions.push({client:previous.client,calc:previous.calc,savedAt:previous.savedAt});
@@ -377,8 +412,8 @@ function captureDraft(kind='client',manual=false){
     all[c.id]=entry;writeDrafts(all);
     Object.assign(c,metadata);
     if(calc){const saved={...draftCopy(calc),id:calcId,date:c.calcs?.[0]?.date||metadata.updatedAt};if(c.calcs?.length)c.calcs[0]=saved;else c.calcs=[saved];}
-    localSave();draftNotice(c.id,'Сохранено на устройстве · ожидает отправки');return entry;
-  }catch(e){setAutosaveStatus('Не удалось сохранить черновик: '+e.message);alert('Не удалось сохранить на устройстве. Не закрывайте расчёт. Сделайте скриншоты или выгрузите HTML. '+e.message);return null;}
+    localSave();localStorageNotice(false);draftNotice(c.id,'Сохранено на устройстве · ожидает отправки');return entry;
+  }catch(e){setAutosaveStatus('Черновик не сохранён на устройстве');localStorageNotice(true);console.warn('Draft not persisted',e);return null;}
 }
 function overlayDrafts(){
   const all=readDrafts();
