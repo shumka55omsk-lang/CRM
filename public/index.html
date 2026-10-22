@@ -99,7 +99,7 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
   <div class="card"><div class="l">Новые</div><div class="v" id="stN">0</div></div>
   <div class="card"><div class="l">В работе</div><div class="v" id="stW">0</div></div>
   <div class="card"><div class="l">Выполнено</div><div class="v" id="stDone">0</div></div>
-  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div><div class="metric-note">Без новых заявок и отказов</div></div>
+  <div class="card"><div class="l">Сумма заказов</div><div class="v" id="stS">0 ₽</div><div class="metric-note">Без новых заявок, отправленных расчётов и отказов</div></div>
 </div>
 <div class="panel dashboard-panel"><h2>Заказы по статусам</h2><p class="muted">Нажмите на статус или заказ, чтобы раскрыть детали.</p><div class="dash-tools"><div><label for="dashSearch">Поиск заказа</label><input id="dashSearch" type="search" placeholder="Имя, телефон или адрес" oninput="renderDashboard()"></div><div><label for="dashStatus">Статус</label><select id="dashStatus" onchange="renderDashboard()"><option value="">Все статусы</option></select></div></div><div id="statusDash" class="statusDash"></div></div>
 <div class="panel"><h2>Последние клиенты</h2><div id="latest"></div></div></section>
@@ -347,6 +347,7 @@ async function delClient(id){if(!confirm('Удалить клиента?'))retur
 function table(list){if(!list.length)return'<div class="empty">Нет данных</div>';return`<div class="tw"><table><thead><tr><th>Клиент</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>История</th><th>Сумма</th><th></th></tr></thead><tbody>${list.map(c=>{let ca=c.calcs&&c.calcs[0];return`<tr><td><b>${esc(c.name||'Без имени')}</b></td><td>${esc(c.phone||'-')}</td><td>${esc(c.address||'-')}</td><td><span class="status">${esc(c.status)}</span></td><td>${(c.history||[]).length}</td><td>${rub(ca?ca.totals.grandTotal:0)}</td><td class="actions"><button class="btn s p" onclick="openCard('${c.id}')">Открыть</button><button class="btn s r" onclick="delClient('${c.id}')">Удалить</button></td></tr>`}).join('')}</tbody></table></div>`}
 
 function orderSum(c){let ca=c.calcs&&c.calcs[0];return ca&&ca.totals?Number(ca.totals.grandTotal||0):0}
+function dashboardOrderTotal(list){return list.filter(c=>!['Новая заявка','Расчёт отправлен','Отказ'].includes(c.status)).reduce((sum,c)=>sum+orderSum(c),0)}
 function statusClass(st){
   if(st==='Завершено')return 'done';
   if(WORK.includes(st))return 'work';
@@ -380,7 +381,7 @@ function renderDashboard(){
   }).join('')||'<div class="statusEmpty">Заказы не найдены. Измените поиск или статус.</div>';
   root.querySelectorAll('[data-open-client]').forEach(button=>button.addEventListener('click',()=>openCard(button.dataset.openClient)));
 }
-function render(){const dashboardClients=clients.filter(c=>c.status!=='Отказ');stC.textContent=dashboardClients.length;stN.textContent=dashboardClients.filter(c=>c.status==='Новая заявка').length;stW.textContent=dashboardClients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(dashboardClients.filter(c=>c.status!=='Новая заявка').reduce((s,c)=>s+orderSum(c),0));latest.innerHTML=table(dashboardClients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
+function render(){const dashboardClients=clients.filter(c=>c.status!=='Отказ');stC.textContent=dashboardClients.length;stN.textContent=dashboardClients.filter(c=>c.status==='Новая заявка').length;stW.textContent=dashboardClients.filter(c=>WORK.includes(c.status)).length;stS.textContent=rub(dashboardOrderTotal(dashboardClients));latest.innerHTML=table(dashboardClients.slice(0,5));renderDashboard();let qq=(q?.value||'').toLowerCase(),fs=fstat?.value||'';clientList.innerHTML=table(clients.filter(c=>(!qq||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(qq))&&(!fs||c.status===fs)));prodList.innerHTML=productionTable();renderBuy()}
 
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 // Durable local journal: independent from the server cache, preserved before startup sync.
