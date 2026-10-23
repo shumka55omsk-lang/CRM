@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: READONLY_QUOTE_EXPORT_2026-10-23 -->
 <!-- CRM_BUILD: QUOTE_FREEZE_PROTECTION_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_TECHCARD_A4_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_WINDOW_EDITOR_STAGE_2026-10-23 -->
@@ -2499,8 +2500,14 @@ h2{font-size:14px;margin:10px 0 5px}.tech-checks{display:grid;grid-template-colu
 </style></head><body>${pages||'<p>В заказе нет окон.</p>'}</body></html>`;
 }
 
+function prepareQuoteForDocument(){
+  if(!client()){alert('Клиент не выбран');return false;}
+  // A pristine saved quote is read-only: exporting it must not create a draft or remote upsert.
+  if(untouchedQuote(prices(),items()))return true;
+  return !!captureDraft('calc');
+}
 function openTechCard(){
- if(!captureDraft('calc'))return;
+ if(!prepareQuoteForDocument())return;
  syncDrafts();
  const c=client();
  if(!c)return alert('Клиент не выбран');
@@ -2508,7 +2515,7 @@ function openTechCard(){
 }
 
 function exportPdfTechCard(){
- if(!captureDraft('calc'))return;
+ if(!prepareQuoteForDocument())return;
  syncDrafts();
  const c=client();
  if(!c)return alert('Клиент не выбран');
@@ -2516,28 +2523,28 @@ function exportPdfTechCard(){
 }
 
 function exportPdfClient(){
-  if(!captureDraft('calc'))return;
+  if(!prepareQuoteForDocument())return;
   syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(clientReport(c,ca),safe('расчет_для_клиента_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfFull(){
-  if(!captureDraft('calc'))return;
+  if(!prepareQuoteForDocument())return;
   syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(report(c,ca),safe('расчет_полный_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfProduction(){
-  if(!captureDraft('calc'))return;
+  if(!prepareQuoteForDocument())return;
   syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
   browserlessPdf(productionTaskHtml(c,ca),safe('задание_производство_'+(c.address||c.name))+'.pdf');
 }
 function exportPdfContract(){
-  if(!captureDraft('calc'))return;
+  if(!prepareQuoteForDocument())return;
   syncDrafts();
   let c=client(),ca=curCalc();
   if(!c)return alert('Клиент не выбран');
