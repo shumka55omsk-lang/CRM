@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: EXCL_TECHCARD_A4_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_WINDOW_EDITOR_STAGE_2026-10-23 -->
 <!-- CRM_BUILD: COMPACT_LOCAL_STORAGE_2026-10-11 -->
 <!-- CRM_BUILD: SCREEN_FILM_2026-10-08 -->
@@ -139,7 +140,7 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
 <button class="material-tile pvc" onclick="addMaterialWindow('pvc')"><b>+ ПВХ</b><small>Прозрачное полотно</small></button>
 <button class="material-tile tpu" onclick="addMaterialWindow('tpu')"><b>+ TPU</b><small>Эластичное прозрачное полотно</small></button>
 <button class="material-tile screen" onclick="addMaterialWindow('screen')"><b>+ Screen</b><small>Сетка для проветривания</small></button>
-</div><nav class="calc-jumps"><a href="#windowTable">Размеры</a><a href="#economyBox">Экономика</a><a href="#schemes">Схемы</a></nav><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Полотно</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><div id="windowValidation" class="window-hints" role="status" aria-live="polite"></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2 id="schemes">Схемы окон</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+</div><nav class="calc-jumps"><a href="#windowTable">Размеры</a><a href="#economyBox">Экономика</a><a href="#schemes">Схемы</a></nav><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Полотно</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><div id="windowValidation" class="window-hints" role="status" aria-live="polite"></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2 id="schemes">Схемы окон</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="openTechCard()">Техкарта HTML</button><button class="btn d" onclick="exportPdfTechCard()">Техкарта PDF</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[],stockLoaded=false,stockLabor={};const LS='swcrm_supabase_settings_v1',STOCK_LABOR_LS='swcrm_stock_installation_cost_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -2452,6 +2453,72 @@ async function browserlessPdf(html,filename){
     alert(e.message||e);
   }
 }
+function techCardHtml(c,original) {
+  const ca=freshProductionCalc(original);
+  const stamp=new Date().toLocaleDateString('ru-RU');
+  const pages=(ca.items||[]).map((x,i)=>{
+    const contourArea=Math.abs(polyArea(cutOpeningPoints(x)))/10000;
+    const billableArea=(Math.max(n(x.h1),n(x.h2))*n(x.w))/10000;
+    const edging=x.ed?`${edgeSideLabel(x,ca.prices)}; полоса канта: ${edgeSideStripLabel(x,ca.prices)}`:'нет';
+    const grommets=x.open||x.blind?grommetQtyText(x):'нет';
+    const zip=x.z?`${zipperCount(x)} шт. × ${n(x.zc)} см; отступ/шаг ${zipperDistance(x)} см`:'нет';
+    const sloping=x.h1!==x.h2?'<p class="attention">Косой верх: сверить диагональ по замеру. Модель задаётся одной шириной и двумя высотами.</p>':'';
+    const screen=filmKind(x)==='screen'?'<p class="attention">Screen: проверить ограничения производителя по эксплуатации и УФ перед раскроем.</p>':'';
+    return `<section class="tech-page">
+<header><div><span class="eyebrow">ТЕХКАРТА · ${esc(stamp)}</span><h1>Окно № ${i+1}</h1><p>${esc(c.address||'Адрес не указан')} · ${esc(c.name||'Клиент не указан')}</p></div><strong>${Math.max(0,ni(x.qty))} шт.</strong></header>
+<div class="tech-drawing">${drawClient(x,i+1,ca.prices)}</div>
+<table><tbody>
+<tr><th>Полотно</th><td>${esc(filmName(filmKind(x)))}</td><th>Размеры</th><td>${n(x.w)} × ${n(x.h1)} / ${n(x.h2)} см</td></tr>
+<tr><th>Площадь по контуру</th><td>${contourArea.toFixed(3)} м²</td><th>Расчётная площадь</th><td>${billableArea.toFixed(3)} м²</td></tr>
+<tr><th>Кант</th><td colspan="3">${esc(edging)}</td></tr>
+<tr><th>Люверсы</th><td colspan="3">${esc(grommets)}</td></tr>
+<tr><th>Молнии</th><td colspan="3">${esc(zip)}</td></tr>
+<tr><th>Ремни</th><td>${Math.max(0,ni(x.straps))} шт. на окно</td><th>Монтаж</th><td>${x.inst?'предусмотрен':'не предусмотрен'}</td></tr>
+</tbody></table>
+${sloping}${screen}
+<h2>Операции и контроль</h2>
+<div class="tech-checks">
+<div>□ Сверить геометрию, диагонали и номер окна</div>
+<div>□ Проверить заготовку по карте раскроя и припуски</div>
+<div>□ Выкроить заготовку, проверить размер</div>
+<div>□ Выполнить сварку и окантовку по схеме</div>
+<div>□ Установить фурнитуру и проверить шаг</div>
+<div>□ Проверить маркировку, качество и упаковку</div>
+</div>
+<div class="sign">Изготовил: ___________________ &nbsp; Проверил: ___________________ &nbsp; Дата: ____________</div>
+</section>`;
+  }).join('');
+  return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Технологическая карта</title>
+<style>
+@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;font:12px Arial,sans-serif;color:#122337;background:#fff}
+.tech-page{break-after:page;page-break-after:always}.tech-page:last-child{break-after:auto;page-break-after:auto}
+header{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #0d7181;padding-bottom:7px;margin-bottom:7px}
+header h1{font-size:21px;margin:4px 0}header p{font-size:11px;margin:0}.eyebrow{font-size:9px;letter-spacing:.07em;color:#0c7282}header strong{font-size:20px;color:#0c7282}
+.tech-drawing{text-align:center;max-height:113mm;overflow:hidden}.tech-drawing .scheme-title,.tech-drawing .scheme-meta{display:none}.tech-drawing svg{width:100%;height:auto;max-height:108mm}
+table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6px}td,th{padding:5px;border:1px solid #ccd5df;vertical-align:top;text-align:left;overflow-wrap:anywhere}th{width:22%;background:#edf7fa}
+h2{font-size:14px;margin:10px 0 5px}.tech-checks{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px}.tech-checks div{font-size:10px;break-inside:avoid}
+.attention{padding:5px;border:1px solid #fdba74;background:#fff7ed;font-size:10px}
+.sign{font-size:10px;border-top:1px solid #ccd5df;padding-top:8px;margin-top:15px}
+@media screen{body{background:#e8eef5;padding:14px}.tech-page{width:210mm;max-width:100%;min-height:297mm;background:#fff;box-shadow:0 4px 16px #102c3e20;padding:10mm;margin:0 auto 16px}}
+</style></head><body>${pages||'<p>В заказе нет окон.</p>'}</body></html>`;
+}
+
+function openTechCard(){
+ if(!captureDraft('calc'))return;
+ syncDrafts();
+ const c=client();
+ if(!c)return alert('Клиент не выбран');
+ openHtmlPreview(techCardHtml(c,curCalc()),safe('техкарта_'+(c.address||c.name))+'.html','Технологическая карта');
+}
+
+function exportPdfTechCard(){
+ if(!captureDraft('calc'))return;
+ syncDrafts();
+ const c=client();
+ if(!c)return alert('Клиент не выбран');
+ browserlessPdf(techCardHtml(c,curCalc()),safe('техкарта_'+(c.address||c.name))+'.pdf');
+}
+
 function exportPdfClient(){
   if(!captureDraft('calc'))return;
   syncDrafts();
