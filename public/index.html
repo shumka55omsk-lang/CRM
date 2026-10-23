@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: REPRICE_SIGNATURE_2026-10-23 -->
 <!-- CRM_BUILD: READONLY_QUOTE_EXPORT_2026-10-23 -->
 <!-- CRM_BUILD: QUOTE_FREEZE_PROTECTION_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_TECHCARD_A4_2026-10-23 -->
@@ -185,7 +186,20 @@ function compactLocalCalc(ca){
   return out;
 }
 function compactLocalClients(list){return list.map(c=>({...c,calcs:(c.calcs||[]).map(compactLocalCalc)}))}
-function draftSignature(metadata,calc){return JSON.stringify({client:{...metadata,updatedAt:''},prices:calc?.prices||null,items:calc?.items||null})}
+function draftSignature(metadata,calc){
+  // Totals are part of quote identity. Explicit repricing with unchanged dimensions
+  // must still produce a new journal revision and sync to Supabase.
+  const t=calc?.totals||{};
+  return JSON.stringify({
+    client:{...metadata,updatedAt:''},
+    prices:calc?.prices||null,
+    items:calc?.items||null,
+    money:calc?{
+      grandTotal:n(t.grandTotal),baseTotal:n(t.baseTotal),extraTotal:n(t.extraTotal),
+      hardwareChargeTotal:n(t.hardwareChargeTotal),scrapCost:n(t.scrapCost),installTotal:n(t.installTotal)
+    }:null
+  });
+}
 function compactLocalDrafts(data){
   const out={};
   for(const [id,d] of Object.entries(data)){
