@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: PDF_PRINT_FALLBACK_2026-10-23 -->
 <!-- CRM_BUILD: REPRICE_SIGNATURE_2026-10-23 -->
 <!-- CRM_BUILD: READONLY_QUOTE_EXPORT_2026-10-23 -->
 <!-- CRM_BUILD: QUOTE_FREEZE_PROTECTION_2026-10-23 -->
@@ -2454,14 +2455,24 @@ async function browserlessPdf(html,filename){
     bar.className='bar ok';
     bar.textContent='PDF создан';
   }catch(e){
+    // Browserless failures must not leave an iPhone user without a printable document.
+    // Open a local HTML version in the pre-opened tab, allowing native Print → Save as PDF.
+    const backupName=filename.replace(/\.pdf$/i,'')+'.html';
+    const printBar='<div id="pdfFallbackBar" style="position:sticky;top:0;z-index:9999;padding:12px;background:#11283c;color:white;font:14px Arial,sans-serif">PDF-сервис недоступен. <button style="margin-left:8px;padding:9px 13px;background:#0d9488;color:white;border:0;border-radius:8px;font-weight:bold" onclick="window.print()">Печать / Сохранить в PDF</button></div><style>@media print{#pdfFallbackBar{display:none!important}}</style>';
+    const fallbackHtml=html.replace(/<body([^>]*)>/i,(tag)=>tag+printBar);
+    const fallbackBlob=new Blob([fallbackHtml],{type:'text/html;charset=utf-8'});
+    const fallbackUrl=URL.createObjectURL(fallbackBlob);
     if(pdfWin&&!pdfWin.closed){
       pdfWin.document.open();
-      pdfWin.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ошибка PDF</title><style>body{font-family:Arial,sans-serif;background:#fff;color:#111827;padding:18px}.err{border:1px solid #fecaca;background:#fff1f2;border-radius:14px;padding:14px}button{background:#2563eb;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:800}</style></head><body><div class="err"><h2>PDF не создан</h2><p>${esc(e.message||e)}</p><button onclick="window.close()">Закрыть</button></div></body></html>`);
+      pdfWin.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Запасной документ</title><style>body{font-family:Arial,sans-serif;background:#f4f7fb;color:#111827;padding:18px}.box{max-width:520px;margin:20px auto;padding:18px;border-radius:14px;background:#fff;border:1px solid #dbe5ef}a{display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700;margin-top:12px}.hint{font-size:13px;line-height:1.5;color:#475569}</style></head><body><div class="box"><h2>PDF пока не создан</h2><p>${esc(e.message||e)}</p><a href="${fallbackUrl}">Открыть документ для печати</a><p class="hint">На iPhone откройте документ, нажмите «Печать / Сохранить в PDF» и используйте системное меню печати/поделиться. Документ не потерян.</p></div></body></html>`);
       pdfWin.document.close();
+    }else{
+      blob(fallbackBlob,backupName);
+      alert('PDF-сервис недоступен. Вместо PDF загружен HTML-документ, который можно открыть и распечатать. '+String(e.message||e));
     }
+    setTimeout(()=>{try{URL.revokeObjectURL(fallbackUrl)}catch(err){}},10*60*1000);
     bar.className='bar warn';
-    bar.textContent='PDF не создан. Расчёт сохранён на устройстве.';
-    alert(e.message||e);
+    bar.textContent='PDF-сервис недоступен · есть печатная HTML-версия.';
   }
 }
 function techCardHtml(c,original) {
