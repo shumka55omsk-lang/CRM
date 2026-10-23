@@ -408,10 +408,10 @@ function renderDashboard(){
   const matching=clients.filter(c=>!query||[c.name,c.phone,c.address].join(' ').toLowerCase().includes(query));
   root.innerHTML=statuses.map(st=>{
     const list=matching.filter(c=>c.status===st);if(query&&!list.length)return '';
-    const isNew=st==='Новая заявка';
-    const sum=isNew?0:list.reduce((sum,c)=>sum+orderSum(c),0);
+    const excludedFromRevenue=st==='Новая заявка'||st==='Расчёт отправлен';
+    const sum=excludedFromRevenue?0:list.reduce((sum,c)=>sum+orderSum(c),0);
     const expanded=query||select.value?true:(dashboardGroups.get(st)===true);
-    return `<details class="statusCol ${statusClass(st)}" data-status="${esc(st)}" ${expanded?'open':''}><summary class="statusColHead"><i class="status-dot" aria-hidden="true"></i><b>${esc(st)}</b><div class="statusCount">${list.length}</div><div class="status-total">${rub(sum)}${isNew?'<small>Не входит в общий итог</small>':''}</div></summary><div class="statusOrders">${list.length?list.map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div></details>`;
+    return `<details class="statusCol ${statusClass(st)}" data-status="${esc(st)}" ${expanded?'open':''}><summary class="statusColHead"><i class="status-dot" aria-hidden="true"></i><b>${esc(st)}</b><div class="statusCount">${list.length}</div><div class="status-total">${rub(sum)}${excludedFromRevenue?'<small>Не входит в общий итог</small>':''}</div></summary><div class="statusOrders">${list.length?list.map(dashboardCard).join(''):'<div class="statusEmpty">Нет заказов</div>'}</div></details>`;
   }).join('')||'<div class="statusEmpty">Заказы не найдены. Измените поиск или статус.</div>';
   root.querySelectorAll('[data-open-client]').forEach(button=>button.addEventListener('click',()=>openCard(button.dataset.openClient)));
 }
