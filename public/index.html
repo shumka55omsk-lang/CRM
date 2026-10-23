@@ -1,4 +1,5 @@
 <!doctype html><html lang="ru"><head>
+<!-- CRM_BUILD: QUOTE_FREEZE_PROTECTION_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_TECHCARD_A4_2026-10-23 -->
 <!-- CRM_BUILD: EXCL_WINDOW_EDITOR_STAGE_2026-10-23 -->
 <!-- CRM_BUILD: COMPACT_LOCAL_STORAGE_2026-10-11 -->
@@ -95,7 +96,8 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
 @media(max-width:850px){.app{display:block}.side{padding:14px}.brand{font-size:19px;margin-bottom:12px}.brand br{display:none}.brand br:after{content:' '}.nav{display:flex;gap:6px;overflow:auto}.nav button{width:auto;min-width:110px;white-space:nowrap;text-align:center}.main{padding:14px}.top{flex-direction:row;align-items:center;gap:12px}h1{font-size:23px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:13px;margin-bottom:4px}.card:last-child{grid-column:span 2}.card .v{font-size:25px}.dashboard-panel{padding:12px}.dash-tools{flex-direction:column;align-items:stretch;gap:10px}.dash-tools>div:last-child{max-width:none}.statusColHead{padding:13px 10px;gap:7px}.statusColHead b{font-size:13px}.statusColHead .status-total{font-size:14px}.statusCount{padding:4px 7px}.orderMiniTop{flex-direction:row;padding:14px 10px;gap:9px}.orderMiniTop b{font-size:13px}.orderMiniSum{font-size:13px}.orderMiniBody{padding:16px}.orderMiniMeta{grid-template-columns:1fr}.statusOrders{max-height:65vh}}
 
 
-/* EXCL-inspired responsive production UI; financial and stock formulas unchanged */
+/* EXCL-inspired responsive production UI; quote preservation protects historical amounts */
+.quote-lock{padding:12px 14px;border:1px solid #a5b4fc;border-radius:12px;background:#eef2ff;color:#312e81;font-size:13px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-top:12px}.quote-lock .btn{background:#fff;border:1px solid #818cf8;color:#312e81;white-space:normal}
 .side{background:linear-gradient(165deg,#071a2c,#123348)}.nav button.active{box-shadow:inset 3px 0 #2dd4bf;background:#164253}
 .btn.p{background:#1264b4}.btn:focus-visible,a:focus-visible,.material-tile:focus-visible{outline:3px solid #14b8a6;outline-offset:2px}
 .pricing-options{border:1px solid #dbe5ef;background:#f8fbff;border-radius:12px;margin-bottom:12px}
@@ -140,7 +142,7 @@ body{background:var(--ui-bg);font-family:Inter,-apple-system,BlinkMacSystemFont,
 <button class="material-tile pvc" onclick="addMaterialWindow('pvc')"><b>+ ПВХ</b><small>Прозрачное полотно</small></button>
 <button class="material-tile tpu" onclick="addMaterialWindow('tpu')"><b>+ TPU</b><small>Эластичное прозрачное полотно</small></button>
 <button class="material-tile screen" onclick="addMaterialWindow('screen')"><b>+ Screen</b><small>Сетка для проветривания</small></button>
-</div><nav class="calc-jumps"><a href="#windowTable">Размеры</a><a href="#economyBox">Экономика</a><a href="#schemes">Схемы</a></nav><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Полотно</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><div id="windowValidation" class="window-hints" role="status" aria-live="polite"></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2 id="schemes">Схемы окон</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="openTechCard()">Техкарта HTML</button><button class="btn d" onclick="exportPdfTechCard()">Техкарта PDF</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
+</div><nav class="calc-jumps"><a href="#windowTable">Размеры</a><a href="#economyBox">Экономика</a><a href="#schemes">Схемы</a></nav><div class="tw"><table class="calc"><thead><tr><th>№</th><th>Полотно</th><th>Ширина</th><th>Высота 1</th><th>Высота 2</th><th>Кол-во</th><th>Окант.</th><th>Кант<br>см</th><th>Ремни</th><th>Молния</th><th>Кол-во молний</th><th>Молния см</th><th>Расст./отступ см</th><th>Глухое</th><th>Люверсы<br>открывается</th><th>Кол-во<br>люверсов</th><th>Дверь</th><th>Монтаж</th><th>Площадь</th><th>Итого</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><div id="windowValidation" class="window-hints" role="status" aria-live="polite"></div><p><button class="btn" onclick="addRow()">+ Добавить окно</button></p><div class="sum"><div class="box"><span>Окон</span><b id="t_qty">0</b></div><div class="box"><span>Площадь</span><b id="t_area">0</b></div><div class="box"><span>Полотно</span><b id="t_base">0</b></div><div class="box"><span>Допы</span><b id="t_extra">0</b></div><div class="box"><span>Обрезки в итог</span><b id="t_scraps">0</b></div><div class="box"><span>Люверсы</span><b id="t_grommets">0 шт</b></div><div class="box"><span>Итого</span><b id="t_total">0</b></div></div><div id="quoteLockNotice" class="quote-lock hide" role="status"><div id="quoteLockText"></div><button class="btn s" onclick="repriceCurrentQuote()">Пересчитать по текущим ценам</button></div><h2>Экономика заказа</h2><div id="economyBox"></div><h2>Закуп</h2><div id="matBox"></div><h2 id="schemes">Схемы окон</h2><div id="prev"></div><p class="actions"><button class="btn p" onclick="saveCalc()">Сохранить расчёт в историю</button><button class="btn g" onclick="downloadHtml()">Открыть HTML полный</button><button class="btn g" onclick="downloadClientHtml()">Открыть HTML для клиента</button><button class="btn p" onclick="exportPdfFull()">PDF полный</button><button class="btn p" onclick="exportPdfClient()">PDF клиенту</button><button class="btn o" onclick="sendHtml()">Отправить в Telegram</button><button class="btn d" onclick="downloadProductionTask()">Задание в производство</button><button class="btn d" onclick="exportPdfProduction()">PDF производство</button><button class="btn d" onclick="openTechCard()">Техкарта HTML</button><button class="btn d" onclick="exportPdfTechCard()">Техкарта PDF</button><button class="btn d" onclick="downloadCutLayoutSvg()">Скачать раскрой SVG</button><button class="btn d" onclick="downloadContractAct()">Договор + акт</button><button class="btn d" onclick="exportPdfContract()">PDF договор</button><button class="btn r" onclick="consumeCurrentMaterials()">Списать материалы</button></p></div><div class="panel"><h2>Фото замера</h2><p><input id="measure_photo" type="file" accept="image/*" multiple></p><p class="muted">Фото автоматически сжимаются перед загрузкой: до 1600 px по длинной стороне, JPEG качество 0.75. Оригиналы в Supabase не загружаются.</p><p class="actions"><button class="btn g" onclick="uploadMeasurePhotos()">Загрузить фото замера</button></p><div id="clientFiles" class="files"></div></div><div class="panel"><h2>Добавить запись</h2><div class="grid"><div><label>Тип</label><select id="h_type"><option>Звонок</option><option>Замер</option><option>Комментарий</option><option>Оплата</option><option>Производство</option><option>Монтаж</option></select></div><div><label>Сумма</label><input id="h_amount" type="number" value="0"></div></div><p><textarea id="h_text" placeholder="Текст записи"></textarea></p><button class="btn" onclick="addHist()">Добавить в историю</button></div><div class="panel"><h2>История клиента</h2><div id="hist" class="hist"></div></div></section></main></div>
 <script>
 const STAT=['Новая заявка','Связаться','Замер назначен','Замер выполнен','Расчёт отправлен','Предоплата','В производстве','Монтаж','Завершено','Отказ'], WORK=['Предоплата','В производстве','Монтаж'];let db=null,clients=[],cur=null,set={},stock=[],stockMoves=[],clientFiles=[],stockLoaded=false,stockLabor={};const LS='swcrm_supabase_settings_v1',STOCK_LABOR_LS='swcrm_stock_installation_cost_v1';
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
@@ -310,24 +312,16 @@ async function initDb(){
 }
 function initUi(){fstat.innerHTML='<option value="">Все</option>'+STAT.map(s=>`<option>${s}</option>`).join('');c_stat.innerHTML=STAT.map(s=>`<option>${s}</option>`).join('')}function show(v){if(v!=='card')flushCalcAutosave();document.querySelectorAll('main>section').forEach(s=>s.classList.add('hide'));document.getElementById(v).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));render()}function client(){return clients.find(c=>c.id===cur)}
 function normalizeCalcForCurrentStock(ca){
-  if(!ca)return ca;
-  if(!stockLoaded)return ca;
-  const pr=ca.prices||set||prices();
-  const items=Array.isArray(ca.items)?ca.items:[];
-  const materialData=mats(items,pr);
-  return Object.assign({},ca,{
-    prices:pr,
-    items,
-    totals:totals(items,pr,materialData),
-    materials:materialData
-  });
+  // Client quotes are historical records: a stock refresh must not rewrite saved totals.
+  // New production layouts are refreshed separately in freshProductionCalc().
+  return ca;
 }
 function normalizeClientCalcsForCurrentStock(c){
   if(!c||!Array.isArray(c.calcs))return c;
   c.calcs=c.calcs.map(normalizeCalcForCurrentStock);
   return c;
 }
-async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;stock=sr.error?[]:(sr.data||[]);stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();stockLoaded=true;clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));overlayDrafts();localSave();render();
+async function loadData(){if(!db)return;let [cr,calr,hr,sr,mr,fr]=await Promise.all([db.from('clients').select('*').order('updated_at',{ascending:false}),db.from('calculations').select('*').order('created_at',{ascending:false}),db.from('client_history').select('*').order('created_at',{ascending:false}),db.from('stock_items').select('*').order('material',{ascending:true}).order('width',{ascending:true}),db.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(50),db.from('client_files').select('*').order('created_at',{ascending:false})]);if(cr.error)throw cr.error;if(calr.error)throw calr.error;if(hr.error)throw hr.error;if(sr.error)throw new Error('Склад недоступен: '+sr.error.message+'. Не подменяем цены пустым складом.');stock=sr.data||[];stockMoves=mr.error?[]:(mr.data||[]);clientFiles=fr.error?[]:(fr.data||[]);await ensureDefaultStockPositions();stockLoaded=true;clients=(cr.data||[]).map(r=>({id:r.id,name:r.name||'',phone:r.phone||'',address:r.address||'',source:r.source||'Сайт',status:r.status||'Новая заявка',measureDate:r.measure_date||'',comment:r.comment||'',createdAt:r.created_at,updatedAt:r.updated_at,calcs:(calr.data||[]).filter(x=>x.client_id===r.id).map(x=>normalizeCalcForCurrentStock({id:x.id,date:x.created_at,prices:x.prices,items:x.items,totals:x.totals,materials:x.materials})),history:(hr.data||[]).filter(x=>x.client_id===r.id).map(x=>({id:x.id,date:x.created_at,type:x.type,text:x.text,amount:x.amount,extra:x.extra})),files:(clientFiles||[]).filter(x=>x.client_id===r.id)}));overlayDrafts();localSave();render();
   try{
     if(cur&&document.getElementById('card')&&!document.getElementById('card').classList.contains('hide')){
       let c=client();
@@ -568,6 +562,8 @@ function loadCalc(ca){
     }
   });
   autosaveLock=false;
+  currentQuoteSnapshot=ca&&ca.totals?draftCopy(ca):null;
+  currentQuoteFingerprint=currentQuoteSnapshot?calcInputFingerprint(prices(),items()):null;
   recalc();
   bindClientAutosave();
   setAutosaveStatus('Автосохранение включено');
@@ -2580,7 +2576,51 @@ function updateCalcSafetyHints(){
  target.textContent=errors.length?('Проверьте размеры: '+errors.join(' ')):slopes?`Косых окон: ${slopes}. Чертёж строится по ширине и двум высотам. Расчётная площадь для цены — по максимальной высоте.`:'Изменение размеров обновляет чертежи, материалы и итог.';
 }
 
-function recalc(){let pr=prices(),it=items(),ma=mats(it,pr),to=totals(it,pr,ma);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);if(typeof economyBox!=='undefined')economyBox.innerHTML=economyHtml(to.economics);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm)gm.value=(it[i]?.open||it[i]?.blind)?(it[i]?.gm||0):0;tr.querySelector('.area').textContent=(to.rows[i]?.area||0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows[i]?.rowTotal||0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="previewgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=previewitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`;updateCalcSafetyHints();}function curCalc(){let pr=prices(),it=items(),ma=mats(it,pr),to=totals(it,pr,ma);return{prices:pr,items:it,totals:to,materials:ma,economics:to.economics}}
+function calcInputFingerprint(pr,it){
+  return JSON.stringify({
+    prices:{m2:n(pr.m2),tpu:n(pr.tpu),screen:n(pr.screen),edge:n(pr.edge),strap:n(pr.strap),zip:n(pr.zip),inst:n(pr.inst),off:n(pr.off),scraps:!!pr.scraps},
+    items:(it||[]).map(x=>({
+      index:ni(x.index),film:filmKind(x),w:n(x.w),h1:n(x.h1),h2:n(x.h2),qty:ni(x.qty),
+      ed:!!x.ed,ew:n(x.ew),et:n(x.et),eb:n(x.eb),el:n(x.el),er:n(x.er),
+      straps:ni(x.straps),z:!!x.z,zq:ni(x.zq),zc:n(x.zc),zd:n(x.zd),
+      blind:!!x.blind,open:!!x.open,door:!!x.door,inst:!!x.inst
+    }))
+  });
+}
+
+let currentQuoteSnapshot=null, currentQuoteFingerprint=null;
+
+function untouchedQuote(pr,it){
+  return currentQuoteSnapshot&&currentQuoteSnapshot.totals&&calcInputFingerprint(pr,it)===currentQuoteFingerprint?currentQuoteSnapshot:null;
+}
+
+function selectQuoteTotals(pr,it,calculated){
+  const preserved=untouchedQuote(pr,it);
+  return preserved?preserved.totals:calculated;
+}
+
+function renderQuoteLock(pr,it,calculated){
+  const box=document.getElementById('quoteLockNotice');
+  if(!box)return;
+  const saved=untouchedQuote(pr,it);
+  box.classList.toggle('hide',!saved);
+  if(!saved)return;
+  const diff=n(calculated.grandTotal)-n(saved.totals.grandTotal);
+  const label=Math.abs(diff)<0.01
+    ? 'Сохранённая сумма совпадает с текущим расчётом.'
+    : 'Сохранённая цена: '+rub(saved.totals.grandTotal)+'. Если сейчас пересчитать по текущему складу, получится '+rub(calculated.grandTotal)+'. Изменение: '+(diff>0?'+':'')+rub(diff)+'.';
+  document.getElementById('quoteLockText').textContent=label+' Изменения размеров и параметров пересчитывают заказ; ручной пересчёт по текущим ценам — только по кнопке.';
+}
+
+function repriceCurrentQuote(){
+  const saved=untouchedQuote(prices(),items());
+  if(!saved)return;
+  if(!confirm('Пересчитать этот заказ по текущим ценам склада и сохранить новую сумму? Старая цена останется в локальной истории черновиков, но текущая сумма заказа изменится.'))return;
+  currentQuoteSnapshot=null;currentQuoteFingerprint=null;
+  recalcAndSaveUrgent();
+}
+
+function recalc(){let pr=prices(),it=items(),ma=mats(it,pr),calculated=totals(it,pr,ma),to=selectQuoteTotals(pr,it,calculated);renderQuoteLock(pr,it,calculated);t_qty.textContent=to.totalQty;if(typeof t_grommets!=='undefined')t_grommets.textContent=(to.totalGrommets||0)+' шт';t_area.textContent=to.totalArea.toFixed(2)+' м²';t_base.textContent=rub(to.baseTotal);t_extra.textContent=rub(to.extraTotal);if(typeof t_scraps!=='undefined')t_scraps.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_roll_area!=='undefined')t_roll_area.textContent=to.rollArea.toFixed(2)+' м²';if(typeof t_cut_area!=='undefined')t_cut_area.textContent=to.cutArea.toFixed(2)+' м²';if(typeof t_scrap_area!=='undefined')t_scrap_area.textContent=to.scrapArea.toFixed(2)+' м²';if(typeof t_scrap_cost!=='undefined')t_scrap_cost.textContent=pr.scraps?rub(to.scrapCost):(rub(to.scrapCostInfo)+' справочно');if(typeof t_scrap_price!=='undefined')t_scrap_price.textContent=rub(to.scrapPurchaseM2).replace(' ₽','')+' ₽/м²';t_total.textContent=rub(to.grandTotal);if(typeof economyBox!=='undefined')economyBox.innerHTML=economyHtml(to.economics);[...rows.querySelectorAll('tr')].forEach((tr,i)=>{let gm=tr.querySelector('.gm');if(gm)gm.value=(it[i]?.open||it[i]?.blind)?(it[i]?.gm||0):0;tr.querySelector('.area').textContent=(to.rows?.[i]?.area??calculated.rows?.[i]?.area??0).toFixed(2);tr.querySelector('.rowt').textContent=rub(to.rows?.[i]?.rowTotal??calculated.rows?.[i]?.rowTotal??0)});matBox.innerHTML=matsHtml(ma);prev.innerHTML=`<div class="previewgrid ${it.length===1?'one':''}">${it.map((x,i)=>`<div class=previewitem>${draw(x,i+1,pr,true,i)}</div>`).join('')}</div>`;updateCalcSafetyHints();}function curCalc(){let pr=prices(),it=items();const preserved=untouchedQuote(pr,it);if(preserved)return draftCopy(preserved);let ma=mats(it,pr),to=totals(it,pr,ma);return{prices:pr,items:it,totals:to,materials:ma,economics:to.economics}}
 function blob(b,nm){let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}
 function openHtmlPreview(html, filename, title){
   const crmUrl = window.location.href;
