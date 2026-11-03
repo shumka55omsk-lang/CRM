@@ -162,18 +162,61 @@ function unpackLocalText(value){
   const binary=chunks.join('');
   return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(binary,c=>c.charCodeAt(0)));
 }
+const LARGE_LOCAL_KEYS=['swcrm_offline_clients_v1','swcrm_recovery_before_v2','swcrm_drafts_v2'];
+let localDatabase=null,localReady=false,localWrite=Promise.resolve();
+const localMirror=new Map();
+function localTransaction(mode,run){
+  return new Promise((resolve,reject)=>{
+    const tx=localDatabase.transaction('copies',mode);
+    tx.oncomplete=()=>resolve();tx.onabort=tx.onerror=()=>reject(tx.error||Error('Ошибка локальной базы'));
+    try{run(tx.objectStore('copies'))}catch(e){tx.abort();reject(e)}
+  });
+}
+function flushLocalWrites(){return localWrite}
+async function initLocalDatabase(){
+  localDatabase=await new Promise((resolve,reject)=>{
+    const request=indexedDB.open('soft-windows-local-v1',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('copies');
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+    request.onblocked=()=>reject(Error('Закройте другие вкладки CRM и повторите загрузку'));
+  });
+  localDatabase.onversionchange=()=>{localDatabase.close();localDatabase=null;localReady=false;localStorageNotice(true)};
+  const migrated=[];
+  await localTransaction('readwrite',store=>{
+    for(const key of LARGE_LOCAL_KEYS){
+      const request=store.get(key);
+      request.onsuccess=()=>{
+        if(request.result!==undefined){localMirror.set(key,request.result);return}
+        const raw=localStorage.getItem(key),value=unpackLocalText(raw);
+        if(value!==null){JSON.parse(value);store.put(value,key);migrated.push([key,raw,value]);}
+        localMirror.set(key,value);
+      };
+    }
+  });
+  // Verify committed data before removing the old copy from limited Web Storage.
+  await localTransaction('readonly',store=>{
+    for(const [key,raw,value] of migrated){const request=store.get(key);request.onsuccess=()=>{
+      if(request.result===value&&localStorage.getItem(key)===raw){try{localStorage.removeItem(key)}catch(e){console.warn('Old copy retained',e)}}
+    }}
+  });
+  localReady=true;
+}
 const crmStorage={
-  getItem(key){return unpackLocalText(localStorage.getItem(key))},
+  getItem(key){return LARGE_LOCAL_KEYS.includes(key)?(localMirror.get(key)??null):unpackLocalText(localStorage.getItem(key))},
   setItem(key,value){
+    if(LARGE_LOCAL_KEYS.includes(key)){
+      if(!localReady)throw Error('Локальная база ещё не готова');
+      localMirror.set(key,value);
+      localWrite=localWrite.catch(()=>{}).then(()=>localTransaction('readwrite',store=>store.put(value,key)));
+      localWrite.catch(e=>{console.warn('Local write failed',e);localStorageNotice(true)});
+      return;
+    }
     const packed=['swcrm_offline_clients_v1','swcrm_recovery_before_v2','swcrm_drafts_v2'].includes(key)?packLocalText(value):value;
     if(unpackLocalText(packed)!==value)throw Error('Не удалось проверить локальную копию');
     localStorage.setItem(key,packed);
   }
 };
-// Atomic replacement needs no spare full-sized backup and never deletes source data.
-for(const key of ['swcrm_offline_clients_v1','swcrm_recovery_before_v2','swcrm_drafts_v2']){
-  try{const raw=localStorage.getItem(key);if(raw!==null&&!raw.startsWith(STORAGE_PACK_PREFIX))crmStorage.setItem(key,raw)}catch(e){console.warn('Storage encoding deferred',key,e.message)}
-}
 function markOfflineDirty(c){if(c){c._localDirty=true;c.updatedAt=new Date().toISOString();}}
 function isLocalDirty(c){return !!(c&&c._localDirty)||(c&&Array.isArray(c.calcs)&&c.calcs.some(x=>x&&x._localDirty));}
 function cleanOfflineFlags(c){if(!c)return c;delete c._localDirty;delete c._localNew;(c.calcs||[]).forEach(x=>{delete x._localDirty;delete x._localNew});return c}
@@ -301,6 +344,7 @@ function fastShowLocalCache(){
   return false;
 }
 async function initDb(){
+  if(!localReady)return;
   try{
     stockLoaded=false;
     let r=await fetch('/api/config',{cache:'no-store'}),c=await r.json();
@@ -430,8 +474,10 @@ function render(){const dashboardClients=clients.filter(c=>c.status!=='Отка�
 let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 // Durable local journal: independent from the server cache, preserved before startup sync.
 const DRAFT_KEY='swcrm_drafts_v2', LEGACY_BACKUP='swcrm_recovery_before_v2';
-compactStoredCopies();
-try{if(crmStorage.getItem(LEGACY_BACKUP)===null)crmStorage.setItem(LEGACY_BACKUP,JSON.stringify(compactLocalClients(localLoad())))}catch(e){console.warn('Recovery backup unavailable',e)}
+function initLocalCopies(){
+  compactStoredCopies();
+  if(crmStorage.getItem(LEGACY_BACKUP)===null)crmStorage.setItem(LEGACY_BACKUP,JSON.stringify(compactLocalClients(localLoad())));
+}
 let draftSyncPromise=null;
 function readDrafts(){const raw=crmStorage.getItem(DRAFT_KEY);return raw?JSON.parse(raw):{}}
 function writeDrafts(data){
@@ -457,7 +503,9 @@ function captureDraft(kind='client',manual=false){
     all[c.id]=entry;writeDrafts(all);
     Object.assign(c,metadata);
     if(calc){const saved={...draftCopy(calc),id:calcId,date:c.calcs?.[0]?.date||metadata.updatedAt};if(c.calcs?.length)c.calcs[0]=saved;else c.calcs=[saved];}
-    localSave();localStorageNotice(false);draftNotice(c.id,'Сохранено на устройстве · ожидает отправки');return entry;
+    const persisted=flushLocalWrites();
+    persisted.then(()=>{if(readDrafts()[c.id]?.revision===entry.revision){localStorageNotice(false);draftNotice(c.id,'Сохранено на устройстве · ожидает отправки')}}).catch(()=>{draftNotice(c.id,'Черновик не сохранён на устройстве');localStorageNotice(true)});
+    draftNotice(c.id,'Сохраняю на устройстве…');return entry;
   }catch(e){setAutosaveStatus('Черновик не сохранён на устройстве');localStorageNotice(true);console.warn('Draft not persisted',e);return null;}
 }
 function overlayDrafts(){
@@ -476,6 +524,7 @@ async function draftRequest(make){
 function syncDrafts(){
   if(draftSyncPromise)return draftSyncPromise;
   draftSyncPromise=(async()=>{
+    try{await flushLocalWrites()}catch(e){localStorageNotice(true);return false}
     if(!db)return false;
     for(;;){
       const entry=Object.values(readDrafts()).find(d=>d.pending);if(!entry)return true;
@@ -489,6 +538,7 @@ function syncDrafts(){
         if(latest){latest.baseStatus=c.status;if(latest.revision===snap.revision){latest.pending=false;latest.historyType=null;latest.syncedAt=new Date().toISOString();}writeDrafts(all);}
         const active=clients.find(x=>x.id===c.id);
         if(active&&latest&&!latest.pending){delete active._localNew;active._localDirty=!!active.history?.some(h=>h._localDirty);(active.calcs||[]).forEach(ca=>{delete ca._localDirty;delete ca._localNew});}
+        await flushLocalWrites();
         localSave();draftNotice(c.id,latest?.pending?'Новые изменения сохранены на устройстве':'Сохранено на устройстве и в базе');
         if(snap.baseStatus!==c.status&&c.status==='В производстве'){
           try{await autoConsumeOnProduction({...active,...c},snap.baseStatus,c.status,snap.calc||active?.calcs?.[0]);}
@@ -501,11 +551,13 @@ function syncDrafts(){
 }
 async function saveClient(silent=false){
   const entry=captureDraft('client',!silent);if(!entry)return;
+  try{await flushLocalWrites()}catch(e){localStorageNotice(true);return alert('Клиент не сохранён на устройстве. Не закрывайте карточку; выгрузите локальные данные JSON.')}
   await syncDrafts();render();
   if(!silent)alert(readDrafts()[entry.client.id]?.pending?'Сохранено на этом устройстве. Отправка в базу ожидает соединения.':'Клиент сохранён на устройстве и в базе');
 }
 async function saveCalc(silent=false){
   const entry=captureDraft('calc',!silent);if(!entry)return;
+  try{await flushLocalWrites()}catch(e){localStorageNotice(true);return alert('Расчёт не сохранён на устройстве. Не закрывайте расчёт; выгрузите HTML или локальные данные JSON.')}
   await syncDrafts();render();
   if(!silent)alert(readDrafts()[entry.client.id]?.pending?'Расчёт сохранён на этом устройстве. Отправка в базу ожидает соединения.':'Расчёт сохранён на устройстве и в базе');
 }
@@ -3475,5 +3527,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pagehide',flushCalcAutosave);
 window.addEventListener('beforeunload',flushCalcAutosave);
 
-window.onload=async()=>{loadSet();initUi();fillSet();bindFastNewClientButtons();render();await initDb()}
+document.querySelector('main').inert=true;
+window.onload=async()=>{
+  try{await initLocalDatabase();initLocalCopies();await flushLocalWrites();loadSet();initUi();fillSet();bindFastNewClientButtons();render();document.querySelector('main').inert=false;await initDb()}
+  catch(e){console.error('Local startup failed',e);bar.className='bar warn';bar.textContent='Не удалось открыть локальную базу. Не вводите новые замеры. Повторите загрузку CRM. '+e.message;localStorageNotice(true)}
+}
 </script></body></html>
