@@ -112,7 +112,7 @@ const STAT=['Новая заявка','Связаться','Замер назн�
 function n(v){return parseFloat(v)||0}function ni(v){return parseInt(v)||0}function rub(v){return new Intl.NumberFormat('ru-RU').format(Math.round(v||0))+' ₽'}function esc(v){return String(v||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}function safe(v){return String(v||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,90)||'order'}
 
 function loadStockLabor(){
-  try{stockLabor=JSON.parse(localStorage.getItem(STOCK_LABOR_LS)||'{}')||{}}catch(e){stockLabor={}}
+  try{stockLabor=JSON.parse(crmStorage.getItem(STOCK_LABOR_LS)||'{}')||{}}catch(e){stockLabor={}}
 }
 function stockLaborKey(material,width){return stockNormMaterial(material)+'|'+stockNormWidth(width)}
 function stockInstallationCost(item){
@@ -122,7 +122,7 @@ function stockInstallationCost(item){
 }
 function saveLocalStockLabor(material,width,value){
   stockLabor[stockLaborKey(material,width)]=Math.max(0,n(value));
-  try{localStorage.setItem(STOCK_LABOR_LS,JSON.stringify(stockLabor))}catch(e){}
+  try{crmStorage.setItem(STOCK_LABOR_LS,JSON.stringify(stockLabor))}catch(e){}
 }
 function missingInstallationCostColumn(error){
   const msg=String(error&&error.message||error||'');
@@ -130,14 +130,58 @@ function missingInstallationCostColumn(error){
 }
 
 const LOCAL_DB='swcrm_offline_clients_v1';
+// Lossless local encoding; keep recovery exports as ordinary JSON.
+const STORAGE_PACK_PREFIX='SWCRM_LZW1:';
+function packLocalText(value){
+  const bytes=new TextEncoder().encode(value),dict=new Map(),codes=[];
+  let word='',next=256;
+  for(const byte of bytes){
+    const char=String.fromCharCode(byte),joined=word+char;
+    if(joined.length===1||dict.has(joined)){word=joined;continue}
+    codes.push(word.length===1?word.charCodeAt(0):dict.get(word));
+    if(next<65536)dict.set(joined,next++);
+    word=char;
+  }
+  if(word)codes.push(word.length===1?word.charCodeAt(0):dict.get(word));
+  let packed=STORAGE_PACK_PREFIX;
+  for(let i=0;i<codes.length;i+=4096)packed+=String.fromCharCode(...codes.slice(i,i+4096));
+  return packed.length<value.length?packed:value;
+}
+function unpackLocalText(value){
+  if(value===null||!value.startsWith(STORAGE_PACK_PREFIX))return value;
+  const input=value.slice(STORAGE_PACK_PREFIX.length),dict=[],chunks=[];
+  let previous='',next=256;
+  for(let i=0;i<input.length;i++){
+    const code=input.charCodeAt(i);
+    const word=code<256?String.fromCharCode(code):(dict[code]??(code===next&&previous?previous+previous[0]:null));
+    if(word===null)throw Error('Повреждена локальная копия CRM');
+    chunks.push(word);
+    if(previous&&next<65536)dict[next++]=previous+word[0];
+    previous=word;
+  }
+  const binary=chunks.join('');
+  return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(binary,c=>c.charCodeAt(0)));
+}
+const crmStorage={
+  getItem(key){return unpackLocalText(localStorage.getItem(key))},
+  setItem(key,value){
+    const packed=['swcrm_offline_clients_v1','swcrm_recovery_before_v2','swcrm_drafts_v2'].includes(key)?packLocalText(value):value;
+    if(unpackLocalText(packed)!==value)throw Error('Не удалось проверить локальную копию');
+    localStorage.setItem(key,packed);
+  }
+};
+// Atomic replacement needs no spare full-sized backup and never deletes source data.
+for(const key of ['swcrm_offline_clients_v1','swcrm_recovery_before_v2','swcrm_drafts_v2']){
+  try{const raw=localStorage.getItem(key);if(raw!==null&&!raw.startsWith(STORAGE_PACK_PREFIX))crmStorage.setItem(key,raw)}catch(e){console.warn('Storage encoding deferred',key,e.message)}
+}
 function markOfflineDirty(c){if(c){c._localDirty=true;c.updatedAt=new Date().toISOString();}}
 function isLocalDirty(c){return !!(c&&c._localDirty)||(c&&Array.isArray(c.calcs)&&c.calcs.some(x=>x&&x._localDirty));}
 function cleanOfflineFlags(c){if(!c)return c;delete c._localDirty;delete c._localNew;(c.calcs||[]).forEach(x=>{delete x._localDirty;delete x._localNew});return c}
 function localLoad(){
-  try{return JSON.parse(localStorage.getItem(LOCAL_DB)||'[]')}catch(e){return []}
+  try{return JSON.parse(crmStorage.getItem(LOCAL_DB)||'[]')}catch(e){return []}
 }
 function localSave(){
-  try{localStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(clients||[])));return true}catch(e){console.warn('Local cache unavailable',e);localStorageNotice(true);return false}
+  try{crmStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(clients||[])));return true}catch(e){console.warn('Local cache unavailable',e);localStorageNotice(true);return false}
 }
 // Keep source data and costing summaries; regenerated drawing geometry is not a backup.
 function compactLocalCalc(ca){
@@ -160,7 +204,7 @@ function compactLocalDrafts(data){
 function compactStoredCopies(){
   // Replace each key atomically. A failed write leaves its original data intact.
   for(const [key,convert] of [[LOCAL_DB,compactLocalClients],['swcrm_recovery_before_v2',compactLocalClients],['swcrm_drafts_v2',compactLocalDrafts]]){
-    try{const raw=localStorage.getItem(key);if(raw!==null){const next=JSON.stringify(convert(JSON.parse(raw)));if(next.length<raw.length)localStorage.setItem(key,next)}}catch(e){console.warn('Local compaction skipped',key,e.message)}
+    try{const raw=crmStorage.getItem(key);if(raw!==null){const next=JSON.stringify(convert(JSON.parse(raw)));if(next.length<raw.length)crmStorage.setItem(key,next)}}catch(e){console.warn('Local compaction skipped',key,e.message)}
   }
 }
 function localStorageNotice(show){
@@ -223,7 +267,7 @@ async function syncOfflineClients(){
     lc.id=onlineId;
     cleanOfflineFlags(lc);
   }
-  try{localStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(allLocal||[])))}catch(e){}
+  try{crmStorage.setItem(LOCAL_DB,JSON.stringify(compactLocalClients(allLocal||[])))}catch(e){}
 }
 window.addEventListener('online',()=>initDb());
 function defaultSet(){return{m2:1800,edge:0,strap:0,zip:0,inst:700,off:4.5,defaultsVersion:2}}
@@ -231,18 +275,18 @@ function loadSet(){
   loadStockLabor();
   const def=defaultSet();
   let saved={};
-  try{saved=JSON.parse(localStorage.getItem(LS)||'{}')||{}}catch(e){saved={}}
+  try{saved=JSON.parse(crmStorage.getItem(LS)||'{}')||{}}catch(e){saved={}}
   // Сброс старых локальных дефолтов 1500/500 на iPhone/ПК.
   // Начиная с версии 2 старт нового клиента: полотно 1800, монтаж 700, остальное 0.
   if(saved.defaultsVersion!==2){
     set=Object.assign({},def,{off:n(saved.off)||def.off});
-    try{localStorage.setItem(LS,JSON.stringify(set))}catch(e){}
+    try{crmStorage.setItem(LS,JSON.stringify(set))}catch(e){}
   }else{
     set=Object.assign({},def,saved);
   }
 }
 function fillSet(){s_m2.value=set.m2;s_edge.value=set.edge;s_strap.value=set.strap;s_zip.value=set.zip;s_inst.value=set.inst;s_off.value=set.off}
-function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5,defaultsVersion:2};localStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
+function saveSet(){set={m2:n(s_m2.value),edge:n(s_edge.value),strap:n(s_strap.value),zip:n(s_zip.value),inst:n(s_inst.value),off:n(s_off.value)||4.5,defaultsVersion:2};crmStorage.setItem(LS,JSON.stringify(set));alert('Сохранено')}
 function fastShowLocalCache(){
   try{
     const cached=localLoad();
@@ -387,12 +431,12 @@ let autosaveClientTimer=null, autosaveCalcTimer=null, autosaveLock=false;
 // Durable local journal: independent from the server cache, preserved before startup sync.
 const DRAFT_KEY='swcrm_drafts_v2', LEGACY_BACKUP='swcrm_recovery_before_v2';
 compactStoredCopies();
-try{if(localStorage.getItem(LEGACY_BACKUP)===null)localStorage.setItem(LEGACY_BACKUP,JSON.stringify(compactLocalClients(localLoad())))}catch(e){console.warn('Recovery backup unavailable',e)}
+try{if(crmStorage.getItem(LEGACY_BACKUP)===null)crmStorage.setItem(LEGACY_BACKUP,JSON.stringify(compactLocalClients(localLoad())))}catch(e){console.warn('Recovery backup unavailable',e)}
 let draftSyncPromise=null;
-function readDrafts(){const raw=localStorage.getItem(DRAFT_KEY);return raw?JSON.parse(raw):{}}
+function readDrafts(){const raw=crmStorage.getItem(DRAFT_KEY);return raw?JSON.parse(raw):{}}
 function writeDrafts(data){
   const payload=JSON.stringify(compactLocalDrafts(data));
-  try{localStorage.setItem(DRAFT_KEY,payload)}catch(e){compactStoredCopies();localStorage.setItem(DRAFT_KEY,payload)}
+  try{crmStorage.setItem(DRAFT_KEY,payload)}catch(e){compactStoredCopies();crmStorage.setItem(DRAFT_KEY,payload)}
 }
 function draftCopy(value){return JSON.parse(JSON.stringify(value))}
 function draftNotice(id,text){if(cur===id)setAutosaveStatus(text)}
@@ -466,7 +510,7 @@ async function saveCalc(silent=false){
   if(!silent)alert(readDrafts()[entry.client.id]?.pending?'Расчёт сохранён на этом устройстве. Отправка в базу ожидает соединения.':'Расчёт сохранён на устройстве и в базе');
 }
 function exportLocalRecovery(){
-  const payload={format:'soft-windows-recovery-v2',exportedAt:new Date().toISOString(),legacyBackup:localStorage.getItem(LEGACY_BACKUP),localClients:localStorage.getItem(LOCAL_DB),drafts:localStorage.getItem(DRAFT_KEY)};
+  const payload={format:'soft-windows-recovery-v2',exportedAt:new Date().toISOString(),legacyBackup:crmStorage.getItem(LEGACY_BACKUP),localClients:crmStorage.getItem(LOCAL_DB),drafts:crmStorage.getItem(DRAFT_KEY)};
   blob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'CRM-local-recovery-'+new Date().toISOString().slice(0,10)+'.json');
 }
 function showLocalRecovery(){
